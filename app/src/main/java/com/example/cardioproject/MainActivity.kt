@@ -3,26 +3,54 @@ package com.example.cardioproject
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.cardioproject.ui.theme.CardioProjectTheme
+
+
+import com.example.cardioproject.presentation.HeartRateMainScreen
+import com.example.cardioproject.presentation.WorkoutSettingsScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
         setContent {
-            CardioProjectTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    innerPadding
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    AppNavigation()
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+fun AppNavigation() {
+    var currentScreen by remember { mutableStateOf("MAIN") }
+
+    when (currentScreen) {
+        "MAIN" -> {
+            HeartRateMainScreen(
+                onStartWorkoutClick = { currentScreen = "SETTINGS" }
+            )
+        }
+
+        "SETTINGS" -> {
+            WorkoutSettingsScreen(
+                onBackClick = { currentScreen = "MAIN" },
+                onStartClick = { currentScreen = "MAIN" }
+            )
         }
     }
 }

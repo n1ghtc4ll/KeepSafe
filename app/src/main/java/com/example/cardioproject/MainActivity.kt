@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 
 
 import com.example.cardioproject.presentation.HeartRateMainScreen
-import com.example.cardioproject.presentation.WorkoutSettingsScreen
+import com.example.cardioproject.workout.presentation.screen.WorkoutSettingsScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

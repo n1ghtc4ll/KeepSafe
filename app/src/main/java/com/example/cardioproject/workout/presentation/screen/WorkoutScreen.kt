@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutScreen(
-    // - StateFlow
     heartRate: Int,
     time: String,
     trainingName: String
@@ -79,7 +78,10 @@ fun WorkoutScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            HeartRateCard(heartRate)
+            HeartRateCard(
+                heartRate = heartRate,
+                modifier = Modifier.weight(1f)
+            )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -108,20 +110,9 @@ fun WorkoutScreen(
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .background(Color.White, RoundedCornerShape(12.dp))
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "График с зонами",
-                    fontSize = 18.sp,
-                    color = Color.Black
-                )
-            }
+            ZonesGraphCard(
+                modifier = Modifier.weight(1f)
+            )
 
             Box(
                 modifier = Modifier
@@ -143,7 +134,8 @@ fun WorkoutScreen(
 }
 
 @Composable
-private fun HeartRateCard(heartRate: Int) {
+private fun HeartRateCard(heartRate: Int, modifier: Modifier = Modifier) {
+
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFFFFFFFF),
@@ -152,12 +144,13 @@ private fun HeartRateCard(heartRate: Int) {
     )
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(gradientBrush, RoundedCornerShape(12.dp))
             .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp))
             .padding(vertical = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = heartRate.toString(),
@@ -178,6 +171,26 @@ private fun HeartRateCard(heartRate: Int) {
         Text(
             text = "уд/мин",
             fontSize = 16.sp,
+            color = Color.Black
+        )
+    }
+}
+
+@Composable
+fun ZonesGraphCard(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        // Переданный modifier ставим в самое начало
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color.White, RoundedCornerShape(12.dp))
+            .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "График с зонами",
+            fontSize = 18.sp,
             color = Color.Black
         )
     }

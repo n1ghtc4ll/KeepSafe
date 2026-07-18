@@ -14,7 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 
 
-import com.example.cardioproject.presentation.HeartRateMainScreen
+import com.example.cardioproject.home.presentation.HeartRateMainScreen
 import com.example.cardioproject.workout.presentation.screen.WorkoutSettingsScreen
 
 class MainActivity : ComponentActivity() {
@@ -27,30 +27,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation()
+                    MainScreen()
                 }
             }
-        }
-    }
-}
-
-
-@Composable
-fun AppNavigation() {
-    var currentScreen by remember { mutableStateOf("MAIN") }
-
-    when (currentScreen) {
-        "MAIN" -> {
-            HeartRateMainScreen(
-                onStartWorkoutClick = { currentScreen = "SETTINGS" }
-            )
-        }
-
-        "SETTINGS" -> {
-            WorkoutSettingsScreen(
-                onBackClick = { currentScreen = "MAIN" },
-                onStartClick = { currentScreen = "MAIN" }
-            )
         }
     }
 }

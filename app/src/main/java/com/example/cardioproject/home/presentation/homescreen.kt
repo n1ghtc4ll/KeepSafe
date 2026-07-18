@@ -1,4 +1,4 @@
-package com.example.cardioproject.presentation
+package com.example.cardioproject.home.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

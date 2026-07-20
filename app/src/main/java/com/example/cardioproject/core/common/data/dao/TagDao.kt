@@ -15,7 +15,6 @@ interface TagDao {
     @Query("SELECT * FROM tags")
     fun getAllTags(): Flow<List<TagEntity>>
 
-    // Добавить или обновить тег
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTag(tag: TagEntity)
 }

@@ -6,12 +6,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 class GetWorkoutSetupDataUseCase(
-    private val commonRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository
 ) {
     operator fun invoke(): Flow<WorkoutSetupData> {
         return combine(
-            commonRepository.getTags(),
-            commonRepository.getTabataProfiles()
+            settingsRepository.getTags(),
+            settingsRepository.getTabataProfiles()
         ) {
             tags, profiles ->
             WorkoutSetupData(tags, profiles)

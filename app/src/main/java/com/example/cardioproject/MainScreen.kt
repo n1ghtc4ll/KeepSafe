@@ -29,6 +29,7 @@ import com.example.cardioproject.core.navigation.TopLevelBackStack
 import com.example.cardioproject.home.presentation.HeartRateMainScreen
 import com.example.cardioproject.settings.presentation.SettingsScreen
 import com.example.cardioproject.workout.presentation.screen.WorkoutSettingsScreen
+import org.koin.java.KoinJavaComponent.inject
 import kotlin.collections.listOf
 
 interface TopLevelRoute: Route {
@@ -52,7 +53,7 @@ data object WorkoutSettings: Route
 
 @Composable
 fun MainScreen() {
-    val topLevelBackStack: TopLevelBackStack<Route> = remember { TopLevelBackStack(Main) }
+    val topLevelBackStack by inject<TopLevelBackStack<Route>>(TopLevelBackStack::class.java)
     val currentRoute = topLevelBackStack.topLevelKey
 
     Scaffold(

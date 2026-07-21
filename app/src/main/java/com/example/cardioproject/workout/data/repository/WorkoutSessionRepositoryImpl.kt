@@ -2,6 +2,7 @@ package com.example.cardioproject.workout.data.repository
 
 import com.example.cardioproject.core.common.data.dao.TagDao
 import com.example.cardioproject.core.common.data.mapper.toDomain
+import com.example.cardioproject.core.common.domain.model.TabataProfile
 import com.example.cardioproject.workout.data.dao.WorkoutSessionDao
 import com.example.cardioproject.workout.data.mapper.toDomain
 import com.example.cardioproject.workout.data.mapper.toEntity

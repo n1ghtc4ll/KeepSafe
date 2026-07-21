@@ -2,11 +2,13 @@ package com.example.cardioproject.workout.presentation.screen
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,12 +16,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +35,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,10 +45,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cardioproject.core.common.domain.model.TabataProfile
+import com.example.cardioproject.core.common.domain.model.Tag
+import com.example.cardioproject.workout.domain.model.WorkoutSettings
+import com.example.cardioproject.workout.presentation.model.WorkoutSettingsUiState
+import com.example.cardioproject.workout.presentation.viewmodel.WorkoutSettingsViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 private val SettingsBackground = Color(0xFFFFFFFF)
 private val TextDark = Color(0xFF1D1B20)
@@ -52,13 +66,38 @@ private val InputBackgroundGray = Color(0xFFEEEEEE)
 private val TabataBackground = Color(0xFFF3EDF7)
 private val ElementBackgroundWhite = Color(0xFFFFFFFF)
 
+
 @Composable
 fun WorkoutSettingsScreen(
-    onBackClick: () -> Unit = {},
-    onStartClick: () -> Unit = {}
+    viewModel: WorkoutSettingsViewModel = koinViewModel(),
+    onNavigateToActiveWorkout: (WorkoutSettings) -> Unit,
+    onBackClick: () -> Unit
 ) {
-    var isTabataEnabled by remember { mutableStateOf(true) }
+    val uiState by viewModel.uiState.collectAsState()
 
+    WorkoutSettingsScreenContent(
+        uiState = uiState,
+        onBackClick = onBackClick,
+        onStartClick = {
+            val finalSettings = viewModel.getFinalSettings()
+            onNavigateToActiveWorkout(finalSettings)
+        },
+        onTitleChange = viewModel::onTitleChanged,
+        onTagSelect = viewModel::onTagSelected,
+        onTabataToggle = viewModel::onTabataToggled
+    )
+}
+
+@Composable
+fun WorkoutSettingsScreenContent(
+    uiState: WorkoutSettingsUiState = WorkoutSettingsUiState(),
+    onBackClick: () -> Unit = {},
+    onStartClick: () -> Unit = {},
+    onTitleChange: (String) -> Unit = {},
+    onTagSelect: (Tag) -> Unit = {},
+    onTabataToggle: (Boolean) -> Unit = {},
+    onProfileSelect: (TabataProfile) -> Unit = {}
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -97,17 +136,23 @@ fun WorkoutSettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Название
-            SettingInputRow(label = "Название", isDropdown = false)
+            SettingTextInputRow(
+                label = "Название",
+                value = uiState.title,
+                onValueChange = onTitleChange
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Тег
-            SettingInputRow(label = "Тег", isDropdown = true)
+            SettingDropdownRow(
+                label = "Тег",
+                items = uiState.availableTags,
+                selectedItem = uiState.selectedTag,
+                onItemSelected = onTagSelect
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Свитч Табата-таймера
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -119,8 +164,8 @@ fun WorkoutSettingsScreen(
                     color = TextDark
                 )
                 Switch(
-                    checked = isTabataEnabled,
-                    onCheckedChange = { isTabataEnabled = it },
+                    checked = uiState.isTabataEnabled,
+                    onCheckedChange = onTabataToggle,
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = AccentPurple
@@ -131,7 +176,7 @@ fun WorkoutSettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Карточка параметров таймера
-            if (isTabataEnabled) {
+            if (uiState.isTabataEnabled) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -148,32 +193,29 @@ fun WorkoutSettingsScreen(
                     HorizontalDivider(color = CardBorder, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Готовые профили
                     Text(
                         text = "Готовые профили",
                         fontSize = 20.sp,
                         color = TextDark
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Box(
+
+                    CustomDropdown(
+                        items = uiState.availableProfiles,
+                        selectedItem = uiState.selectedProfile,
+                        itemLabel = { it.name },
+                        onItemSelected = onProfileSelect,
+                        backgroundColor = ElementBackgroundWhite,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(40.dp)
-                            .background(ElementBackgroundWhite, RoundedCornerShape(6.dp))
-                            .padding(horizontal = 12.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowDropDown,
-                            contentDescription = null,
-                            tint = TextDark
-                        )
-                    }
+                    )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // Ряды с параметрами
                     TabataTimeRow(label = "Пауза перед\nтренировкой")
+
                     Spacer(modifier = Modifier.height(16.dp))
 
                     TabataNumberRow(label = "Кол-во интервалов")
@@ -194,7 +236,6 @@ fun WorkoutSettingsScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Кнопка Начать
             Button(
                 onClick = onStartClick,
                 modifier = Modifier
@@ -215,9 +256,12 @@ fun WorkoutSettingsScreen(
         }
     }
 }
-
 @Composable
-private fun SettingInputRow(label: String, isDropdown: Boolean) {
+private fun SettingTextInputRow(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -235,15 +279,105 @@ private fun SettingInputRow(label: String, isDropdown: Boolean) {
             modifier = Modifier
                 .weight(0.65f)
                 .height(44.dp)
-                .background(InputBackgroundGray, RoundedCornerShape(6.dp)),
-            contentAlignment = if (isDropdown) Alignment.CenterEnd else Alignment.CenterStart
+                .background(InputBackgroundGray, RoundedCornerShape(6.dp))
+                .padding(horizontal = 12.dp),
+            contentAlignment = Alignment.CenterStart
         ) {
-            if (isDropdown) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = null,
-                    tint = TextDark,
-                    modifier = Modifier.padding(end = 8.dp)
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                textStyle = TextStyle(fontSize = 18.sp, color = TextDark),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                decorationBox = { innerTextField ->
+                    if (value.isEmpty()) {
+                        Text("Введите название", color = Color.Gray, fontSize = 16.sp)
+                    }
+                    innerTextField()
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingDropdownRow(
+    label: String,
+    items: List<Tag>,
+    selectedItem: Tag?,
+    onItemSelected: (Tag) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            fontSize = 20.sp,
+            color = TextDark,
+            modifier = Modifier.weight(0.35f)
+        )
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        CustomDropdown(
+            items = items,
+            selectedItem = selectedItem,
+            itemLabel = { it.name },
+            onItemSelected = onItemSelected,
+            backgroundColor = InputBackgroundGray,
+            modifier = Modifier
+                .weight(0.65f)
+                .height(44.dp)
+        )
+    }
+}
+
+@Composable
+fun <T> CustomDropdown(
+    items: List<T>,
+    selectedItem: T?,
+    itemLabel: (T) -> String,
+    onItemSelected: (T) -> Unit,
+    backgroundColor: Color,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(backgroundColor, RoundedCornerShape(6.dp))
+                .clickable { expanded = true }
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = selectedItem?.let(itemLabel) ?: "Не выбрано",
+                color = TextDark,
+                fontSize = 16.sp
+            )
+            Icon(
+                imageVector = Icons.Filled.ArrowDropDown,
+                contentDescription = "Открыть список",
+                tint = TextDark
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(Color.White)
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(text = itemLabel(item), color = TextDark) },
+                    onClick = {
+                        onItemSelected(item)
+                        expanded = false
+                    }
                 )
             }
         }
@@ -266,7 +400,12 @@ private fun TabataTimeRow(label: String) {
         )
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            HalfDropIcon(modifier = Modifier.size(24.dp))
+            Icon(
+                imageVector = Icons.Filled.InvertColors,
+                contentDescription = "Выбор цвета",
+                tint = TextDark,
+                modifier = Modifier.size(24.dp)
+            )
 
             Spacer(modifier = Modifier.width(8.dp))
 
@@ -308,44 +447,15 @@ private fun TabataNumberRow(label: String) {
     }
 }
 
+@Preview(showBackground = true, backgroundColor = 0xFF2B2B2B)
 @Composable
-private fun HalfDropIcon(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier) {
-        val w = size.width
-        val h = size.height
-
-        // Внешний контур капли
-        val path = Path().apply {
-            moveTo(w / 2f, h * 0.1f)
-            quadraticBezierTo(w * 0.9f, h * 0.5f, w * 0.85f, h * 0.75f)
-            quadraticBezierTo(w * 0.75f, h * 0.95f, w / 2f, h * 0.95f)
-            quadraticBezierTo(w * 0.25f, h * 0.95f, w * 0.15f, h * 0.75f)
-            quadraticBezierTo(w * 0.1f, h * 0.5f, w / 2f, h * 0.1f)
-            close()
-        }
-
-        drawPath(path = path, color = TextDark, style = Stroke(width = 2.dp.toPx()))
-
-        // Закрашиваем левую половину капли
-        val halfPath = Path().apply {
-            moveTo(w / 2f, h * 0.1f)
-            quadraticBezierTo(w * 0.1f, h * 0.5f, w * 0.15f, h * 0.75f)
-            quadraticBezierTo(w * 0.25f, h * 0.95f, w / 2f, h * 0.95f)
-            close()
-        }
-        drawPath(path = halfPath, color = TextDark)
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2B2B) // Темный фон для контраста
-@Composable
-fun WorkoutSettingsScreenPreview() {
+fun WorkoutSettingsScreenContentPreview() {
     MaterialTheme {
         Box(
             modifier = Modifier.padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            WorkoutSettingsScreen()
+            WorkoutSettingsScreenContent()
         }
     }
 }

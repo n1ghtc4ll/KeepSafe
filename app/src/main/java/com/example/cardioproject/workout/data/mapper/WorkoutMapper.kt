@@ -3,8 +3,6 @@ package com.example.cardioproject.workout.data.mapper
 import com.example.cardioproject.core.common.domain.model.Tag
 import com.example.cardioproject.workout.data.entity.WorkoutSessionDbEntity
 import com.example.cardioproject.workout.domain.model.WorkoutSession
-import com.example.cardioproject.workout.presentation.screen.WorkoutScreen
-import kotlinx.serialization.json.Json
 
 fun WorkoutSession.toEntity(): WorkoutSessionDbEntity {
     return WorkoutSessionDbEntity(

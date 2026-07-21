@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +23,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -32,13 +34,61 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cardioproject.workout.di.workoutModule
+import com.example.cardioproject.workout.domain.model.WorkoutPhase
+import com.example.cardioproject.workout.domain.model.WorkoutSettings
+import com.example.cardioproject.workout.presentation.viewmodel.ActiveWorkoutViewModel
+import org.koin.androidx.compose.koinViewModel
+
+@Composable
+fun WorkoutScreen(
+    settings: WorkoutSettings,
+    viewModel: ActiveWorkoutViewModel = koinViewModel(),
+    onFinish: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(settings) {
+        viewModel.startWorkout(settings)
+    }
+
+    LaunchedEffect(uiState.currentPhase) {
+        if (uiState.currentPhase == WorkoutPhase.FINISHED) {
+            onFinish()
+        }
+    }
+
+    val formattedTime = uiState.timeRemainingSec.let { seconds ->
+        val minutes = seconds / 60
+        val remainingSeconds = seconds % 60
+        String.format("%02d:%02d", minutes, remainingSeconds)
+    }
+
+    WorkoutScreenContent(
+        heartRate = uiState.currentHeartRate,
+        time = formattedTime,
+        trainingName = settings.title,
+        onBackClick = {
+            viewModel.stopWorkout()
+        },
+        onStopClick = {
+            viewModel.stopWorkout()
+        },
+        onPauseClick = {
+
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WorkoutScreen(
+fun WorkoutScreenContent(
     heartRate: Int,
     time: String,
-    trainingName: String
+    trainingName: String,
+    onBackClick: () -> Unit = {},
+    onStopClick: () -> Unit = {},
+    onPauseClick: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -51,23 +101,21 @@ fun WorkoutScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { TODO() }) {
+                    IconButton(onClick = { onBackClick }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
                     }
                 },
-                actions = {
+                /*actions = {
                     IconButton(onClick = { TODO() }) {
                         Icon(Icons.Default.Share, contentDescription = "Поделиться")
                     }
-                },
+                },*/
                 /*colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFFF3F3F3) // Цвет фона шапки из дизайна
                 )*/
             )
         },
-/*        bottomBar = {
-            TODO()
-        },*/
+
         containerColor = Color(0xFFF3F3F3)
     ) { paddingValues ->
         Column(
@@ -88,7 +136,7 @@ fun WorkoutScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Button(
-                    onClick = { TODO() },
+                    onClick = onStopClick,
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
@@ -99,7 +147,7 @@ fun WorkoutScreen(
                 }
 
                 Button(
-                    onClick = { TODO() },
+                    onClick = onPauseClick,
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
@@ -181,7 +229,6 @@ fun ZonesGraphCard(
     modifier: Modifier = Modifier
 ) {
     Box(
-        // Переданный modifier ставим в самое начало
         modifier = modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(12.dp))
@@ -198,6 +245,6 @@ fun ZonesGraphCard(
 
 @Preview(showBackground = true, apiLevel = 36)
 @Composable
-fun WorkoutScreenPreview() {
-    WorkoutScreen(190, "00:00:00", "Название тренировки")
+fun WorkoutScreenContentPreview() {
+    WorkoutScreenContent(190, "00:00:00", "Название тренировки")
 }

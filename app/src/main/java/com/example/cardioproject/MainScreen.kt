@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.EventNote
-import androidx.compose.material.icons.outlined.EventNote
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Icon
@@ -12,7 +11,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,8 +27,12 @@ import com.example.cardioproject.anthropometric.presentation.screen.AddAnthropom
 import com.example.cardioproject.core.navigation.Route
 import com.example.cardioproject.core.navigation.TopLevelBackStack
 import com.example.cardioproject.home.presentation.HeartRateMainScreen
-import com.example.cardioproject.settings.presentation.SettingsScreen
+import com.example.cardioproject.workout.domain.model.WorkoutSettings
+import com.example.cardioproject.workout.presentation.screen.WorkoutScreen
 import com.example.cardioproject.workout.presentation.screen.WorkoutSettingsScreen
+import com.example.cardioproject.workout.presentation.screen.WorkoutSettingsScreenContent
+import com.example.cardioproject.workout.presentation.viewmodel.WorkoutSettingsViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.java.KoinJavaComponent.inject
 import kotlin.collections.listOf
 
@@ -49,7 +53,8 @@ data object Anthropometric: TopLevelRoute {
 }
 
 data object AddAnthropometric: Route
-data object WorkoutSettings: Route
+data object WorkoutSetting: Route
+data class ActiveWorkout(val settings: WorkoutSettings): Route
 
 @Composable
 fun MainScreen() {
@@ -87,7 +92,7 @@ fun MainScreen() {
                 entry<Main> {
                     HeartRateMainScreen(
                         onAddMeasurementsClick = { topLevelBackStack.add(AddAnthropometric) },
-                        onStartWorkoutClick = { topLevelBackStack.add(WorkoutSettings) }
+                        onStartWorkoutClick = { topLevelBackStack.add(WorkoutSetting) }
                     )
                 }
                 entry<WorkoutHistory> {
@@ -100,19 +105,29 @@ fun MainScreen() {
                     AddAnthropometricScreen(onBackClick = { topLevelBackStack.removeLast() })
                 }
 
-                entry<WorkoutSettings>(
+                entry<WorkoutSetting>(
                     metadata = DialogSceneStrategy.dialog(
                         DialogProperties(usePlatformDefaultWidth = false)
                     )
                 ) {
                     Box(modifier = Modifier.padding(16.dp)) {
                         WorkoutSettingsScreen(
+                            onNavigateToActiveWorkout = { settings ->
+                                topLevelBackStack.removeLast()
+                                topLevelBackStack.add(ActiveWorkout(settings))
+                            },
                             onBackClick = { topLevelBackStack.removeLast() },
-                            onStartClick = {
-                                 topLevelBackStack.removeLast()
-                            }
                         )
                     }
+                }
+
+                entry<ActiveWorkout> { activeWorkout ->
+                    WorkoutScreen(
+                        settings = activeWorkout.settings,
+                        onFinish = {
+                            topLevelBackStack.removeLast()
+                        }
+                    )
                 }
             }
         )

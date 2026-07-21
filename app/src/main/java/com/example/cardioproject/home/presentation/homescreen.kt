@@ -47,7 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cardioproject.workout.presentation.screen.WorkoutSettingsScreen
+import com.example.cardioproject.workout.presentation.screen.WorkoutSettingsScreenContent
 
 // Палитра — только те значения, которые нужны Главному экрану
 private val ScreenBackground = Color(0xFFF3F3F3)
@@ -87,7 +87,7 @@ fun AppNavigation() {
             onStartWorkoutClick = { currentScreen = "SETTINGS" }
         )
 
-        "SETTINGS" -> WorkoutSettingsScreen(
+        "SETTINGS" -> WorkoutSettingsScreenContent(
             onBackClick = { currentScreen = "MAIN" }
         )
     }

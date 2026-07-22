@@ -32,6 +32,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
@@ -108,6 +110,7 @@ data class AnthroDiaryUiState(
 @Composable
 fun AnthroDiaryScreen(
     state: AnthroDiaryUiState,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onBackClick: () -> Unit = {},
     onWeightChange: (String) -> Unit = {},
     onChestChange: (String) -> Unit = {},
@@ -121,6 +124,7 @@ fun AnthroDiaryScreen(
     Scaffold(
         topBar = { AnthroDiaryTopBar(currentDate = state.currentDate, onBackClick = onBackClick) },
         bottomBar = { AnthroDiaryBottomBar(selectedTab = state.selectedTab, onTabSelected = onTabSelected) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = BackgroundColor
     ) { padding ->
         LazyColumn(
@@ -239,7 +243,7 @@ private fun MeasurementInputCard(
                 onValueChange = onHipsChange
             )
             MeasurementInputRow(
-                label = "Обхват бицепца",
+                label = "Обхват бицепса",
                 unit = "см",
                 value = input.biceps,
                 onValueChange = onBicepsChange,
@@ -346,12 +350,11 @@ private fun PreviousRecordCard(
                 )
             }
             HorizontalDivider(color = DividerColor, thickness = 1.dp)
-
             PreviousRecordRow(label = "Вес", value = "${record.weight} кг")
             PreviousRecordRow(label = "Обхват груди", value = "${record.chest} см")
             PreviousRecordRow(label = "Обхват талии", value = "${record.waist} см")
             PreviousRecordRow(label = "Обхват бедер", value = "${record.hips} см")
-            PreviousRecordRow(label = "Обхват бицепца", value = "${record.biceps} см", isLast = true)
+            PreviousRecordRow(label = "Обхват бицепса", value = "${record.biceps} см", isLast = true)
         }
     }
 }

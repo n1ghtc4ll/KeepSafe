@@ -11,13 +11,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
@@ -27,11 +31,15 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,6 +55,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.UUID
 
 private val BackgroundF3 = Color(0xFFF3F3F3)
 private val ButtonPurple = Color(0xFF6750A4)
@@ -79,53 +88,22 @@ val defaultTags = mutableStateListOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutHistoryScreen(
+    workouts: List<WorkoutSession>,
     onBackClick: () -> Unit = {},
-    onWorkoutClick: (String) -> Unit = {}
+    onWorkoutClick: (String) -> Unit = {},
+    onAddWorkout: (WorkoutSession) -> Unit = {},
+    onEditWorkout: (WorkoutSession) -> Unit = {},
+    onDeleteWorkout: (WorkoutSession) -> Unit = {}
 ) {
-    // Демонстрационные данные
-    val initialWorkouts = remember {
-        listOf(
-            WorkoutSession(
-                "1",
-                "Интервальная тренировка",
-                "12.07.2023",
-                "08:00",
-                "00:45:00",
-                defaultTags[0]
-            ),
-            WorkoutSession(
-                "2",
-                "Силовая тренировка",
-                "10.07.2023",
-                "18:30",
-                "01:20:00",
-                defaultTags[1]
-            ),
-            WorkoutSession(
-                "3",
-                "Легкая пробежка",
-                "08.07.2023",
-                "07:00",
-                "00:30:00",
-                defaultTags[2]
-            ),
-            WorkoutSession(
-                "4",
-                "Табата интенсив",
-                "05.07.2023",
-                "19:00",
-                "00:20:00",
-                defaultTags[0]
-            )
-        )
-    }
-
-    var workouts by remember { mutableStateOf(initialWorkouts) }
     var showFilterDialog by remember { mutableStateOf(false) }
     var showPeriodDialog by remember { mutableStateOf(false) }
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedTypeFilter by remember { mutableStateOf("Все") }
+
+    // Состояния для добавления/редактирования
+    var showEditDialog by remember { mutableStateOf(false) }
+    var workoutToEdit by remember { mutableStateOf<WorkoutSession?>(null) }
 
     val filteredWorkouts = workouts.filter { session ->
         val matchesSearch = session.title.contains(searchQuery, ignoreCase = true)
@@ -133,85 +111,105 @@ fun WorkoutHistoryScreen(
         matchesSearch && matchesType
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundF3)
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Назад", tint = TextBlack)
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "История тренировок",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextBlack
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(
-                onClick = { showFilterDialog = true },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ButtonPurple)
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    workoutToEdit = null
+                    showEditDialog = true
+                },
+                containerColor = ButtonPurple,
+                contentColor = Color.White
             ) {
-                Icon(Icons.Filled.List, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Фильтр", fontSize = 16.sp, color = Color.White)
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Button(
-                onClick = { showPeriodDialog = true },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ButtonPurple)
-            ) {
-                Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Период", fontSize = 16.sp, color = Color.White)
+                Icon(Icons.Filled.Add, "Добавить тренировку")
             }
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        if (filteredWorkouts.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Тренировок не найдено", color = Color.Gray, fontSize = 16.sp)
-            }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BackgroundF3)
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                items(filteredWorkouts) { session ->
-                    WorkoutItem(
-                        session = session,
-                        onClick = { onWorkoutClick(session.id) },
-                        onCheckedChange = { isChecked ->
-                            workouts = workouts.map {
-                                if (it.id == session.id) it.copy(isSelected = isChecked) else it
+                IconButton(onClick = onBackClick) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Назад", tint = TextBlack)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "История тренировок",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextBlack
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = { showFilterDialog = true },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ButtonPurple)
+                ) {
+                    Icon(Icons.Filled.List, contentDescription = null, tint = Color.White)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Фильтр", fontSize = 16.sp, color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Button(
+                    onClick = { showPeriodDialog = true },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ButtonPurple)
+                ) {
+                    Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color.White)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Период", fontSize = 16.sp, color = Color.White)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            if (filteredWorkouts.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Тренировок не найдено", color = Color.Gray, fontSize = 16.sp)
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(filteredWorkouts) { session ->
+                        WorkoutItem(
+                            session = session,
+                            onClick = { onWorkoutClick(session.id) },
+                            onEditClick = {
+                                workoutToEdit = session
+                                showEditDialog = true
+                            },
+                            onDeleteClick = { onDeleteWorkout(session) },
+                            onCheckedChange = { isChecked ->
+                                // Обновляем состояние isSelected у конкретной сессии
+                                onEditWorkout(session.copy(isSelected = isChecked))
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -297,12 +295,138 @@ fun WorkoutHistoryScreen(
             }
         )
     }
+
+    if (showEditDialog) {
+        WorkoutEditDialog(
+            initialSession = workoutToEdit,
+            onDismiss = { showEditDialog = false },
+            onSave = { session ->
+                if (workoutToEdit == null) {
+                    onAddWorkout(session)
+                } else {
+                    onEditWorkout(session)
+                }
+                showEditDialog = false
+            }
+        )
+    }
 }
+
+@Composable
+fun WorkoutEditDialog(
+    initialSession: WorkoutSession?,
+    onDismiss: () -> Unit,
+    onSave: (WorkoutSession) -> Unit
+) {
+    var title by remember { mutableStateOf(initialSession?.title ?: "") }
+    var date by remember { mutableStateOf(initialSession?.date ?: "01.01.2023") }
+    var time by remember { mutableStateOf(initialSession?.time ?: "12:00") }
+    var duration by remember { mutableStateOf(initialSession?.duration ?: "00:30:00") }
+    var tag by remember { mutableStateOf(initialSession?.tag ?: defaultTags[0]) }
+
+    var expandedTag by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (initialSession == null) "Добавить тренировку" else "Редактировать тренировку") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Название") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = date,
+                        onValueChange = { date = it },
+                        label = { Text("Дата") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = time,
+                        onValueChange = { time = it },
+                        label = { Text("Время") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                OutlinedTextField(
+                    value = duration,
+                    onValueChange = { duration = it },
+                    label = { Text("Длительность") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Box {
+                    OutlinedTextField(
+                        value = tag.name,
+                        onValueChange = { },
+                        label = { Text("Тег") },
+                        readOnly = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { expandedTag = true },
+                        trailingIcon = {
+                            IconButton(onClick = { expandedTag = true }) {
+                                Icon(Icons.Filled.List, contentDescription = null)
+                            }
+                        }
+                    )
+                    DropdownMenu(
+                        expanded = expandedTag,
+                        onDismissRequest = { expandedTag = false }
+                    ) {
+                        defaultTags.forEach { t ->
+                            DropdownMenuItem(
+                                text = { Text(t.name) },
+                                onClick = {
+                                    tag = t
+                                    expandedTag = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val newSession = WorkoutSession(
+                        id = initialSession?.id ?: UUID.randomUUID().toString(),
+                        title = title.ifBlank { "Без названия" },
+                        date = date,
+                        time = time,
+                        duration = duration,
+                        tag = tag,
+                        isSelected = initialSession?.isSelected ?: false
+                    )
+                    onSave(newSession)
+                }
+            ) {
+                Text("Сохранить", color = ButtonPurple)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Отмена", color = Color.Gray)
+            }
+        }
+    )
+}
+
 
 @Composable
 fun WorkoutItem(
     session: WorkoutSession,
     onClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Card(
@@ -313,83 +437,99 @@ fun WorkoutItem(
         colors = CardDefaults.cardColors(containerColor = CardWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Информация о тренировке
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = session.title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextBlack
-                )
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Дата:",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = session.date, fontSize = 14.sp, color = TextBlack)
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Text(
-                        text = "Время:",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = session.time, fontSize = 14.sp, color = TextBlack)
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Длительность:",
-                        fontSize = 14.sp,
-                        fontStyle = FontStyle.Italic,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = session.duration,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = TextBlack
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .background(session.tag.color, RoundedCornerShape(8.dp))
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    contentAlignment = Alignment.Center
+                // Информация о тренировке
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
-                        text = session.tag.name,
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
+                        text = session.title,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextBlack
                     )
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Дата:",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = session.date, fontSize = 14.sp, color = TextBlack)
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Text(
+                            text = "Время:",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = session.time, fontSize = 14.sp, color = TextBlack)
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Длительность:",
+                            fontSize = 14.sp,
+                            fontStyle = FontStyle.Italic,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = session.duration,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextBlack
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .background(session.tag.color, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = session.tag.name,
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
+
+                // Чекбокс выбора
+                Checkbox(
+                    checked = session.isSelected,
+                    onCheckedChange = onCheckedChange,
+                    colors = CheckboxDefaults.colors(checkedColor = ButtonPurple)
+                )
             }
 
-            // Чекбокс выбора
-            Checkbox(
-                checked = session.isSelected,
-                onCheckedChange = onCheckedChange,
-                colors = CheckboxDefaults.colors(checkedColor = ButtonPurple)
-            )
+            // Кнопки управления (Изменить / Удалить)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = onEditClick, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Filled.Edit, contentDescription = "Редактировать", tint = Color.Gray)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(onClick = onDeleteClick, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Filled.Delete, contentDescription = "Удалить", tint = Color.Red)
+                }
+            }
         }
     }
 }

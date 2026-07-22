@@ -67,11 +67,15 @@ private val TagColors = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutDetailsScreen(
-    onBackClick: () -> Unit = {}
+    workout: WorkoutSession,
+    onBackClick: () -> Unit = {},
+    onWorkoutUpdated: (WorkoutSession) -> Unit = {}
 ) {
-    var workoutTitle by remember { mutableStateOf("Утренняя пробежка") }
+    // Инициализируем состояния значениями из переданной тренировки
+    var workoutTitle by remember(workout.id) { mutableStateOf(workout.title) }
     var isEditingTitle by remember { mutableStateOf(false) }
-    var currentTag by remember { mutableStateOf(WorkoutTag("t1", "Общая", Color(0xFF009951))) }
+
+    var currentTag by remember(workout.id) { mutableStateOf(workout.tag) }
     var showTagManager by remember { mutableStateOf(false) }
 
     Column(
@@ -102,7 +106,11 @@ fun WorkoutDetailsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         trailingIcon = {
-                            IconButton(onClick = { isEditingTitle = false }) {
+                            IconButton(onClick = {
+                                isEditingTitle = false
+                                // Сохраняем новое название в глобальный список
+                                onWorkoutUpdated(workout.copy(title = workoutTitle))
+                            }) {
                                 Icon(
                                     Icons.Filled.Check,
                                     contentDescription = "Сохранить",
@@ -132,7 +140,13 @@ fun WorkoutDetailsScreen(
                         }
                     }
                 }
-                Text(text = "Сегодня, 08:00 - 08:45", fontSize = 14.sp, color = TextGray)
+
+                // Отображаем реальные данные из тренировки
+                Text(
+                    text = "${workout.date}, ${workout.time} • ${workout.duration}",
+                    fontSize = 14.sp,
+                    color = TextGray
+                )
             }
 
             IconButton(onClick = { /* TODO: Логика экспорта в Excel */ }) {
@@ -203,13 +217,13 @@ fun WorkoutDetailsScreen(
             StatCard(
                 modifier = Modifier.weight(1f),
                 title = "Средний пульс",
-                value = "145",
+                value = "145", // В будущем здесь будет расчет из данных
                 unit = "уд/мин"
             )
             StatCard(
                 modifier = Modifier.weight(1f),
                 title = "Макс. пульс",
-                value = "172",
+                value = "172", // В будущем здесь будет расчет из данных
                 unit = "уд/мин"
             )
         }
@@ -221,13 +235,14 @@ fun WorkoutDetailsScreen(
             StatCard(
                 modifier = Modifier.weight(1f),
                 title = "Сжигание",
-                value = "420",
+                value = "420", // Расчет на основе веса/пульса
                 unit = "ккал"
             )
             StatCard(
                 modifier = Modifier.weight(1f),
                 title = "Длительность",
-                value = "45",
+                // Оставляем минуты от длительности для красоты
+                value = workout.duration.split(":").getOrNull(1) ?: "00",
                 unit = "мин"
             )
         }
@@ -236,9 +251,11 @@ fun WorkoutDetailsScreen(
     if (showTagManager) {
         TagManagementDialog(
             currentTag = currentTag,
-            onTagSelected = {
-                currentTag = it
+            onTagSelected = { newTag ->
+                currentTag = newTag
                 showTagManager = false
+                // Сохраняем обновленный тег
+                onWorkoutUpdated(workout.copy(tag = newTag))
             },
             onDismiss = { showTagManager = false }
         )
@@ -432,5 +449,13 @@ fun HeartRateGraph() {
 @Preview(showBackground = true)
 @Composable
 fun WorkoutDetailsPreview() {
-    WorkoutDetailsScreen()
+    val sampleWorkout = WorkoutSession(
+        id = "1",
+        title = "Утренняя пробежка",
+        date = "15.07.2023",
+        time = "08:00",
+        duration = "00:45:00",
+        tag = defaultTags[0]
+    )
+    WorkoutDetailsScreen(workout = sampleWorkout)
 }

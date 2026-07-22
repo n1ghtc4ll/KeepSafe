@@ -2,6 +2,7 @@ package com.example.cardioproject.workout.presentation.model
 
 import com.example.cardioproject.core.common.domain.model.TabataProfile
 import com.example.cardioproject.core.common.domain.model.Tag
+import com.example.cardioproject.workout.domain.model.TabataSetup
 
 data class WorkoutSettingsUiState(
     val title: String = "",
@@ -9,6 +10,5 @@ data class WorkoutSettingsUiState(
     val selectedTag: Tag? = null,
     val isTabataEnabled: Boolean = true,
     val availableProfiles: List<TabataProfile> = emptyList(),
-    val selectedProfile: TabataProfile? = null,
-    val customInput: CustomTabataInput = CustomTabataInput()
+    val tabataSetup: TabataSetup? = null,
 )

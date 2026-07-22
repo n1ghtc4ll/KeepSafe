@@ -101,18 +101,13 @@ fun WorkoutScreenContent(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onBackClick }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Назад"
+                        )
                     }
                 },
-                /*actions = {
-                    IconButton(onClick = { TODO() }) {
-                        Icon(Icons.Default.Share, contentDescription = "Поделиться")
-                    }
-                },*/
-                /*colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF3F3F3) // Цвет фона шапки из дизайна
-                )*/
             )
         },
 

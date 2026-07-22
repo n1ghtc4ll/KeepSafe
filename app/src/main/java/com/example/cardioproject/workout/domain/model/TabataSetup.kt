@@ -8,12 +8,12 @@ sealed interface TabataSetup {
     ) : TabataSetup
 
     data class Custom(
-        val setsCount: Int,
-        val repsCount: Int,
-        val warmUpTimeSec: Int,
-        val workoutTimeSec: Int,
-        val relaxTimeSec: Int,
-        val breakTimeSec: Int,
-        val coolDownTimeSec: Int
+        val setsCount: Int = 0,
+        val repsCount: Int = 0,
+        val warmUpTimeSec: Int = 0,
+        val workoutTimeSec: Int = 0,
+        val relaxTimeSec: Int = 0,
+        val breakTimeSec: Int = 0,
+        val coolDownTimeSec: Int = 0
     ) : TabataSetup
 }

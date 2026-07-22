@@ -1,0 +1,36 @@
+package com.example.cardioproject.anthrodiary.presentation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import org.koin.androidx.compose.koinViewModel
+
+/**
+ * Точка входа для навигации: NavHost должен вызывать AnthroDiaryRoute(...),
+ * а не AnthroDiaryScreen(...) напрямую.
+ *
+ * Пример: composable("anthro_diary") { AnthroDiaryRoute(onBackClick = { navController.popBackStack() }) }
+ */
+@Composable
+fun AnthroDiaryRoute(
+    onBackClick: () -> Unit = {}
+) {
+    val viewModel: AnthroDiaryViewModel = koinViewModel()
+    val state by viewModel.uiState.collectAsState()
+    // val saveError by viewModel.saveError.collectAsState()
+    // TODO: сейчас saveError никак не показывается пользователю (нет Snackbar в AnthroDiaryScreen).
+    // Если нужно — добавить SnackbarHost в Scaffold экрана и показывать здесь через LaunchedEffect.
+
+    AnthroDiaryScreen(
+        state = state,
+        onBackClick = onBackClick,
+        onWeightChange = viewModel::onWeightChange,
+        onChestChange = viewModel::onChestChange,
+        onWaistChange = viewModel::onWaistChange,
+        onHipsChange = viewModel::onHipsChange,
+        onBicepsChange = viewModel::onBicepsChange,
+        onSaveClick = viewModel::onSaveClick,
+        onPreviousRecordPickerClick = viewModel::onPreviousRecordPickerClick,
+        onTabSelected = viewModel::onTabSelected,
+    )
+}

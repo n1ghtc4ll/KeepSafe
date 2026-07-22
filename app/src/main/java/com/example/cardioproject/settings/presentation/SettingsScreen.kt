@@ -3,6 +3,7 @@ package com.example.cardioproject.settings.presentation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,16 +19,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -36,6 +41,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,19 +54,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.UUID
 
 // ---------- Colors matching the mock (light theme) ----------
+
 private val BackgroundColor = Color(0xFFFFFFFF)
 private val SurfaceColor = Color(0xFFF5F5F7)
 private val AccentPurple = Color(0xFF7C6BFF)
 private val TextPrimary = Color(0xFF1A1A1E)
 private val TextSecondary = Color(0xFF737379)
 private val DividerColor = Color(0xFFE0E0E4)
+private val DestructiveRed = Color(0xFFD32F2F)
 
 private val KeepSafeLightColorScheme = lightColorScheme(
     background = BackgroundColor,
@@ -79,7 +89,10 @@ data class HeartRateZone(
 
 data class WorkoutTag(
     val name: String,
-    val editable: Boolean = true
+    val editable: Boolean = true,
+    // Добавлено: нужен для сопоставления с domain-моделью при редактировании/удалении.
+    // Дефолтное значение не ломает существующие места создания WorkoutTag(...).
+    val id: String = UUID.randomUUID().toString()
 )
 
 data class SettingsUiState(
@@ -117,13 +130,23 @@ fun SettingsScreen(
     onSearchDevices: () -> Unit = {},
     onPhaseSoundToggle: (Boolean) -> Unit = {},
     onVolumeChange: (Float) -> Unit = {},
-    onAddTag: () -> Unit = {},
-    onEditTag: (WorkoutTag) -> Unit = {},
+    onAddTag: (String) -> Unit = {},
+    onEditTag: (WorkoutTag, String) -> Unit = { _, _ -> },
+    onDeleteTag: (WorkoutTag) -> Unit = {},
     onZoneChange: (Int, ClosedFloatingPointRange<Float>) -> Unit = { _, _ -> },
     onAutoCalculateZones: () -> Unit = {},
     onCriticalPulseAlertToggle: (Boolean) -> Unit = {},
     onKeepScreenOnToggle: (Boolean) -> Unit = {},
+    onBirthDateChange: (String) -> Unit = {},
+    onGenderChange: (String) -> Unit = {},
+    onHeightChange: (String) -> Unit = {},
 ) {
+    var showAddTagDialog by remember { mutableStateOf(false) }
+    var tagBeingEdited by remember { mutableStateOf<WorkoutTag?>(null) }
+    var showBirthDateDialog by remember { mutableStateOf(false) }
+    var showGenderDialog by remember { mutableStateOf(false) }
+    var showHeightDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = { SettingsTopBar(onBackClick) },
         containerColor = BackgroundColor
@@ -178,12 +201,12 @@ fun SettingsScreen(
                 SectionTitle("Теги тренировок")
                 TagsFlowRow(
                     tags = state.tags,
-                    onEditTag = onEditTag
+                    onEditTag = { tag -> tagBeingEdited = tag }
                 )
                 Spacer(Modifier.height(12.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     OutlinedButton(
-                        onClick = onAddTag,
+                        onClick = { showAddTagDialog = true },
                         shape = RoundedCornerShape(20.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
                         border = BorderStroke(1.dp, DividerColor)
@@ -195,9 +218,22 @@ fun SettingsScreen(
             }
 
             item {
-                LabeledInputRow(label = "Дата рождения", value = state.birthDate, icon = Icons.Default.DateRange)
-                LabeledInputRow(label = "Пол", value = state.gender)
-                LabeledInputRow(label = "Рост", value = state.height)
+                LabeledInputRow(
+                    label = "Дата рождения",
+                    value = state.birthDate,
+                    icon = Icons.Default.DateRange,
+                    onClick = { showBirthDateDialog = true }
+                )
+                LabeledInputRow(
+                    label = "Пол",
+                    value = state.gender,
+                    onClick = { showGenderDialog = true }
+                )
+                LabeledInputRow(
+                    label = "Рост",
+                    value = state.height,
+                    onClick = { showHeightDialog = true }
+                )
                 SectionDivider()
             }
 
@@ -239,6 +275,74 @@ fun SettingsScreen(
                 )
             }
         }
+    }
+
+    if (showAddTagDialog) {
+        TagInputDialog(
+            title = "Новый тег",
+            initialValue = "",
+            onConfirm = { name ->
+                onAddTag(name)
+                showAddTagDialog = false
+            },
+            onDismiss = { showAddTagDialog = false }
+        )
+    }
+
+    tagBeingEdited?.let { tag ->
+        TagInputDialog(
+            title = "Редактировать тег",
+            initialValue = tag.name,
+            onConfirm = { newName ->
+                onEditTag(tag, newName)
+                tagBeingEdited = null
+            },
+            onDismiss = { tagBeingEdited = null },
+            onDelete = if (tag.editable) {
+                {
+                    onDeleteTag(tag)
+                    tagBeingEdited = null
+                }
+            } else null
+        )
+    }
+
+    if (showBirthDateDialog) {
+        TextInputDialog(
+            title = "Дата рождения",
+            placeholder = "гггг-мм-дд",
+            initialValue = state.birthDate,
+            onConfirm = { value ->
+                onBirthDateChange(value)
+                showBirthDateDialog = false
+            },
+            onDismiss = { showBirthDateDialog = false }
+        )
+    }
+
+    if (showGenderDialog) {
+        GenderPickerDialog(
+            initialValue = state.gender,
+            onConfirm = { value ->
+                onGenderChange(value)
+                showGenderDialog = false
+            },
+            onDismiss = { showGenderDialog = false }
+        )
+    }
+
+    if (showHeightDialog) {
+        TextInputDialog(
+            title = "Рост, см",
+            placeholder = "175",
+            initialValue = state.height,
+            keyboardType = KeyboardType.Number,
+            onConfirm = { value ->
+                onHeightChange(value)
+                showHeightDialog = false
+            },
+            onDismiss = { showHeightDialog = false }
+        )
     }
 }
 
@@ -416,7 +520,6 @@ private fun SimpleFlowRow(
         val horizontalGapPx = horizontalGap.roundToPx()
         val verticalGapPx = verticalGap.roundToPx()
         val maxWidth = constraints.maxWidth
-
         val itemConstraints = Constraints(maxWidth = maxWidth)
         val placeables = measurables.map { it.measure(itemConstraints) }
 
@@ -482,11 +585,13 @@ private fun TagChip(tag: WorkoutTag, onEditClick: () -> Unit) {
 private fun LabeledInputRow(
     label: String,
     value: String,
-    icon: ImageVector? = null
+    icon: ImageVector? = null,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .let { base -> if (onClick != null) base.clickable(onClick = onClick) else base }
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -562,25 +667,146 @@ private fun HeartRateZoneRow(
     }
 }
 
+// ---------- Dialogs ----------
+
+@Composable
+private fun TagInputDialog(
+    title: String,
+    initialValue: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onDelete: (() -> Unit)? = null
+) {
+    var text by remember { mutableStateOf(initialValue) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                singleLine = true,
+                label = { Text("Название тега") }
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { if (text.isNotBlank()) onConfirm(text.trim()) }) {
+                Text("Сохранить")
+            }
+        },
+        dismissButton = {
+            Row {
+                if (onDelete != null) {
+                    TextButton(onClick = onDelete) {
+                        Text("Удалить", color = DestructiveRed)
+                    }
+                }
+                TextButton(onClick = onDismiss) { Text("Отмена") }
+            }
+        }
+    )
+}
+
+@Composable
+private fun TextInputDialog(
+    title: String,
+    initialValue: String,
+    placeholder: String = "",
+    keyboardType: KeyboardType = KeyboardType.Text,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var text by remember { mutableStateOf(initialValue) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                singleLine = true,
+                placeholder = { Text(placeholder) },
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(text.trim()) }) { Text("Сохранить") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Отмена") }
+        }
+    )
+}
+
+@Composable
+private fun GenderPickerDialog(
+    initialValue: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var selected by remember { mutableStateOf(initialValue) }
+    val options = listOf("Мужской", "Женский")
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Пол") },
+        text = {
+            Column {
+                options.forEach { option ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selected = option }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = selected == option, onClick = { selected = option })
+                        Spacer(Modifier.width(8.dp))
+                        Text(option, color = TextPrimary)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(selected) }) { Text("Сохранить") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Отмена") }
+        }
+    )
+}
+
 // ---------- Preview ----------
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF, widthDp = 360, heightDp = 900)
 @Composable
 private fun SettingsScreenPreview() {
     var state by remember { mutableStateOf(SettingsUiState()) }
-
     MaterialTheme(colorScheme = KeepSafeLightColorScheme) {
         SettingsScreen(
             state = state,
             onPhaseSoundToggle = { state = state.copy(phaseSoundEnabled = it) },
             onVolumeChange = { state = state.copy(signalVolume = it) },
+            onAddTag = { name ->
+                state = state.copy(tags = state.tags + WorkoutTag(name = name))
+            },
+            onEditTag = { tag, newName ->
+                state = state.copy(
+                    tags = state.tags.map { if (it.id == tag.id) it.copy(name = newName) else it }
+                )
+            },
+            onDeleteTag = { tag ->
+                state = state.copy(tags = state.tags.filterNot { it.id == tag.id })
+            },
             onZoneChange = { index, range ->
                 val updated = state.zones.toMutableList()
                 updated[index] = updated[index].copy(range = range)
                 state = state.copy(zones = updated)
             },
             onCriticalPulseAlertToggle = { state = state.copy(criticalPulseAlertEnabled = it) },
-            onKeepScreenOnToggle = { state = state.copy(keepScreenOnEnabled = it) }
+            onKeepScreenOnToggle = { state = state.copy(keepScreenOnEnabled = it) },
+            onBirthDateChange = { state = state.copy(birthDate = it) },
+            onGenderChange = { state = state.copy(gender = it) },
+            onHeightChange = { state = state.copy(height = it) }
         )
     }
 }

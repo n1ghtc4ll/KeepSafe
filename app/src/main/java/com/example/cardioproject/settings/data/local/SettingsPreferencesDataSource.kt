@@ -11,7 +11,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.example.cardioproject.settings.data.local.dto.HeartRateZoneDto
 import com.example.cardioproject.settings.data.local.dto.WorkoutTagDto
 import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

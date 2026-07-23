@@ -1,5 +1,8 @@
 package com.example.cardioproject.settings.domain.model
 
+import com.example.cardioproject.core.common.domain.model.Tag
+import kotlin.String
+
 /**
  * Последнее известное состояние подключённого устройства.
  * Логика сканирования/подключения (BLE) живёт в отдельном модуле —
@@ -7,11 +10,12 @@ package com.example.cardioproject.settings.domain.model
  */
 data class DeviceInfo(
     val name: String,
+    val macAddress: String = "",
     val batteryLevel: Int,
     val isConnected: Boolean
 ) {
     companion object {
-        val Unknown = DeviceInfo(name = "", batteryLevel = 0, isConnected = false)
+        val Unknown = DeviceInfo(name = "", macAddress = "", batteryLevel = 0, isConnected = false)
     }
 }
 
@@ -36,16 +40,6 @@ data class HeartRateZone(
     }
 }
 
-/**
- * Тег тренировки (например "Силовая"). isEditable=false — для системных тегов,
- * которые пользователь не может редактировать/удалить.
- */
-data class WorkoutTag(
-    val id: String,
-    val name: String,
-    val isEditable: Boolean = true
-)
-
 data class UserProfile(
     val birthDate: String = "",
     val gender: String = "",
@@ -60,7 +54,7 @@ data class TrainingSettings(
     val device: DeviceInfo = DeviceInfo.Unknown,
     val phaseSoundEnabled: Boolean = true,
     val signalVolume: Float = 0.6f,
-    val tags: List<WorkoutTag> = emptyList(),
+    val tags: List<Tag> = emptyList(),
     val profile: UserProfile = UserProfile(),
     val heartRateZones: List<HeartRateZone> = emptyList(),
     val criticalPulseAlertEnabled: Boolean = true,

@@ -28,4 +28,15 @@ class WorkoutSessionRepositoryImpl(
             }
         }
     }
+
+    override fun getWorkoutById(id: String): Flow<WorkoutSession?> {
+        return workoutDao.getWorkoutById(id).map { entity ->
+            val domainTag = entity?.tagId?.let { tagId -> tagDao.getTagById(tagId)?.toDomain() }
+            entity?.toDomain(domainTag)
+        }
+    }
+
+    override suspend fun deleteWorkout(session: WorkoutSession) {
+        workoutDao.deleteWorkout(session.toEntity())
+    }
 }

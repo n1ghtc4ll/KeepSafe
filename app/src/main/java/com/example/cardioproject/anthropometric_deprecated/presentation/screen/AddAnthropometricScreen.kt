@@ -1,4 +1,4 @@
-package com.example.cardioproject.anthropometric.presentation.screen
+package com.example.cardioproject.anthropometric_deprecated.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

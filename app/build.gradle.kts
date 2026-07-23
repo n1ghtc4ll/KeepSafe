@@ -53,8 +53,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

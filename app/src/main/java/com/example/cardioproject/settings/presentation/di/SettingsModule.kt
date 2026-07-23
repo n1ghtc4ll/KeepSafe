@@ -1,5 +1,6 @@
 package com.example.cardioproject.settings.presentation.di
 
+import androidx.lifecycle.SavedStateHandle
 import com.example.cardioproject.settings.data.local.SettingsPreferencesDataSource
 import com.example.cardioproject.settings.data.repository.SettingsRepositoryImpl
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
@@ -15,7 +16,8 @@ import com.example.cardioproject.settings.domain.usecase.UpdatePhaseSoundUseCase
 import com.example.cardioproject.settings.domain.usecase.UpdateSignalVolumeUseCase
 import com.example.cardioproject.settings.domain.usecase.UpdateUserProfileUseCase
 import com.example.cardioproject.settings.presentation.SettingsViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import com.example.cardioproject.settings.presentation.viewmodel.ProfileBuilderViewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 /**
@@ -31,7 +33,7 @@ val settingsModule = module {
 
     single { SettingsPreferencesDataSource(context = get()) }
 
-    single<SettingsRepository> { SettingsRepositoryImpl(dataSource = get()) }
+    single<SettingsRepository> { SettingsRepositoryImpl(get(), get(), get()) }
 
     factory { ObserveSettingsUseCase(get()) }
     factory { UpdatePhaseSoundUseCase(get()) }
@@ -58,6 +60,14 @@ val settingsModule = module {
             autoCalculateHeartRateZones = get(),
             updateCriticalPulseAlert = get(),
             updateKeepScreenOn = get(),
+            settingsRepository = get()
+        )
+    }
+
+    viewModel { parameters ->
+        ProfileBuilderViewModel(
+            profileId = parameters.getOrNull(),
+            repository = get()
         )
     }
 }

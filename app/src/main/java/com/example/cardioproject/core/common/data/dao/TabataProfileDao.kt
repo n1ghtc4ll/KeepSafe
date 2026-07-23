@@ -17,4 +17,7 @@ interface TabataProfileDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTabataProfile(tabata: TabataProfileEntity)
+
+    @Query("DELETE FROM tabata_profiles WHERE id = :id")
+    suspend fun deleteTabataProfileById(id: String)
 }

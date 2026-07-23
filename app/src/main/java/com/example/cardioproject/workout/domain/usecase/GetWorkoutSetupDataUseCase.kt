@@ -1,6 +1,6 @@
 package com.example.cardioproject.workout.domain.usecase
 
-import com.example.cardioproject.core.common.domain.repository.SettingsRepository
+import com.example.cardioproject.settings.domain.repository.SettingsRepository
 import com.example.cardioproject.workout.domain.model.WorkoutSetupData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine

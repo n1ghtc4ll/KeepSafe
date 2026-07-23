@@ -1,5 +1,6 @@
-package com.example.cardioproject.presentation
+package com.example.cardioproject.workout.presentation.screen
 
+import android.R
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,15 +42,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.UUID
 
 private val BackgroundColor = Color(0xFFF4F4F6)
 private val CardBackground = Color(0xFFFFFFFF)
@@ -151,7 +155,7 @@ fun WorkoutDetailsScreen(
 
             IconButton(onClick = { /* TODO: Логика экспорта в Excel */ }) {
                 Icon(
-                    painter = androidx.compose.ui.res.painterResource(android.R.drawable.ic_menu_save),
+                    painter = painterResource(R.drawable.ic_menu_save),
                     contentDescription = "Экспорт в Excel",
                     tint = AccentPurple
                 )
@@ -355,7 +359,7 @@ fun TagManagementDialog(
                             onClick = {
                                 if (newTagName.isNotBlank()) {
                                     val newTag = WorkoutTag(
-                                        java.util.UUID.randomUUID().toString(),
+                                        UUID.randomUUID().toString(),
                                         newTagName,
                                         newTagColor
                                     )
@@ -415,8 +419,8 @@ fun HeartRateGraph() {
             val y = height * (i.toFloat() / lineCount)
             drawLine(
                 color = Color.LightGray.copy(alpha = 0.5f),
-                start = androidx.compose.ui.geometry.Offset(0f, y),
-                end = androidx.compose.ui.geometry.Offset(width, y),
+                start = Offset(0f, y),
+                end = Offset(width, y),
                 strokeWidth = 1f
             )
         }

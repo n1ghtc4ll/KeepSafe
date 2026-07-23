@@ -1,4 +1,4 @@
-package com.example.cardioproject.presentation
+package com.example.cardioproject.workout.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

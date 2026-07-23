@@ -23,10 +23,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +47,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +65,9 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 // ---------- Colors matching the mock (light theme) ----------
@@ -87,12 +95,16 @@ data class HeartRateZone(
     var range: ClosedFloatingPointRange<Float>
 )
 
+data class TimerProfileUi(
+    val id: String,
+    val name: String
+)
+
 data class WorkoutTag(
+    val id: String,
     val name: String,
-    val editable: Boolean = true,
-    // Добавлено: нужен для сопоставления с domain-моделью при редактировании/удалении.
-    // Дефолтное значение не ломает существующие места создания WorkoutTag(...).
-    val id: String = UUID.randomUUID().toString()
+    val color: String, // Добавили цвет, так как он есть в TagEntity
+    val editable: Boolean = true
 )
 
 data class SettingsUiState(
@@ -102,10 +114,14 @@ data class SettingsUiState(
     val phaseSoundEnabled: Boolean = true,
     val signalVolume: Float = 0.6f,
     val tags: List<WorkoutTag> = listOf(
-        WorkoutTag("Общая"),
-        WorkoutTag("Силовая"),
-        WorkoutTag("Легкая"),
-        WorkoutTag("Вело")
+        WorkoutTag(UUID.randomUUID().toString(), "Общая", "#6750A4", false),
+        WorkoutTag(UUID.randomUUID().toString(), "Силовая", "#6750A4", false),
+        WorkoutTag(UUID.randomUUID().toString(), "Легкая", "#6750A4", false),
+        WorkoutTag(UUID.randomUUID().toString(), "Вело", "#6750A4", false)
+    ),
+    val timerProfiles: List<TimerProfileUi> = listOf(
+        TimerProfileUi("1", "Профиль 1"),
+        TimerProfileUi("2", "Профиль 2")
     ),
     val birthDate: String = "",
     val gender: String = "",
@@ -126,6 +142,9 @@ data class SettingsUiState(
 fun SettingsScreen(
     state: SettingsUiState,
     onBackClick: () -> Unit = {},
+    onAddProfileClick: () -> Unit = {},
+    onEditProfileClick: (TimerProfileUi) -> Unit = {},
+    onDeleteProfileClick: (TimerProfileUi) -> Unit = {},
     onDisconnectDevice: () -> Unit = {},
     onSearchDevices: () -> Unit = {},
     onPhaseSoundToggle: (Boolean) -> Unit = {},
@@ -168,6 +187,7 @@ fun SettingsScreen(
                 BluetoothDeviceRow(
                     name = state.deviceName,
                     battery = state.deviceBattery,
+                    isConnected = state.isDeviceConnected,
                     onDisconnect = onDisconnectDevice
                 )
                 Spacer(Modifier.height(8.dp))
@@ -193,7 +213,14 @@ fun SettingsScreen(
                     fontSize = 15.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                ProfileSelectorBox()
+
+                TimerProfilesSection(
+                    profiles = state.timerProfiles,
+                    onAddClick = onAddProfileClick,
+                    onEditClick = onEditProfileClick,
+                    onDeleteClick = onDeleteProfileClick
+                )
+
                 SectionDivider()
             }
 
@@ -307,13 +334,23 @@ fun SettingsScreen(
         )
     }
 
-    if (showBirthDateDialog) {
+    /*if (showBirthDateDialog) {
         TextInputDialog(
             title = "Дата рождения",
             placeholder = "гггг-мм-дд",
             initialValue = state.birthDate,
             onConfirm = { value ->
                 onBirthDateChange(value)
+                showBirthDateDialog = false
+            },
+            onDismiss = { showBirthDateDialog = false }
+        )
+    }*/
+    if (showBirthDateDialog) {
+        BirthDatePickerDialog(
+            initialValue = state.birthDate,
+            onConfirm = { formattedDate ->
+                onBirthDateChange(formattedDate)
                 showBirthDateDialog = false
             },
             onDismiss = { showBirthDateDialog = false }
@@ -394,6 +431,7 @@ private fun SectionDivider() {
 private fun BluetoothDeviceRow(
     name: String,
     battery: Int,
+    isConnected: Boolean,
     onDisconnect: () -> Unit
 ) {
     Row(
@@ -405,13 +443,15 @@ private fun BluetoothDeviceRow(
             Text(text = name, color = TextPrimary, fontSize = 15.sp)
             Text(text = "Батарея: $battery%", color = TextSecondary, fontSize = 13.sp)
         }
-        OutlinedButton(
-            onClick = onDisconnect,
-            shape = RoundedCornerShape(20.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-            border = BorderStroke(1.dp, DividerColor)
-        ) {
-            Text("Отключить")
+        if (isConnected) {
+            OutlinedButton(
+                onClick = onDisconnect,
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+                border = BorderStroke(1.dp, DividerColor)
+            ) {
+                Text("Отключить")
+            }
         }
     }
 }
@@ -477,14 +517,76 @@ private fun VolumeRow(
 }
 
 @Composable
-private fun ProfileSelectorBox() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(90.dp)
-            .border(width = 1.5.dp, color = AccentPurple, shape = RoundedCornerShape(12.dp))
-            .padding(12.dp)
-    )
+private fun TimerProfilesSection(
+    profiles: List<TimerProfileUi>,
+    onAddClick: () -> Unit,
+    onEditClick: (TimerProfileUi) -> Unit,
+    onDeleteClick: (TimerProfileUi) -> Unit
+) {
+    Column {
+        if (profiles.isNotEmpty()) {
+            Surface(
+                color = SurfaceColor,
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, DividerColor),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column {
+                    profiles.forEachIndexed { index, profile ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp, horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = profile.name, color = TextPrimary, fontSize = 15.sp)
+                            Row {
+                                IconButton(
+                                    onClick = { onEditClick(profile) },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = "Редактировать",
+                                        tint = TextSecondary,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                                Spacer(Modifier.width(16.dp))
+                                IconButton(
+                                    onClick = { onDeleteClick(profile) },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Удалить",
+                                        tint = TextSecondary,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        }
+                        if (index < profiles.lastIndex) {
+                            androidx.compose.material3.Divider(color = DividerColor, thickness = 1.dp)
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            OutlinedButton(
+                onClick = onAddClick,
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+                border = BorderStroke(1.dp, DividerColor)
+            ) {
+                Text("Добавить")
+            }
+        }
+    }
 }
 
 @Composable
@@ -738,6 +840,41 @@ private fun TextInputDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BirthDatePickerDialog(
+    initialValue: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val formattedDate = formatter.format(Date(millis))
+                        onConfirm(formattedDate)
+                    } ?: onDismiss()
+                }
+            ) {
+                Text("Сохранить")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Отмена") }
+        }
+    ) {
+        DatePicker(
+            state = datePickerState,
+            showModeToggle = false
+        )
+    }
+}
+
 @Composable
 private fun GenderPickerDialog(
     initialValue: String,
@@ -787,8 +924,7 @@ private fun SettingsScreenPreview() {
             onPhaseSoundToggle = { state = state.copy(phaseSoundEnabled = it) },
             onVolumeChange = { state = state.copy(signalVolume = it) },
             onAddTag = { name ->
-                state = state.copy(tags = state.tags + WorkoutTag(name = name))
-            },
+                state = state.copy(tags = state.tags + WorkoutTag(id = UUID.randomUUID().toString(), name = name, color = "#FF0000"))            },
             onEditTag = { tag, newName ->
                 state = state.copy(
                     tags = state.tags.map { if (it.id == tag.id) it.copy(name = newName) else it }

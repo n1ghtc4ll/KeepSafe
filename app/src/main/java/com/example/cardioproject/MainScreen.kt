@@ -23,16 +23,20 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import com.example.cardioproject.anthropometric.presentation.screen.AddAnthropometricScreen
+import com.example.cardioproject.anthrodiary.presentation.AnthroDiaryRoute
 import com.example.cardioproject.core.navigation.Route
 import com.example.cardioproject.core.navigation.TopLevelBackStack
-import com.example.cardioproject.home.presentation.HeartRateMainScreen
+import com.example.cardioproject.presentation.HeartRateMainScreen
+import com.example.cardioproject.workout.presentation.screen.WorkoutDetailsScreen
+import com.example.cardioproject.workout.presentation.screen.WorkoutHistoryScreen
+import com.example.cardioproject.settings.presentation.SettingsRoute
+import com.example.cardioproject.settings.presentation.screen.ProfileBuilderRoute
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
 import com.example.cardioproject.workout.presentation.screen.WorkoutScreen
 import com.example.cardioproject.workout.presentation.screen.WorkoutSettingsScreen
-import com.example.cardioproject.workout.presentation.screen.WorkoutSettingsScreenContent
-import com.example.cardioproject.workout.presentation.viewmodel.WorkoutSettingsViewModel
-import org.koin.compose.viewmodel.koinViewModel
+import com.example.cardioproject.workout.presentation.viewmodel.WorkoutDetailsViewModel
+import com.example.cardioproject.workout.presentation.viewmodel.WorkoutHistoryViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.java.KoinJavaComponent.inject
 import kotlin.collections.listOf
 
@@ -54,7 +58,10 @@ data object Anthropometric: TopLevelRoute {
 
 data object AddAnthropometric: Route
 data object WorkoutSetting: Route
+data object Settings: Route
+data class ProfileBuilder(val profileId: String? = null): Route
 data class ActiveWorkout(val settings: WorkoutSettings): Route
+data class WorkoutDetails(val workoutId: String) : Route
 
 @Composable
 fun MainScreen() {
@@ -92,17 +99,63 @@ fun MainScreen() {
                 entry<Main> {
                     HeartRateMainScreen(
                         onAddMeasurementsClick = { topLevelBackStack.add(AddAnthropometric) },
-                        onStartWorkoutClick = { topLevelBackStack.add(WorkoutSetting) }
+                        onStartWorkoutClick = { topLevelBackStack.add(WorkoutSetting) },
+                        onSettingsClick = { topLevelBackStack.add(Settings) }
                     )
                 }
                 entry<WorkoutHistory> {
+                    val viewModel: WorkoutHistoryViewModel = koinViewModel()
+                    val workouts by viewModel.workouts.collectAsState()
 
+                    WorkoutHistoryScreen(
+                        workouts = workouts,
+                        onBackClick = { topLevelBackStack.removeLast() },
+                        onWorkoutClick = { id ->
+                            topLevelBackStack.add(WorkoutDetails(id))
+                        },
+                        onAddWorkout = { },
+                        onEditWorkout = {  },
+                        onDeleteWorkout = { session ->
+                            // viewModel.deleteWorkoutById(session.id)
+                        }
+                    )
+                }
+
+                entry<WorkoutDetails> { route ->
+                    val viewModel: WorkoutDetailsViewModel = koinViewModel(
+                        parameters = { org.koin.core.parameter.parametersOf(route.workoutId) }
+                    )
+                    val workout by viewModel.workout.collectAsState()
+
+                    workout?.let { loadedWorkout ->
+                        WorkoutDetailsScreen(
+                            workout = loadedWorkout,
+                            onBackClick = { topLevelBackStack.removeLast() },
+                            onWorkoutUpdated = { updatedWorkout ->
+                                viewModel.updateTag(updatedWorkout.tag)
+                            }
+                        )
+                    }
                 }
                 entry<Anthropometric> {
-
+                    AnthroDiaryRoute(onBackClick = { topLevelBackStack.removeLast() })
                 }
                 entry<AddAnthropometric> {
-                    AddAnthropometricScreen(onBackClick = { topLevelBackStack.removeLast() })
+                    AnthroDiaryRoute(onBackClick = { topLevelBackStack.removeLast() })
+                }
+                entry<Settings> {
+                    SettingsRoute(
+                        onBackClick = { topLevelBackStack.removeLast() },
+                        onNavigateToProfileBuilder = { profileId ->
+                            topLevelBackStack.add(ProfileBuilder(profileId))
+                        }
+                    )
+                }
+                entry<ProfileBuilder> { route ->
+                    ProfileBuilderRoute(
+                        profileId = route.profileId,
+                        onNavigateBack = { topLevelBackStack.removeLast() }
+                    )
                 }
 
                 entry<WorkoutSetting>(
@@ -126,6 +179,7 @@ fun MainScreen() {
                         settings = activeWorkout.settings,
                         onFinish = {
                             topLevelBackStack.removeLast()
+                            topLevelBackStack.addTopLevel(WorkoutHistory)
                         }
                     )
                 }

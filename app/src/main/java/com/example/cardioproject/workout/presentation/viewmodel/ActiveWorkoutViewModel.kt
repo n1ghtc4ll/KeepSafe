@@ -2,6 +2,8 @@ package com.example.cardioproject.workout.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cardioproject.core.bluetooth.domain.HeartRateDevice
+import com.example.cardioproject.settings.domain.repository.SettingsRepository
 import com.example.cardioproject.workout.domain.model.WorkoutPhase
 import com.example.cardioproject.workout.domain.model.WorkoutSession
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
@@ -19,7 +21,9 @@ import kotlin.random.Random
 
 class ActiveWorkoutViewModel(
     private val startTimerUseCase: StartWorkoutTimerUseCase,
-    private val repository: WorkoutSessionRepository
+    private val workoutRepository: WorkoutSessionRepository,
+    private val settingsRepository: SettingsRepository,
+    private val heartRateDevice: HeartRateDevice
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ActiveWorkoutUiState())
@@ -31,9 +35,25 @@ class ActiveWorkoutViewModel(
     private var currentSettings: WorkoutSettings? = null
     private var sessionStartTime: Long = 0
 
+    init {
+        viewModelScope.launch {
+            heartRateDevice.heartRate.collect { bpm ->
+                if (bpm > 0) {
+                    onNewHeartRateReceived(bpm)
+                }
+            }
+        }
+    }
+
     fun startWorkout(settings: WorkoutSettings) {
         currentSettings = settings
         sessionStartTime = System.currentTimeMillis()
+
+        viewModelScope.launch {
+            settingsRepository.observeSettings().collect { trainingSettings ->
+                _uiState.update { it.copy(hrZones = trainingSettings.heartRateZones) }
+            }
+        }
 
         startHeartRateSimulation()
 
@@ -74,10 +94,27 @@ class ActiveWorkoutViewModel(
         heartRateJob = viewModelScope.launch {
             while (true) {
                 val fakeBpm = Random.nextInt(110, 165)
+                // Сохраняем в локальный список для базы данных
                 heartRateHistory.add(fakeBpm)
-                _uiState.update { it.copy(currentHeartRate = fakeBpm) }
+                // ОБЯЗАТЕЛЬНО обновляем список внутри ActiveWorkoutUiState
+                _uiState.update { state ->
+                    state.copy(
+                        currentHeartRate = fakeBpm,
+                        heartRateHistory = state.heartRateHistory + fakeBpm
+                    )
+                }
                 delay(1000)
             }
+        }
+    }
+
+    fun onNewHeartRateReceived(bpm: Int) {
+        heartRateHistory.add(bpm)
+        _uiState.update { state ->
+            state.copy(
+                currentHeartRate = bpm,
+                heartRateHistory = state.heartRateHistory + bpm
+            )
         }
     }
 
@@ -108,7 +145,12 @@ class ActiveWorkoutViewModel(
                 minHeartRate = heartRateHistory.minOrNull(),
                 heartRateHistory = heartRateHistory.toList()
             )
-            repository.saveWorkoutResult(session)
+            workoutRepository.saveWorkoutResult(session)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        heartRateDevice.disconnect()
     }
 }

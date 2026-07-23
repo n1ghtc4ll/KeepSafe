@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.cardioproject.core.common.data.entity.TagEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -17,4 +18,10 @@ interface TagDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTag(tag: TagEntity)
+
+    @Update
+    suspend fun updateTag(tag: TagEntity)
+
+    @Query("DELETE FROM tags WHERE id = :id")
+    suspend fun deleteTagById(id: String)
 }

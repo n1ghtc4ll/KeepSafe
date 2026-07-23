@@ -1,7 +1,10 @@
 package com.example.cardioproject
 
 import android.app.Application
+import com.example.cardioproject.anthrodiary.di.anthroDiaryModule
+import com.example.cardioproject.core.bluetooth.bluetoothModule
 import com.example.cardioproject.core.di.mainModule
+import com.example.cardioproject.settings.presentation.di.settingsModule
 import com.example.cardioproject.workout.di.workoutModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -16,7 +19,10 @@ class App: Application() {
             androidContext(this@App)
             modules(
                 mainModule,
-                workoutModule
+                workoutModule,
+                anthroDiaryModule,
+                settingsModule,
+                bluetoothModule
             )
         }
     }

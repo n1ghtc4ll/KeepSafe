@@ -10,10 +10,15 @@ fun TabataProfile.toEntity(): TabataProfileEntity {
         setsCount = this.setsCount,
         repsCount = this.repsCount,
         warmUpTimeSec = this.warmUpTimeSec,
+        warmUpColorHex = this.warmUpColorHex,
         workoutTimeSec = this.workoutTimeSec,
+        workoutColorHex = this.workoutColorHex,
         relaxTimeSec = this.relaxTimeSec,
+        relaxColorHex = this.relaxColorHex,
         breakTimeSec = this.breakTimeSec,
-        coolDownTimeSec = this.coolDownTimeSec
+        breakColorHex = this.breakColorHex,
+        coolDownTimeSec = this.coolDownTimeSec,
+        coolDownColorHex = this.coolDownColorHex
     )
 }
 
@@ -24,9 +29,14 @@ fun TabataProfileEntity.toDomain(): TabataProfile {
         setsCount = this.setsCount,
         repsCount = this.repsCount,
         warmUpTimeSec = this.warmUpTimeSec,
+        warmUpColorHex = this.warmUpColorHex,
         workoutTimeSec = this.workoutTimeSec,
+        workoutColorHex = this.workoutColorHex,
         relaxTimeSec = this.relaxTimeSec,
+        relaxColorHex = this.relaxColorHex,
         breakTimeSec = this.breakTimeSec,
-        coolDownTimeSec = this.coolDownTimeSec
+        breakColorHex = this.breakColorHex,
+        coolDownTimeSec = this.coolDownTimeSec,
+        coolDownColorHex = this.coolDownColorHex
     )
 }

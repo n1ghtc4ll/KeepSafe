@@ -8,12 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import org.koin.androidx.compose.koinViewModel
 
-/**
- * Точка входа для навигации: NavHost должен вызывать AnthroDiaryRoute(...),
- * а не AnthroDiaryScreen(...) напрямую.
- *
- * Пример: composable("anthro_diary") { AnthroDiaryRoute(onBackClick = { navController.popBackStack() }) }
- */
 @Composable
 fun AnthroDiaryRoute(
     onBackClick: () -> Unit = {}
@@ -45,6 +39,6 @@ fun AnthroDiaryRoute(
         onBicepsChange = viewModel::onBicepsChange,
         onSaveClick = viewModel::onSaveClick,
         onPreviousRecordPickerClick = viewModel::onPreviousRecordPickerClick,
-        onTabSelected = viewModel::onTabSelected,
+        //onTabSelected = viewModel::onTabSelected,
     )
 }

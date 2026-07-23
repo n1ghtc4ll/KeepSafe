@@ -2,9 +2,11 @@ package com.example.cardioproject.settings.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cardioproject.core.common.domain.model.TabataProfile
+import com.example.cardioproject.core.common.domain.model.Tag
 import com.example.cardioproject.settings.domain.model.HeartRateZone as DomainHeartRateZone
 import com.example.cardioproject.settings.domain.model.TrainingSettings
-import com.example.cardioproject.settings.domain.model.WorkoutTag as DomainWorkoutTag
+import com.example.cardioproject.settings.domain.repository.SettingsRepository
 import com.example.cardioproject.settings.domain.usecase.AddWorkoutTagUseCase
 import com.example.cardioproject.settings.domain.usecase.AutoCalculateHeartRateZonesUseCase
 import com.example.cardioproject.settings.domain.usecase.EditWorkoutTagUseCase
@@ -19,19 +21,11 @@ import com.example.cardioproject.settings.domain.usecase.UpdateUserProfileUseCas
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Связывает domain-слой (usecase'ы) с презентационным SettingsUiState.
- *
- * ВАЖНО: WorkoutTag и HeartRateZone существуют в двух версиях — доменной
- * (com.example.cardioproject.settings.domain.model) и презентационной
- * (com.example.cardioproject.settings.presentation, объявлена в SettingsScreen.kt).
- * Чтобы не путать их, доменные версии импортированы с алиасом (DomainWorkoutTag,
- * DomainHeartRateZone). Безымянные WorkoutTag / HeartRateZone в этом файле —
- * всегда презентационные типы, те же, что ожидает SettingsScreen.
- */
 class SettingsViewModel(
+    private val settingsRepository: SettingsRepository,
     private val observeSettings: ObserveSettingsUseCase,
     private val updatePhaseSound: UpdatePhaseSoundUseCase,
     private val updateSignalVolume: UpdateSignalVolumeUseCase,
@@ -48,15 +42,42 @@ class SettingsViewModel(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
-    // Держим последний снимок domain-модели, чтобы не гонять usecase'ы за списком
-    // тегов/зон каждый раз — обновления zones/tags идут по индексу/id из этого снимка.
     private var latestSettings: TrainingSettings = TrainingSettings()
 
     init {
+        // 1. Подписываемся на общие настройки (DataStore)
         viewModelScope.launch {
             observeSettings().collect { settings ->
                 latestSettings = settings
-                _uiState.value = settings.toUiState()
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        deviceName = settings.device.name,
+                        deviceBattery = settings.device.batteryLevel,
+                        isDeviceConnected = settings.device.isConnected,
+                        phaseSoundEnabled = settings.phaseSoundEnabled,
+                        signalVolume = settings.signalVolume,
+                        birthDate = settings.profile.birthDate,
+                        gender = settings.profile.gender,
+                        height = settings.profile.heightCm?.toString().orEmpty(),
+                        zones = settings.heartRateZones.map { it.toUiZone() },
+                        criticalPulseAlertEnabled = settings.criticalPulseAlertEnabled,
+                        keepScreenOnEnabled = settings.keepScreenOnEnabled
+                    )
+                }
+            }
+        }
+
+        // 2. Подписываемся на профили Табаты (Room)
+        viewModelScope.launch {
+            settingsRepository.getTabataProfiles().collect { profiles ->
+                _uiState.update { it.copy(timerProfiles = profiles.map(TabataProfile::toUiProfile)) }
+            }
+        }
+
+        // 3. Подписываемся на теги (Room)
+        viewModelScope.launch {
+            settingsRepository.getTags().collect { tags ->
+                _uiState.update { it.copy(tags = tags.map(Tag::toUiTag)) }
             }
         }
     }
@@ -71,24 +92,36 @@ class SettingsViewModel(
 
     fun onAddTag(name: String) {
         if (name.isBlank()) return
-        viewModelScope.launch { addWorkoutTag(name) }
+        viewModelScope.launch {
+            // Используем UseCase вместо репозитория
+            addWorkoutTag(name, "#6750A4")
+        }
     }
 
     fun onEditTag(tag: WorkoutTag, newName: String) {
         if (newName.isBlank()) return
         viewModelScope.launch {
-            editWorkoutTag(
-                DomainWorkoutTag(
-                    id = tag.id,
-                    name = newName,
-                    isEditable = tag.editable
-                )
+            val updatedTag = Tag(
+                id = tag.id,
+                name = newName,
+                color = tag.color
             )
+            // Используем UseCase
+            editWorkoutTag(updatedTag)
         }
     }
 
     fun onDeleteTag(tag: WorkoutTag) {
-        viewModelScope.launch { removeWorkoutTag(tag.id) }
+        viewModelScope.launch {
+            // Используем UseCase
+            removeWorkoutTag(tag.id)
+        }
+    }
+
+    fun onDeleteProfile(profile: TimerProfileUi) {
+        viewModelScope.launch {
+            settingsRepository.deleteTabataProfile(profile.id)
+        }
     }
 
     fun onBirthDateChange(value: String) {
@@ -122,7 +155,12 @@ class SettingsViewModel(
     }
 
     fun onAutoCalculateZones() {
-        viewModelScope.launch { autoCalculateHeartRateZones(latestSettings.heartRateZones) }
+        viewModelScope.launch {
+            autoCalculateHeartRateZones(
+                latestSettings.heartRateZones,
+                birthDateStr = uiState.value.birthDate
+            )
+        }
     }
 
     fun onCriticalPulseAlertToggle(enabled: Boolean) {
@@ -136,28 +174,19 @@ class SettingsViewModel(
 
 // ---------- Mapping: domain -> presentation ----------
 
-private fun TrainingSettings.toUiState(): SettingsUiState = SettingsUiState(
-    deviceName = device.name,
-    deviceBattery = device.batteryLevel,
-    isDeviceConnected = device.isConnected,
-    phaseSoundEnabled = phaseSoundEnabled,
-    signalVolume = signalVolume,
-    tags = tags.map { it.toUiTag() },
-    birthDate = profile.birthDate,
-    gender = profile.gender,
-    height = profile.heightCm?.toString().orEmpty(),
-    zones = heartRateZones.map { it.toUiZone() },
-    criticalPulseAlertEnabled = criticalPulseAlertEnabled,
-    keepScreenOnEnabled = keepScreenOnEnabled
-)
-
-private fun DomainWorkoutTag.toUiTag() = WorkoutTag(
-    id = id,
-    name = name,
-    editable = isEditable
-)
-
 private fun DomainHeartRateZone.toUiZone() = HeartRateZone(
     label = label,
     range = lowerBpm.toFloat()..upperBpm.toFloat()
+)
+
+private fun TabataProfile.toUiProfile() = TimerProfileUi(
+    id = this.id,
+    name = this.name
+)
+
+private fun Tag.toUiTag() = WorkoutTag(
+    id = this.id,
+    name = this.name,
+    color = this.color,
+    editable = true
 )

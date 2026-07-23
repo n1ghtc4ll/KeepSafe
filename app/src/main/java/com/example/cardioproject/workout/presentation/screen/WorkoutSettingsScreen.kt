@@ -116,7 +116,7 @@ fun WorkoutSettingsScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = 24.dp, horizontal = 16.dp),
+                .padding(vertical = 16.dp, horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -161,7 +161,7 @@ fun WorkoutSettingsScreenContent(
                 onItemSelected = { onTagSelect(it) }
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -241,6 +241,11 @@ fun WorkoutSettingsScreenContent(
                         is TabataSetup.Custom -> setup.relaxTimeSec
                         null -> 0
                     }
+                    val breakValue = when (setup) {
+                        is TabataSetup.Preset -> setup.profile.breakTimeSec
+                        is TabataSetup.Custom -> setup.breakTimeSec
+                        null -> 0
+                    }
                     val coolDownValue = when (setup) {
                         is TabataSetup.Preset -> setup.profile.coolDownTimeSec
                         is TabataSetup.Custom -> setup.coolDownTimeSec
@@ -277,7 +282,13 @@ fun WorkoutSettingsScreenContent(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     EditableTabataRow(
-                        label = "Перезарядка", value = coolDownValue, isReadOnly = isReadOnly, showIcon = true,
+                        label = "Перезарядка", value = breakValue, isReadOnly = isReadOnly, showIcon = true,
+                        onValueChange = { onCustomParamChange("break", it) }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    EditableTabataRow(
+                        label = "Заминка", value = coolDownValue, isReadOnly = isReadOnly, showIcon = true,
                         onValueChange = { onCustomParamChange("coolDown", it) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -289,7 +300,7 @@ fun WorkoutSettingsScreenContent(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Button(
                 onClick = onStartClick,

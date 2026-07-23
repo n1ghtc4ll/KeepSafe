@@ -1,6 +1,5 @@
 package com.example.cardioproject.anthrodiary.presentation.di
 
-import com.example.cardioproject.anthrodiary.data.local.AnthroDiaryDatabase
 import com.example.cardioproject.anthrodiary.data.repository.AnthroDiaryRepositoryImpl
 import com.example.cardioproject.anthrodiary.domain.repository.AnthroDiaryRepository
 import com.example.cardioproject.anthrodiary.domain.usecase.DeleteMeasurementUseCase
@@ -9,8 +8,9 @@ import com.example.cardioproject.anthrodiary.domain.usecase.ObserveLatestMeasure
 import com.example.cardioproject.anthrodiary.domain.usecase.ObserveMeasurementsUseCase
 import com.example.cardioproject.anthrodiary.domain.usecase.SaveMeasurementUseCase
 import com.example.cardioproject.anthrodiary.presentation.AnthroDiaryViewModel
-import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
+import com.example.cardioproject.core.common.data.db.AppDatabase
+import org.koin.core.module.dsl.viewModel
+
 import org.koin.dsl.module
 
 /**
@@ -21,9 +21,7 @@ import org.koin.dsl.module
  * рост/вес из дневника, а не хранить дублирующееся значение в settings.UserProfile.
  */
 val anthroDiaryModule = module {
-
-    single { AnthroDiaryDatabase.getInstance(androidContext()) }
-    single { get<AnthroDiaryDatabase>().anthroMeasurementDao() }
+    single { get<AppDatabase>().anthroMeasurementDao() }
 
     single<AnthroDiaryRepository> { AnthroDiaryRepositoryImpl(dao = get()) }
 

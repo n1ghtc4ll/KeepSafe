@@ -119,11 +119,11 @@ fun AnthroDiaryScreen(
     onBicepsChange: (String) -> Unit = {},
     onSaveClick: () -> Unit = {},
     onPreviousRecordPickerClick: () -> Unit = {},
-    onTabSelected: (BottomNavTab) -> Unit = {},
+    //onTabSelected: (BottomNavTab) -> Unit = {},
 ) {
     Scaffold(
         topBar = { AnthroDiaryTopBar(currentDate = state.currentDate, onBackClick = onBackClick) },
-        bottomBar = { AnthroDiaryBottomBar(selectedTab = state.selectedTab, onTabSelected = onTabSelected) },
+        //bottomBar = { AnthroDiaryBottomBar(selectedTab = state.selectedTab, onTabSelected = onTabSelected) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = BackgroundColor
     ) { padding ->
@@ -376,7 +376,7 @@ private fun PreviousRecordRow(label: String, value: String, isLast: Boolean = fa
     }
 }
 
-@Composable
+/*@Composable
 private fun AnthroDiaryBottomBar(
     selectedTab: BottomNavTab,
     onTabSelected: (BottomNavTab) -> Unit,
@@ -408,9 +408,9 @@ private fun AnthroDiaryBottomBar(
             )
         }
     }
-}
+}*/
 
-@Composable
+/*@Composable
 private fun BottomNavItem(
     icon: ImageVector,
     label: String,
@@ -434,7 +434,7 @@ private fun BottomNavItem(
             lineHeight = 13.sp
         )
     }
-}
+}*/
 
 // ---------- Preview ----------
 
@@ -451,7 +451,7 @@ private fun AnthroDiaryScreenPreview() {
             onWaistChange = { state = state.copy(input = state.input.copy(waist = it)) },
             onHipsChange = { state = state.copy(input = state.input.copy(hips = it)) },
             onBicepsChange = { state = state.copy(input = state.input.copy(biceps = it)) },
-            onTabSelected = { state = state.copy(selectedTab = it) }
+            //onTabSelected = { state = state.copy(selectedTab = it) }
         )
     }
 }

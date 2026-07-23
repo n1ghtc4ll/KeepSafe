@@ -1,5 +1,7 @@
 package com.example.cardioproject.workout.di
 
+import com.example.cardioproject.core.bluetooth.data.HeartRateDeviceImpl
+import com.example.cardioproject.core.bluetooth.domain.HeartRateDevice
 import com.example.cardioproject.workout.data.repository.WorkoutSessionRepositoryImpl
 import com.example.cardioproject.workout.domain.repository.WorkoutSessionRepository
 import com.example.cardioproject.workout.domain.usecase.GetWorkoutSetupDataUseCase
@@ -19,5 +21,6 @@ val workoutModule = module {
     factory { StartWorkoutTimerUseCase() }
 
     viewModel { WorkoutSettingsViewModel(get()) }
-    viewModel { ActiveWorkoutViewModel(get(), get()) }
+    viewModel { ActiveWorkoutViewModel(get(), get(), get(), get()) }
+    single<HeartRateDevice> { HeartRateDeviceImpl(context = get()) }
 }

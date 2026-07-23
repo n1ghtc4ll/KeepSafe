@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import com.example.cardioproject.anthrodiary.data.local.dao.AnthroMeasurementDao
 import com.example.cardioproject.anthrodiary.data.local.entity.AnthroMeasurementEntity
 
+/*
 @Database(entities = [AnthroMeasurementEntity::class], version = 1, exportSchema = false)
 abstract class AnthroDiaryDatabase : RoomDatabase() {
 
@@ -27,4 +28,4 @@ abstract class AnthroDiaryDatabase : RoomDatabase() {
                 ).build().also { instance = it }
             }
     }
-}
+}*/

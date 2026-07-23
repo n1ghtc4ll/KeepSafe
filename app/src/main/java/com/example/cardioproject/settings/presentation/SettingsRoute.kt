@@ -1,8 +1,11 @@
 package com.example.cardioproject.settings.presentation
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -18,14 +21,28 @@ import org.koin.androidx.compose.koinViewModel
  */
 @Composable
 fun SettingsRoute(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onNavigateToProfileBuilder: (String?) -> Unit = {}
 ) {
     val viewModel: SettingsViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     SettingsScreen(
         state = state,
         onBackClick = onBackClick,
+        onSearchDevices = {
+            try {
+                // Открываем системные настройки Bluetooth телефона
+                val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                // Защита, если на кастомной прошивке путь к настройкам отличается
+            }
+        },
+        onAddProfileClick = { onNavigateToProfileBuilder(null) },
+        onEditProfileClick = { profile -> onNavigateToProfileBuilder(profile.id) },
+        onDeleteProfileClick = viewModel::onDeleteProfile,
         onPhaseSoundToggle = viewModel::onPhaseSoundToggle,
         onVolumeChange = viewModel::onVolumeChange,
         onAddTag = viewModel::onAddTag,

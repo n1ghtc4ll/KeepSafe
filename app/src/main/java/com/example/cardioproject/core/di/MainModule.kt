@@ -4,16 +4,12 @@ import androidx.room.Room
 import com.example.cardioproject.Main
 import com.example.cardioproject.anthrodiary.data.repository.AnthroDiaryRepositoryImpl
 import com.example.cardioproject.anthrodiary.domain.repository.AnthroDiaryRepository
-import com.example.cardioproject.core.bluetooth.data.HeartRateDeviceImpl
-import com.example.cardioproject.core.bluetooth.domain.HeartRateDevice
 import com.example.cardioproject.core.common.data.db.AppDatabase
 import com.example.cardioproject.core.navigation.Route
 import com.example.cardioproject.core.navigation.TopLevelBackStack
 import com.example.cardioproject.settings.data.repository.SettingsRepositoryImpl
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.module.dsl.singleOf
-import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val mainModule = module {

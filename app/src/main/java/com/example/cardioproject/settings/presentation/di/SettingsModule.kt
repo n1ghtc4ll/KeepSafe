@@ -16,6 +16,7 @@ import com.example.cardioproject.settings.domain.usecase.UpdatePhaseSoundUseCase
 import com.example.cardioproject.settings.domain.usecase.UpdateSignalVolumeUseCase
 import com.example.cardioproject.settings.domain.usecase.UpdateUserProfileUseCase
 import com.example.cardioproject.settings.presentation.SettingsViewModel
+import com.example.cardioproject.settings.presentation.viewmodel.DeviceConnectViewModel
 import com.example.cardioproject.settings.presentation.viewmodel.ProfileBuilderViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -70,4 +71,5 @@ val settingsModule = module {
             repository = get()
         )
     }
+    viewModel { DeviceConnectViewModel(get(), get(), get()) }
 }

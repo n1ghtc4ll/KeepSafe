@@ -1,5 +1,7 @@
 package com.example.cardioproject
 
+import android.Manifest
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -30,6 +32,7 @@ import com.example.cardioproject.presentation.HeartRateMainScreen
 import com.example.cardioproject.workout.presentation.screen.WorkoutDetailsScreen
 import com.example.cardioproject.workout.presentation.screen.WorkoutHistoryScreen
 import com.example.cardioproject.settings.presentation.SettingsRoute
+import com.example.cardioproject.settings.presentation.screen.DeviceScanBottomSheet
 import com.example.cardioproject.settings.presentation.screen.ProfileBuilderRoute
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
 import com.example.cardioproject.workout.presentation.screen.WorkoutScreen
@@ -59,10 +62,15 @@ data object Anthropometric: TopLevelRoute {
 data object AddAnthropometric: Route
 data object WorkoutSetting: Route
 data object Settings: Route
+data object DeviceSearch: Route
 data class ProfileBuilder(val profileId: String? = null): Route
 data class ActiveWorkout(val settings: WorkoutSettings): Route
 data class WorkoutDetails(val workoutId: String) : Route
 
+@RequiresPermission(allOf = [
+    Manifest.permission.BLUETOOTH_SCAN,
+    Manifest.permission.BLUETOOTH_CONNECT
+])
 @Composable
 fun MainScreen() {
     val topLevelBackStack by inject<TopLevelBackStack<Route>>(TopLevelBackStack::class.java)
@@ -146,11 +154,16 @@ fun MainScreen() {
                 entry<Settings> {
                     SettingsRoute(
                         onBackClick = { topLevelBackStack.removeLast() },
+                        onSearchDevices = { topLevelBackStack.add(DeviceSearch) },
                         onNavigateToProfileBuilder = { profileId ->
                             topLevelBackStack.add(ProfileBuilder(profileId))
                         }
                     )
                 }
+
+                /*entry<DeviceSearch> {
+                    DeviceScanBottomSheet(onDismiss = { topLevelBackStack.removeLast() })
+                }*/
                 entry<ProfileBuilder> { route ->
                     ProfileBuilderRoute(
                         profileId = route.profileId,
@@ -188,6 +201,7 @@ fun MainScreen() {
     }
 }
 
+@RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {

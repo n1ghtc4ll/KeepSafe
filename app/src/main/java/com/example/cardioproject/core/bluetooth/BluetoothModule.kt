@@ -6,7 +6,6 @@ import android.content.Context
 import com.example.cardioproject.core.bluetooth.data.BleConnectionManager
 import com.example.cardioproject.core.bluetooth.data.BleScanRepository
 import com.example.cardioproject.core.bluetooth.data.BleScanner
-import com.example.cardioproject.core.bluetooth.domain.HeartRateDevice
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 

@@ -12,27 +12,6 @@ class UpdateHeartRateZoneUseCase(
         lowerBpm: Int,
         upperBpm: Int
     ) {
-        /*require(index in currentZones.indices) { "Некорректный индекс зоны: $index" }
-        require(lowerBpm <= upperBpm) { "Нижняя граница не может быть больше верхней" }
-
-        if (index > 0) {
-            val previousZone = currentZones[index - 1]
-            require(lowerBpm > previousZone.upperBpm) {
-                "Нижняя граница ($lowerBpm) пересекает предыдущую зону (${previousZone.upperBpm})"
-            }
-        }
-        if (index < currentZones.lastIndex) {
-            val nextZone = currentZones[index + 1]
-            require(upperBpm < nextZone.lowerBpm) {
-                "Верхняя граница ($upperBpm) пересекает следующую зону (${nextZone.lowerBpm})"
-            }
-        }
-
-        val updatedZones = currentZones.toMutableList().apply {
-            this[index] = this[index].copy(lowerBpm = lowerBpm, upperBpm = upperBpm)
-        }
-        repository.updateHeartRateZones(updatedZones)*/
-
         if (index !in currentZones.indices) return
 
         val oldZone = currentZones[index]

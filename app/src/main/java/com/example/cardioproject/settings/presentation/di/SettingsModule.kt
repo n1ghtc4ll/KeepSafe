@@ -1,20 +1,12 @@
 package com.example.cardioproject.settings.presentation.di
 
-import androidx.lifecycle.SavedStateHandle
 import com.example.cardioproject.settings.data.local.SettingsPreferencesDataSource
 import com.example.cardioproject.settings.data.repository.SettingsRepositoryImpl
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
-import com.example.cardioproject.settings.domain.usecase.AddWorkoutTagUseCase
 import com.example.cardioproject.settings.domain.usecase.AutoCalculateHeartRateZonesUseCase
-import com.example.cardioproject.settings.domain.usecase.EditWorkoutTagUseCase
-import com.example.cardioproject.settings.domain.usecase.ObserveSettingsUseCase
-import com.example.cardioproject.settings.domain.usecase.RemoveWorkoutTagUseCase
-import com.example.cardioproject.settings.domain.usecase.UpdateCriticalPulseAlertUseCase
+import com.example.cardioproject.settings.domain.usecase.TagInteractor
 import com.example.cardioproject.settings.domain.usecase.UpdateHeartRateZoneUseCase
-import com.example.cardioproject.settings.domain.usecase.UpdateKeepScreenOnUseCase
-import com.example.cardioproject.settings.domain.usecase.UpdatePhaseSoundUseCase
 import com.example.cardioproject.settings.domain.usecase.UpdateSignalVolumeUseCase
-import com.example.cardioproject.settings.domain.usecase.UpdateUserProfileUseCase
 import com.example.cardioproject.settings.presentation.SettingsViewModel
 import com.example.cardioproject.settings.presentation.viewmodel.DeviceConnectViewModel
 import com.example.cardioproject.settings.presentation.viewmodel.ProfileBuilderViewModel
@@ -36,32 +28,18 @@ val settingsModule = module {
 
     single<SettingsRepository> { SettingsRepositoryImpl(get(), get(), get()) }
 
-    factory { ObserveSettingsUseCase(get()) }
-    factory { UpdatePhaseSoundUseCase(get()) }
     factory { UpdateSignalVolumeUseCase(get()) }
-    factory { AddWorkoutTagUseCase(get()) }
-    factory { EditWorkoutTagUseCase(get()) }
-    factory { RemoveWorkoutTagUseCase(get()) }
-    factory { UpdateUserProfileUseCase(get()) }
+    factory { TagInteractor(get()) }
     factory { UpdateHeartRateZoneUseCase(get()) }
     factory { AutoCalculateHeartRateZonesUseCase(get()) }
-    factory { UpdateCriticalPulseAlertUseCase(get()) }
-    factory { UpdateKeepScreenOnUseCase(get()) }
 
     viewModel {
         SettingsViewModel(
-            observeSettings = get(),
-            updatePhaseSound = get(),
+            settingsRepository = get(),
             updateSignalVolume = get(),
-            addWorkoutTag = get(),
-            editWorkoutTag = get(),
-            removeWorkoutTag = get(),
-            updateUserProfile = get(),
+            tagInteractor = get(),
             updateHeartRateZone = get(),
             autoCalculateHeartRateZones = get(),
-            updateCriticalPulseAlert = get(),
-            updateKeepScreenOn = get(),
-            settingsRepository = get()
         )
     }
 

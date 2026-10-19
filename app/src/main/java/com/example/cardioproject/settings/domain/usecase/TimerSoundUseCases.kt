@@ -2,14 +2,6 @@ package com.example.cardioproject.settings.domain.usecase
 
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
 
-class UpdatePhaseSoundUseCase(
-    private val repository: SettingsRepository
-) {
-    suspend operator fun invoke(enabled: Boolean) {
-        repository.updatePhaseSoundEnabled(enabled)
-    }
-}
-
 class UpdateSignalVolumeUseCase(
     private val repository: SettingsRepository
 ) {

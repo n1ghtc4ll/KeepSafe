@@ -7,17 +7,10 @@ import com.example.cardioproject.core.common.domain.model.Tag
 import com.example.cardioproject.settings.domain.model.HeartRateZone as DomainHeartRateZone
 import com.example.cardioproject.settings.domain.model.TrainingSettings
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
-import com.example.cardioproject.settings.domain.usecase.AddWorkoutTagUseCase
 import com.example.cardioproject.settings.domain.usecase.AutoCalculateHeartRateZonesUseCase
-import com.example.cardioproject.settings.domain.usecase.EditWorkoutTagUseCase
-import com.example.cardioproject.settings.domain.usecase.ObserveSettingsUseCase
-import com.example.cardioproject.settings.domain.usecase.RemoveWorkoutTagUseCase
-import com.example.cardioproject.settings.domain.usecase.UpdateCriticalPulseAlertUseCase
+import com.example.cardioproject.settings.domain.usecase.TagInteractor
 import com.example.cardioproject.settings.domain.usecase.UpdateHeartRateZoneUseCase
-import com.example.cardioproject.settings.domain.usecase.UpdateKeepScreenOnUseCase
-import com.example.cardioproject.settings.domain.usecase.UpdatePhaseSoundUseCase
 import com.example.cardioproject.settings.domain.usecase.UpdateSignalVolumeUseCase
-import com.example.cardioproject.settings.domain.usecase.UpdateUserProfileUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,17 +19,10 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
-    private val observeSettings: ObserveSettingsUseCase,
-    private val updatePhaseSound: UpdatePhaseSoundUseCase,
     private val updateSignalVolume: UpdateSignalVolumeUseCase,
-    private val addWorkoutTag: AddWorkoutTagUseCase,
-    private val editWorkoutTag: EditWorkoutTagUseCase,
-    private val removeWorkoutTag: RemoveWorkoutTagUseCase,
-    private val updateUserProfile: UpdateUserProfileUseCase,
+    private val tagInteractor: TagInteractor,
     private val updateHeartRateZone: UpdateHeartRateZoneUseCase,
     private val autoCalculateHeartRateZones: AutoCalculateHeartRateZonesUseCase,
-    private val updateCriticalPulseAlert: UpdateCriticalPulseAlertUseCase,
-    private val updateKeepScreenOn: UpdateKeepScreenOnUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -47,7 +33,7 @@ class SettingsViewModel(
     init {
         // 1. Подписываемся на общие настройки (DataStore)
         viewModelScope.launch {
-            observeSettings().collect { settings ->
+            settingsRepository.observeSettings().collect { settings ->
                 latestSettings = settings
                 _uiState.update { currentState ->
                     currentState.copy(
@@ -83,7 +69,7 @@ class SettingsViewModel(
     }
 
     fun onPhaseSoundToggle(enabled: Boolean) {
-        viewModelScope.launch { updatePhaseSound(enabled) }
+        viewModelScope.launch { settingsRepository.updatePhaseSoundEnabled(enabled) }
     }
 
     fun onVolumeChange(volume: Float) {
@@ -93,8 +79,7 @@ class SettingsViewModel(
     fun onAddTag(name: String) {
         if (name.isBlank()) return
         viewModelScope.launch {
-            // Используем UseCase вместо репозитория
-            addWorkoutTag(name, "#6750A4")
+            tagInteractor.addWorkoutTag(name, "#6750A4")
         }
     }
 
@@ -106,15 +91,13 @@ class SettingsViewModel(
                 name = newName,
                 color = tag.color
             )
-            // Используем UseCase
-            editWorkoutTag(updatedTag)
+            tagInteractor.updateWorkoutTag(updatedTag)
         }
     }
 
     fun onDeleteTag(tag: WorkoutTag) {
         viewModelScope.launch {
-            // Используем UseCase
-            removeWorkoutTag(tag.id)
+            tagInteractor.deleteWorkoutTag(tag.id)
         }
     }
 
@@ -126,20 +109,20 @@ class SettingsViewModel(
 
     fun onBirthDateChange(value: String) {
         viewModelScope.launch {
-            updateUserProfile(latestSettings.profile.copy(birthDate = value))
+            settingsRepository.updateProfile(latestSettings.profile.copy(birthDate = value))
         }
     }
 
     fun onGenderChange(value: String) {
         viewModelScope.launch {
-            updateUserProfile(latestSettings.profile.copy(gender = value))
+            settingsRepository.updateProfile(latestSettings.profile.copy(gender = value))
         }
     }
 
     fun onHeightChange(value: String) {
         val heightCm = value.toIntOrNull()
         viewModelScope.launch {
-            updateUserProfile(latestSettings.profile.copy(heightCm = heightCm))
+            settingsRepository.updateProfile(latestSettings.profile.copy(heightCm = heightCm))
         }
     }
 
@@ -164,11 +147,11 @@ class SettingsViewModel(
     }
 
     fun onCriticalPulseAlertToggle(enabled: Boolean) {
-        viewModelScope.launch { updateCriticalPulseAlert(enabled) }
+        viewModelScope.launch { settingsRepository.updateCriticalPulseAlertEnabled(enabled) }
     }
 
     fun onKeepScreenOnToggle(enabled: Boolean) {
-        viewModelScope.launch { updateKeepScreenOn(enabled) }
+        viewModelScope.launch { settingsRepository.updateKeepScreenOnEnabled(enabled) }
     }
 }
 

@@ -154,7 +154,6 @@ fun MainScreen() {
                 entry<Settings> {
                     SettingsRoute(
                         onBackClick = { topLevelBackStack.removeLast() },
-                        onSearchDevices = { topLevelBackStack.add(DeviceSearch) },
                         onNavigateToProfileBuilder = { profileId ->
                             topLevelBackStack.add(ProfileBuilder(profileId))
                         }

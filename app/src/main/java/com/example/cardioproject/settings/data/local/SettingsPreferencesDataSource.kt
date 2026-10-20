@@ -34,8 +34,6 @@ class SettingsPreferencesDataSource(
         val PHASE_SOUND_ENABLED = booleanPreferencesKey("phase_sound_enabled")
         val SIGNAL_VOLUME = floatPreferencesKey("signal_volume")
 
-        //val TAGS_JSON = stringPreferencesKey("tags_json")
-
         val BIRTH_DATE = stringPreferencesKey("birth_date")
         val GENDER = stringPreferencesKey("gender")
         val HEIGHT_CM = intPreferencesKey("height_cm")
@@ -96,12 +94,6 @@ class SettingsPreferencesDataSource(
 
     fun phaseSoundEnabled(prefs: Preferences) = prefs[Keys.PHASE_SOUND_ENABLED] ?: true
     fun signalVolume(prefs: Preferences) = prefs[Keys.SIGNAL_VOLUME] ?: 0.6f
-
-/*    fun tags(prefs: Preferences): List<WorkoutTagDto> =
-        prefs[Keys.TAGS_JSON]
-            ?.let { raw -> runCatching { json.decodeFromString<List<WorkoutTagDto>>(raw) }.getOrNull() }
-            ?: DEFAULT_TAGS*/
-
     fun birthDate(prefs: Preferences) = prefs[Keys.BIRTH_DATE] ?: ""
     fun gender(prefs: Preferences) = prefs[Keys.GENDER] ?: ""
     fun heightCm(prefs: Preferences) = prefs[Keys.HEIGHT_CM]
@@ -115,13 +107,6 @@ class SettingsPreferencesDataSource(
     fun keepScreenOnEnabled(prefs: Preferences) = prefs[Keys.KEEP_SCREEN_ON_ENABLED] ?: true
 
     private companion object {
-/*        val DEFAULT_TAGS = listOf(
-            WorkoutTagDto(id = "default_general", name = "Общая"),
-            WorkoutTagDto(id = "default_strength", name = "Силовая"),
-            WorkoutTagDto(id = "default_light", name = "Легкая"),
-            WorkoutTagDto(id = "default_bike", name = "Вело")
-        )*/
-
         val DEFAULT_ZONES = listOf(
             HeartRateZoneDto(index = 0, label = "Зона 1", lowerBpm = 100, upperBpm = 119),
             HeartRateZoneDto(index = 1, label = "Зона 2", lowerBpm = 120, upperBpm = 139),

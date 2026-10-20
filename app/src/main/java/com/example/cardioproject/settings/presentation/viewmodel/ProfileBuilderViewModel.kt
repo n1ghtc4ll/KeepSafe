@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cardioproject.core.common.domain.model.TabataProfile
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
-import com.example.cardioproject.settings.presentation.screen.PhaseType
-import com.example.cardioproject.settings.presentation.screen.ProfileBuilderUiState
+import com.example.cardioproject.settings.presentation.model.PhaseType
+import com.example.cardioproject.settings.presentation.model.ProfileBuilderUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

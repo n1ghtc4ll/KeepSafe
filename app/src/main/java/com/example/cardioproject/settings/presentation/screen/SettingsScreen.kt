@@ -2,10 +2,7 @@ package com.example.cardioproject.settings.presentation.screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,122 +10,46 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.Placeable
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.cardioproject.core.ui.components.AppThemeTopBar
 import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
-import com.example.cardioproject.core.ui.theme.GraySurface
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.util.UUID
-import androidx.core.graphics.toColorInt
-import com.example.cardioproject.core.ui.components.ColorPickerDialog
-import com.example.cardioproject.core.ui.theme.PurplePrimary
-import com.example.cardioproject.core.ui.theme.TabataPhaseColorsPalette
 import com.example.cardioproject.core.ui.theme.TextGray
-
-
-// ---------- Data models ----------
-
-data class HeartRateZone(
-    val label: String,
-    var range: ClosedFloatingPointRange<Float>
-)
-
-data class TimerProfileUi(
-    val id: String,
-    val name: String
-)
-
-data class WorkoutTag(
-    val id: String,
-    val name: String,
-    val color: String, // Добавили цвет, так как он есть в TagEntity
-    val editable: Boolean = true
-)
-
-data class SettingsUiState(
-    val deviceName: String = "Coospo HW9",
-    val deviceBattery: Int = 85,
-    val isDeviceConnected: Boolean = true,
-    val phaseSoundEnabled: Boolean = true,
-    val signalVolume: Float = 0.6f,
-    val tags: List<WorkoutTag> = listOf(
-        WorkoutTag(UUID.randomUUID().toString(), "Общая", "#6750A4", false),
-        WorkoutTag(UUID.randomUUID().toString(), "Силовая", "#6750A4", false),
-        WorkoutTag(UUID.randomUUID().toString(), "Легкая", "#6750A4", false),
-        WorkoutTag(UUID.randomUUID().toString(), "Вело", "#6750A4", false)
-    ),
-    val timerProfiles: List<TimerProfileUi> = listOf(
-        TimerProfileUi("1", "Профиль 1"),
-        TimerProfileUi("2", "Профиль 2")
-    ),
-    val birthDate: String = "",
-    val gender: String = "",
-    val height: String = "",
-    val zones: List<HeartRateZone> = listOf(
-        HeartRateZone("Зона 1", 60f..79f),
-        HeartRateZone("Зона 2", 60f..79f),
-        HeartRateZone("Зона 3", 60f..79f),
-        HeartRateZone("Зона 4", 60f..79f),
-    ),
-    val criticalPulseAlertEnabled: Boolean = true,
-    val keepScreenOnEnabled: Boolean = true,
-)
+import com.example.cardioproject.settings.presentation.model.SettingsUiState
+import com.example.cardioproject.settings.presentation.model.TimerProfileUi
+import com.example.cardioproject.settings.presentation.model.WorkoutTag
+import com.example.cardioproject.settings.presentation.ui.components.BirthDatePickerDialog
+import com.example.cardioproject.settings.presentation.ui.components.BluetoothDeviceRow
+import com.example.cardioproject.settings.presentation.ui.components.GenderPickerDialog
+import com.example.cardioproject.settings.presentation.ui.components.HeartRateZoneRow
+import com.example.cardioproject.settings.presentation.ui.components.LabeledInputRow
+import com.example.cardioproject.settings.presentation.ui.components.OutlinedFullWidthButton
+import com.example.cardioproject.settings.presentation.ui.components.SectionDivider
+import com.example.cardioproject.settings.presentation.ui.components.SectionTitle
+import com.example.cardioproject.settings.presentation.ui.components.TagInputDialog
+import com.example.cardioproject.settings.presentation.ui.components.TagsFlowRow
+import com.example.cardioproject.settings.presentation.ui.components.TextInputDialog
+import com.example.cardioproject.settings.presentation.ui.components.TimerProfilesSection
+import com.example.cardioproject.settings.presentation.ui.components.ToggleRow
+import com.example.cardioproject.settings.presentation.ui.components.VolumeRow
 
 // ---------- Screen ----------
 
@@ -161,7 +82,7 @@ fun SettingsScreen(
     var showHeightDialog by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { SettingsTopBar(onBackClick) },
+        topBar = { AppThemeTopBar(title = "Настройки", onBackClick = onBackClick) },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         LazyColumn(
@@ -372,614 +293,6 @@ fun SettingsScreen(
     }
 }
 
-// ---------- Components ----------
-
-@Composable
-private fun SettingsTopBar(onBackClick: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.background) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Назад",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            Text(
-                text = "Настройки",
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-    }
-}
-
-@Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        style = MaterialTheme.typography.labelMedium,
-        modifier = Modifier.padding(top = 12.dp, bottom = 10.dp)
-    )
-}
-
-@Composable
-private fun SectionDivider() {
-    Spacer(Modifier.height(4.dp))
-}
-
-@Composable
-private fun BluetoothDeviceRow(
-    name: String,
-    battery: Int,
-    onDisconnect: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column {
-            Text(text = name, color = MaterialTheme.colorScheme.onSurface, fontSize = 15.sp)
-            Text(
-                text = "Батарея: $battery%",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.labelMedium
-            )
-        }
-        OutlinedButton(
-            onClick = onDisconnect,
-            shape = RoundedCornerShape(20.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-        ) {
-            Text("Отключить")
-        }
-    }
-}
-
-@Composable
-private fun OutlinedFullWidthButton(text: String, onClick: () -> Unit) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Text(text)
-    }
-}
-
-@Composable
-private fun ToggleRow(
-    label: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f)
-        )
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                uncheckedTrackColor = MaterialTheme.colorScheme.outlineVariant
-            )
-        )
-    }
-}
-
-@Composable
-private fun VolumeRow(
-    volume: Float,
-    onVolumeChange: (Float) -> Unit
-) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(
-            text = "Громкость сигналов",
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Spacer(Modifier.height(6.dp))
-        Slider(
-            value = volume,
-            onValueChange = onVolumeChange,
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
-            )
-        )
-    }
-}
-
-@Composable
-private fun TimerProfilesSection(
-    profiles: List<TimerProfileUi>,
-    onAddClick: () -> Unit,
-    onEditClick: (TimerProfileUi) -> Unit,
-    onDeleteClick: (TimerProfileUi) -> Unit
-) {
-    Column {
-        if (profiles.isNotEmpty()) {
-            Surface(
-                color = GraySurface,
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column {
-                    profiles.forEachIndexed { index, profile ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp, horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = profile.name,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Row {
-                                IconButton(
-                                    onClick = { onEditClick(profile) },
-                                    modifier = Modifier.size(24.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = "Редактировать",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                                Spacer(Modifier.width(16.dp))
-                                IconButton(
-                                    onClick = { onDeleteClick(profile) },
-                                    modifier = Modifier.size(24.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Удалить",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                            }
-                        }
-                        if (index < profiles.lastIndex) {
-                            Divider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
-                        }
-                    }
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-        }
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            OutlinedButton(
-                onClick = onAddClick,
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-            ) {
-                Text("Добавить")
-            }
-        }
-    }
-}
-
-@Composable
-private fun TagsFlowRow(
-    tags: List<WorkoutTag>,
-    onEditTag: (WorkoutTag) -> Unit
-) {
-    SimpleFlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalGap = 8.dp,
-        verticalGap = 8.dp
-    ) {
-        tags.forEach { tag ->
-            TagChip(tag = tag, onEditClick = { onEditTag(tag) })
-        }
-    }
-}
-
-/**
- * Minimal wrap-row layout that places children left-to-right, wrapping to a new line
- * when the current row would exceed the available width. Implemented directly with
- * [Layout] instead of foundation's FlowRow to avoid API-version mismatches between
- * the compiled app and the IDE preview renderer.
- */
-@Composable
-private fun SimpleFlowRow(
-    modifier: Modifier = Modifier,
-    horizontalGap: Dp = 8.dp,
-    verticalGap: Dp = 8.dp,
-    content: @Composable () -> Unit
-) {
-    Layout(content = content, modifier = modifier) { measurables, constraints ->
-        val horizontalGapPx = horizontalGap.roundToPx()
-        val verticalGapPx = verticalGap.roundToPx()
-        val maxWidth = constraints.maxWidth
-        val itemConstraints = Constraints(maxWidth = maxWidth)
-        val placeables = measurables.map { it.measure(itemConstraints) }
-
-        data class FlowLine(val items: MutableList<Placeable> = mutableListOf(), var width: Int = 0, var height: Int = 0)
-
-        val rows = mutableListOf(FlowLine())
-        placeables.forEach { placeable ->
-            var row = rows.last()
-            val extraWidth = if (row.items.isEmpty()) placeable.width else horizontalGapPx + placeable.width
-            if (row.items.isNotEmpty() && row.width + extraWidth > maxWidth) {
-                row = FlowLine()
-                rows.add(row)
-            }
-            row.items.add(placeable)
-            row.width += if (row.items.size == 1) placeable.width else horizontalGapPx + placeable.width
-            row.height = maxOf(row.height, placeable.height)
-        }
-
-        val totalHeight = rows.sumOf { it.height } + verticalGapPx * (rows.size - 1).coerceAtLeast(0)
-
-        layout(maxWidth, totalHeight) {
-            var y = 0
-            rows.forEach { row ->
-                var x = 0
-                row.items.forEach { placeable ->
-                    placeable.placeRelative(x, y)
-                    x += placeable.width + horizontalGapPx
-                }
-                y += row.height + verticalGapPx
-            }
-        }
-    }
-}
-
-@Composable
-private fun TagChip(tag: WorkoutTag, onEditClick: () -> Unit) {
-    val tagColor = try {
-        Color(tag.color.toColorInt())
-    } catch (e: Exception) {
-        MaterialTheme.colorScheme.primary
-    }
-
-    Surface(
-        color = GraySurface,
-        shape = RoundedCornerShape(18.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Row(
-            modifier = Modifier.padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .clip(CircleShape)
-                    .background(tagColor)
-            )
-            Spacer(Modifier.width(6.dp))
-
-            Text(
-                text = tag.name,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelLarge
-            )
-            if (tag.editable) {
-                Spacer(Modifier.width(6.dp))
-                IconButton(onClick = onEditClick, modifier = Modifier.size(18.dp)) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Редактировать тег",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LabeledInputRow(
-    label: String,
-    value: String,
-    icon: ImageVector? = null,
-    onClick: (() -> Unit)? = null
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .let { base -> if (onClick != null) base.clickable(onClick = onClick) else base }
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Surface(
-            color = GraySurface,
-            shape = RoundedCornerShape(10.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-        ) {
-            Row(
-                modifier = Modifier
-                    .width(120.dp)
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = value,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.labelMedium
-                )
-                if (icon != null) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HeartRateZoneRow(
-    zone: HeartRateZone,
-    onRangeChange: (ClosedFloatingPointRange<Float>) -> Unit
-) {
-    Column(modifier = Modifier.padding(vertical = 6.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = zone.label, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "${zone.range.start.toInt()}-${zone.range.endInclusive.toInt()} уд/мин",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.labelMedium
-                )
-                Spacer(Modifier.width(4.dp))
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-        }
-        RangeSlider(
-            value = zone.range,
-            onValueChange = onRangeChange,
-            valueRange = 40f..200f,
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
-            )
-        )
-    }
-}
-
-// ---------- Dialogs ----------
-
-@Composable
-private fun TagInputDialog(
-    title: String,
-    initialName: String,
-    initialColorHex: String,
-    onConfirm: (String, String) -> Unit,
-    onDismiss: () -> Unit,
-    onDelete: (() -> Unit)? = null
-) {
-    var text by remember { mutableStateOf(initialName) }
-    var showColorPicker by remember { mutableStateOf(false) }
-
-    val fallbackColor = MaterialTheme.colorScheme.primary
-    val fallbackColorLong = fallbackColor.toArgb().toLong() and 0xFFFFFFFFL
-
-    var colorLong by remember {
-        mutableLongStateOf(
-            try {
-                initialColorHex.toColorInt().toLong() and 0xFFFFFFFFL }
-            catch (e: Exception) { fallbackColorLong }
-        )
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(Color(colorLong))
-                        .clickable { showColorPicker = true }
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    singleLine = true,
-                    label = { Text("Название тега") },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    if (text.isNotBlank()) {
-                        val hexString = String.format("#%08X", colorLong)
-                        onConfirm(text.trim(), hexString)
-                    }
-                }
-            ) {
-                Text("Сохранить")
-            }
-        },
-        dismissButton = {
-            Row {
-                if (onDelete != null) {
-                    TextButton(onClick = onDelete) {
-                        Text("Удалить", color = MaterialTheme.colorScheme.error)
-                    }
-                }
-                TextButton(onClick = onDismiss) { Text("Отмена") }
-            }
-        }
-    )
-
-    if (showColorPicker) {
-        ColorPickerDialog(
-            initialColor = colorLong,
-            colorsPalette = TabataPhaseColorsPalette,
-            onColorSelected = { selectedLong ->
-                colorLong = selectedLong
-                showColorPicker = false
-            },
-            onDismiss = { showColorPicker = false }
-        )
-    }
-}
-
-@Composable
-private fun TextInputDialog(
-    title: String,
-    initialValue: String,
-    placeholder: String = "",
-    keyboardType: KeyboardType = KeyboardType.Text,
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var text by remember { mutableStateOf(initialValue) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                singleLine = true,
-                placeholder = { Text(placeholder) },
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(text.trim()) }) { Text("Сохранить") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun BirthDatePickerDialog(
-    initialValue: String,
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val datePickerState = rememberDatePickerState()
-
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        val formattedDate = formatter.format(Date(millis))
-                        onConfirm(formattedDate)
-                    } ?: onDismiss()
-                }
-            ) {
-                Text("Сохранить")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
-        }
-    ) {
-        DatePicker(
-            state = datePickerState,
-            showModeToggle = false
-        )
-    }
-}
-
-@Composable
-private fun GenderPickerDialog(
-    initialValue: String,
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var selected by remember { mutableStateOf(initialValue) }
-    val options = listOf("Мужской", "Женский")
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Пол") },
-        text = {
-            Column {
-                options.forEach { option ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { selected = option }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(selected = selected == option, onClick = { selected = option })
-                        Spacer(Modifier.width(8.dp))
-                        Text(option, color = MaterialTheme.colorScheme.onSurface)
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(selected) }) { Text("Сохранить") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
-        }
-    )
-}
-
 // ---------- Preview ----------
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF, widthDp = 360, heightDp = 900)
@@ -992,7 +305,12 @@ private fun SettingsScreenPreview() {
             onPhaseSoundToggle = { state = state.copy(phaseSoundEnabled = it) },
             onVolumeChange = { state = state.copy(signalVolume = it) },
             onAddTag = { name, color ->
-                state = state.copy(tags = state.tags + WorkoutTag(id = UUID.randomUUID().toString(), name = name, color = "#FF0000"))            },
+                state = state.copy(tags = state.tags + WorkoutTag(
+                    id = UUID.randomUUID().toString(),
+                    name = name,
+                    color = "#FF0000"
+                )
+                )            },
             onEditTag = { tag, newName, color ->
                 state = state.copy(
                     tags = state.tags.map { if (it.id == tag.id) it.copy(name = newName) else it }

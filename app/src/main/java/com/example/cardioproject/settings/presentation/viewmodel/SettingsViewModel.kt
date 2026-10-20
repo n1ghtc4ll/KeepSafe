@@ -15,10 +15,10 @@ import com.example.cardioproject.settings.domain.usecase.AutoCalculateHeartRateZ
 import com.example.cardioproject.settings.domain.usecase.TagInteractor
 import com.example.cardioproject.settings.domain.usecase.UpdateHeartRateZoneUseCase
 import com.example.cardioproject.settings.domain.usecase.UpdateSignalVolumeUseCase
-import com.example.cardioproject.settings.presentation.screen.HeartRateZone
-import com.example.cardioproject.settings.presentation.screen.SettingsUiState
-import com.example.cardioproject.settings.presentation.screen.TimerProfileUi
-import com.example.cardioproject.settings.presentation.screen.WorkoutTag
+import com.example.cardioproject.settings.presentation.model.HeartRateZone
+import com.example.cardioproject.settings.presentation.model.SettingsUiState
+import com.example.cardioproject.settings.presentation.model.TimerProfileUi
+import com.example.cardioproject.settings.presentation.model.WorkoutTag
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

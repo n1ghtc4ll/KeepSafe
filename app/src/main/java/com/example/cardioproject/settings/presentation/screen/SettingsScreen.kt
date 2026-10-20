@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -48,12 +50,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
@@ -70,6 +75,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import androidx.core.graphics.toColorInt
+import com.example.cardioproject.core.ui.components.ColorPickerDialog
+import com.example.cardioproject.core.ui.theme.PurplePrimary
+import com.example.cardioproject.core.ui.theme.TabataPhaseColorsPalette
+import com.example.cardioproject.core.ui.theme.TextGray
 
 
 // ---------- Data models ----------
@@ -133,8 +143,8 @@ fun SettingsScreen(
     onSearchDevices: () -> Unit = {},
     onPhaseSoundToggle: (Boolean) -> Unit = {},
     onVolumeChange: (Float) -> Unit = {},
-    onAddTag: (String) -> Unit = {},
-    onEditTag: (WorkoutTag, String) -> Unit = { _, _ -> },
+    onAddTag: (String, String) -> Unit = { _, _ -> },
+    onEditTag: (WorkoutTag, String, String) -> Unit = { _, _, _ -> },
     onDeleteTag: (WorkoutTag) -> Unit = {},
     onZoneChange: (Int, ClosedFloatingPointRange<Float>) -> Unit = { _, _ -> },
     onAutoCalculateZones: () -> Unit = {},
@@ -291,9 +301,10 @@ fun SettingsScreen(
     if (showAddTagDialog) {
         TagInputDialog(
             title = "Новый тег",
-            initialValue = "",
-            onConfirm = { name ->
-                onAddTag(name)
+            initialName = "",
+            initialColorHex = TextGray.value.toHexString(),
+            onConfirm = { name, colorHex ->
+                onAddTag(name, colorHex)
                 showAddTagDialog = false
             },
             onDismiss = { showAddTagDialog = false }
@@ -303,9 +314,10 @@ fun SettingsScreen(
     tagBeingEdited?.let { tag ->
         TagInputDialog(
             title = "Редактировать тег",
-            initialValue = tag.name,
-            onConfirm = { newName ->
-                onEditTag(tag, newName)
+            initialName = tag.name,
+            initialColorHex = tag.color,
+            onConfirm = { newName, newColorHex ->
+                onEditTag(tag, newName, newColorHex)
                 tagBeingEdited = null
             },
             onDismiss = { tagBeingEdited = null },
@@ -318,18 +330,6 @@ fun SettingsScreen(
         )
     }
 
-    /*if (showBirthDateDialog) {
-        TextInputDialog(
-            title = "Дата рождения",
-            placeholder = "гггг-мм-дд",
-            initialValue = state.birthDate,
-            onConfirm = { value ->
-                onBirthDateChange(value)
-                showBirthDateDialog = false
-            },
-            onDismiss = { showBirthDateDialog = false }
-        )
-    }*/
     if (showBirthDateDialog) {
         BirthDatePickerDialog(
             initialValue = state.birthDate,
@@ -658,6 +658,12 @@ private fun SimpleFlowRow(
 
 @Composable
 private fun TagChip(tag: WorkoutTag, onEditClick: () -> Unit) {
+    val tagColor = try {
+        Color(tag.color.toColorInt())
+    } catch (e: Exception) {
+        MaterialTheme.colorScheme.primary
+    }
+
     Surface(
         color = GraySurface,
         shape = RoundedCornerShape(18.dp),
@@ -667,6 +673,14 @@ private fun TagChip(tag: WorkoutTag, onEditClick: () -> Unit) {
             modifier = Modifier.padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(tagColor)
+            )
+            Spacer(Modifier.width(6.dp))
+
             Text(
                 text = tag.name,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -782,25 +796,57 @@ private fun HeartRateZoneRow(
 @Composable
 private fun TagInputDialog(
     title: String,
-    initialValue: String,
-    onConfirm: (String) -> Unit,
+    initialName: String,
+    initialColorHex: String,
+    onConfirm: (String, String) -> Unit,
     onDismiss: () -> Unit,
     onDelete: (() -> Unit)? = null
 ) {
-    var text by remember { mutableStateOf(initialValue) }
+    var text by remember { mutableStateOf(initialName) }
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    val fallbackColor = MaterialTheme.colorScheme.primary
+    val fallbackColorLong = fallbackColor.toArgb().toLong() and 0xFFFFFFFFL
+
+    var colorLong by remember {
+        mutableLongStateOf(
+            try {
+                initialColorHex.toColorInt().toLong() and 0xFFFFFFFFL }
+            catch (e: Exception) { fallbackColorLong }
+        )
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                singleLine = true,
-                label = { Text("Название тега") }
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color(colorLong))
+                        .clickable { showColorPicker = true }
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    singleLine = true,
+                    label = { Text("Название тега") },
+                    modifier = Modifier.weight(1f)
+                )
+            }
         },
         confirmButton = {
-            TextButton(onClick = { if (text.isNotBlank()) onConfirm(text.trim()) }) {
+            TextButton(
+                onClick = {
+                    if (text.isNotBlank()) {
+                        val hexString = String.format("#%08X", colorLong)
+                        onConfirm(text.trim(), hexString)
+                    }
+                }
+            ) {
                 Text("Сохранить")
             }
         },
@@ -815,6 +861,18 @@ private fun TagInputDialog(
             }
         }
     )
+
+    if (showColorPicker) {
+        ColorPickerDialog(
+            initialColor = colorLong,
+            colorsPalette = TabataPhaseColorsPalette,
+            onColorSelected = { selectedLong ->
+                colorLong = selectedLong
+                showColorPicker = false
+            },
+            onDismiss = { showColorPicker = false }
+        )
+    }
 }
 
 @Composable
@@ -931,9 +989,9 @@ private fun SettingsScreenPreview() {
             state = state,
             onPhaseSoundToggle = { state = state.copy(phaseSoundEnabled = it) },
             onVolumeChange = { state = state.copy(signalVolume = it) },
-            onAddTag = { name ->
+            onAddTag = { name, color ->
                 state = state.copy(tags = state.tags + WorkoutTag(id = UUID.randomUUID().toString(), name = name, color = "#FF0000"))            },
-            onEditTag = { tag, newName ->
+            onEditTag = { tag, newName, color ->
                 state = state.copy(
                     tags = state.tags.map { if (it.id == tag.id) it.copy(name = newName) else it }
                 )

@@ -85,16 +85,7 @@ fun SettingsRoute(
     SettingsScreen(
         state = state,
         onBackClick = onBackClick,
-        onSearchDevices = ::onSearchDevicesClick/*{
-
-            *//*try {
-                // Открываем системные настройки Bluetooth телефона
-                val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
-                context.startActivity(intent)
-            } catch (e: Exception) {
-                // Защита, если на кастомной прошивке путь к настройкам отличается
-            }*//*
-        }*/,
+        onSearchDevices = ::onSearchDevicesClick,
         onAddProfileClick = { onNavigateToProfileBuilder(null) },
         onEditProfileClick = { profile -> onNavigateToProfileBuilder(profile.id) },
         onDeleteProfileClick = viewModel::onDeleteProfile,

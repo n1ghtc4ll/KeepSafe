@@ -80,20 +80,20 @@ class SettingsViewModel(
         viewModelScope.launch { updateSignalVolume(volume) }
     }
 
-    fun onAddTag(name: String) {
+    fun onAddTag(name: String, color: String) {
         if (name.isBlank()) return
         viewModelScope.launch {
-            tagInteractor.addWorkoutTag(name, "#6750A4")
+            tagInteractor.addWorkoutTag(name, color)
         }
     }
 
-    fun onEditTag(tag: WorkoutTag, newName: String) {
+    fun onEditTag(tag: WorkoutTag, newName: String, color: String) {
         if (newName.isBlank()) return
         viewModelScope.launch {
             val updatedTag = Tag(
                 id = tag.id,
                 name = newName,
-                color = tag.color
+                color = color
             )
             tagInteractor.updateWorkoutTag(updatedTag)
         }

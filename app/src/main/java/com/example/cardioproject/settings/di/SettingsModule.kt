@@ -36,6 +36,7 @@ val settingsModule = module {
     viewModel {
         SettingsViewModel(
             settingsRepository = get(),
+            bleConnectionManager = get(),
             updateSignalVolume = get(),
             tagInteractor = get(),
             updateHeartRateZone = get(),

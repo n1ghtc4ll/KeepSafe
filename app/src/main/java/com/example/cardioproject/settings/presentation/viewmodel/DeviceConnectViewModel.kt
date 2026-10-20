@@ -10,12 +10,15 @@ import com.example.cardioproject.core.bluetooth.domain.ConnectionState
 import com.example.cardioproject.settings.domain.model.DeviceInfo
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class DeviceConnectViewModel(
     private val settingsRepository: SettingsRepository,
@@ -90,11 +93,15 @@ class DeviceConnectViewModel(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun selectAndConnectDevice(device: DeviceInfo) {
-        stopScan()
+        //stopScan()
         viewModelScope.launch {
-            settingsRepository.updateDeviceInfo(
-                device.copy(isConnected = false)
-            )
+            scanJob?.cancelAndJoin()
+            scanJob = null
+            _isScanning.value = false
+
+            settingsRepository.updateDeviceInfo(device)
+
+            delay(150.milliseconds)
             bleConnectionManager.connect(device.macAddress)
         }
     }

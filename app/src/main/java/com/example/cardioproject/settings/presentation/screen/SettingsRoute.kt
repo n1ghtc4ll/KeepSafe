@@ -89,6 +89,7 @@ fun SettingsRoute(
         onAddProfileClick = { onNavigateToProfileBuilder(null) },
         onEditProfileClick = { profile -> onNavigateToProfileBuilder(profile.id) },
         onDeleteProfileClick = viewModel::onDeleteProfile,
+        onDisconnectDevice = deviceViewModel::disconnectDevice,
         onPhaseSoundToggle = viewModel::onPhaseSoundToggle,
         onVolumeChange = viewModel::onVolumeChange,
         onAddTag = viewModel::onAddTag,

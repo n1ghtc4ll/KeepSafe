@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.cardioproject.settings.domain.model.DeviceInfo
 import com.example.cardioproject.settings.presentation.viewmodel.DeviceConnectViewModel
-import org.koin.compose.viewmodel.koinViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @RequiresPermission(allOf = [
     Manifest.permission.BLUETOOTH_SCAN,
@@ -62,8 +62,10 @@ fun DeviceScanBottomSheet(
         onDismissRequest = onDismiss
     ) {
         DeviceScanBottomSheetContent(
-            modifier = modifier,
-            onDeviceClick = viewModel::selectAndConnectDevice,
+            onDeviceClick = { device ->
+                viewModel.selectAndConnectDevice(device)
+                onDismiss()
+            },
             devices = devices,
             isScanning = isScanning,
             onDismiss = onDismiss

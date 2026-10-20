@@ -1,7 +1,11 @@
 package com.example.cardioproject.settings.presentation.viewmodel
 
+import android.Manifest
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cardioproject.core.bluetooth.data.BleConnectionManager
+import com.example.cardioproject.core.bluetooth.domain.ConnectionState
 import com.example.cardioproject.core.common.domain.model.TabataProfile
 import com.example.cardioproject.core.common.domain.model.Tag
 import com.example.cardioproject.settings.domain.model.HeartRateZone as DomainHeartRateZone
@@ -18,11 +22,13 @@ import com.example.cardioproject.settings.presentation.screen.WorkoutTag
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
+    private val bleConnectionManager: BleConnectionManager,
     private val updateSignalVolume: UpdateSignalVolumeUseCase,
     private val tagInteractor: TagInteractor,
     private val updateHeartRateZone: UpdateHeartRateZoneUseCase,
@@ -37,13 +43,25 @@ class SettingsViewModel(
     init {
         // 1. Подписываемся на общие настройки (DataStore)
         viewModelScope.launch {
-            settingsRepository.observeSettings().collect { settings ->
+            combine(
+                settingsRepository.observeSettings(),
+                bleConnectionManager.connectionState
+            ) { settings, connectionState ->
+                settings to connectionState
+            }.collect { (settings, connectionState) ->
+
                 latestSettings = settings
+                val isConnected = connectionState is ConnectionState.Connected
+                val isConnecting = connectionState is ConnectionState.Connecting
+
                 _uiState.update { currentState ->
                     currentState.copy(
-                        deviceName = settings.device.name,
+                        deviceName = if (isConnecting)
+                            "${settings.device.name} (Подключение...)"
+                        else
+                            settings.device.name,
                         deviceBattery = settings.device.batteryLevel,
-                        isDeviceConnected = settings.device.isConnected,
+                        isDeviceConnected = isConnected || isConnecting,
                         phaseSoundEnabled = settings.phaseSoundEnabled,
                         signalVolume = settings.signalVolume,
                         birthDate = settings.profile.birthDate,
@@ -156,6 +174,11 @@ class SettingsViewModel(
 
     fun onKeepScreenOnToggle(enabled: Boolean) {
         viewModelScope.launch { settingsRepository.updateKeepScreenOnEnabled(enabled) }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun onDisconnectDevice() {
+        bleConnectionManager.disconnect()
     }
 }
 

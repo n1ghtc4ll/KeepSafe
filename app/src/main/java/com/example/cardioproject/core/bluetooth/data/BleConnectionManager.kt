@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.example.cardioproject.core.bluetooth.domain.ConnectionState
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,9 +35,12 @@ class BleConnectionManager(
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
+            Log.d("BLE_DEBUG", "onConnectionStateChange: status=$status, newState=$newState")
 
             if (status != BluetoothGatt.GATT_SUCCESS) {
+                Log.e("BLE_DEBUG", "GATT error: status=$status")
                 gatt?.close()
+                bluetoothGatt = null
                 _connectionState.value = ConnectionState.Error(status, "error occurred with status: $status")
                 return
             }
@@ -151,7 +155,12 @@ class BleConnectionManager(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun disconnect() {
-        bluetoothGatt?.disconnect()
+        if (_connectionState.value is ConnectionState.Connecting) {
+            closeConnection()
+            _connectionState.value = ConnectionState.Disconnected
+        } else {
+            bluetoothGatt?.disconnect()
+        }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)

@@ -178,14 +178,19 @@ fun SettingsScreen(
         ) {
             item {
                 SectionTitle("Bluetooth-устройства")
-                BluetoothDeviceRow(
-                    name = state.deviceName,
-                    battery = state.deviceBattery,
-                    isConnected = state.isDeviceConnected,
-                    onDisconnect = onDisconnectDevice
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedFullWidthButton(text = "Поиск устройств", onClick = onSearchDevices)
+
+                if (state.isDeviceConnected) {
+                    BluetoothDeviceRow(
+                        name = state.deviceName,
+                        battery = state.deviceBattery,
+                        onDisconnect = onDisconnectDevice
+                    )
+                } else {
+                    OutlinedFullWidthButton(
+                        text = "Поиск устройств",
+                        onClick = onSearchDevices
+                    )
+                }
                 SectionDivider()
             }
 
@@ -414,7 +419,6 @@ private fun SectionDivider() {
 private fun BluetoothDeviceRow(
     name: String,
     battery: Int,
-    isConnected: Boolean,
     onDisconnect: () -> Unit
 ) {
     Row(
@@ -430,15 +434,13 @@ private fun BluetoothDeviceRow(
                 style = MaterialTheme.typography.labelMedium
             )
         }
-        if (isConnected) {
-            OutlinedButton(
-                onClick = onDisconnect,
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-            ) {
-                Text("Отключить")
-            }
+        OutlinedButton(
+            onClick = onDisconnect,
+            shape = RoundedCornerShape(20.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        ) {
+            Text("Отключить")
         }
     }
 }

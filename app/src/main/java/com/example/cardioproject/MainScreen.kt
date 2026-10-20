@@ -31,8 +31,7 @@ import com.example.cardioproject.core.navigation.TopLevelBackStack
 import com.example.cardioproject.presentation.HeartRateMainScreen
 import com.example.cardioproject.workout.presentation.screen.WorkoutDetailsScreen
 import com.example.cardioproject.workout.presentation.screen.WorkoutHistoryScreen
-import com.example.cardioproject.settings.presentation.SettingsRoute
-import com.example.cardioproject.settings.presentation.screen.DeviceScanBottomSheet
+import com.example.cardioproject.settings.presentation.screen.SettingsRoute
 import com.example.cardioproject.settings.presentation.screen.ProfileBuilderRoute
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
 import com.example.cardioproject.workout.presentation.screen.WorkoutScreen

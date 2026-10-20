@@ -1,4 +1,4 @@
-package com.example.cardioproject.settings.presentation.di
+package com.example.cardioproject.settings.di
 
 import com.example.cardioproject.settings.data.local.SettingsPreferencesDataSource
 import com.example.cardioproject.settings.data.repository.SettingsRepositoryImpl
@@ -7,7 +7,7 @@ import com.example.cardioproject.settings.domain.usecase.AutoCalculateHeartRateZ
 import com.example.cardioproject.settings.domain.usecase.TagInteractor
 import com.example.cardioproject.settings.domain.usecase.UpdateHeartRateZoneUseCase
 import com.example.cardioproject.settings.domain.usecase.UpdateSignalVolumeUseCase
-import com.example.cardioproject.settings.presentation.SettingsViewModel
+import com.example.cardioproject.settings.presentation.viewmodel.SettingsViewModel
 import com.example.cardioproject.settings.presentation.viewmodel.DeviceConnectViewModel
 import com.example.cardioproject.settings.presentation.viewmodel.ProfileBuilderViewModel
 import org.koin.core.module.dsl.viewModel

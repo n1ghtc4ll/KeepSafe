@@ -1,10 +1,8 @@
-package com.example.cardioproject.settings.presentation
+package com.example.cardioproject.settings.presentation.screen
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -15,8 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import com.example.cardioproject.settings.presentation.screen.DeviceScanBottomSheet
 import com.example.cardioproject.settings.presentation.viewmodel.DeviceConnectViewModel
+import com.example.cardioproject.settings.presentation.viewmodel.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 /**

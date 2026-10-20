@@ -1,4 +1,4 @@
-package com.example.cardioproject.settings.presentation
+package com.example.cardioproject.settings.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +11,10 @@ import com.example.cardioproject.settings.domain.usecase.AutoCalculateHeartRateZ
 import com.example.cardioproject.settings.domain.usecase.TagInteractor
 import com.example.cardioproject.settings.domain.usecase.UpdateHeartRateZoneUseCase
 import com.example.cardioproject.settings.domain.usecase.UpdateSignalVolumeUseCase
+import com.example.cardioproject.settings.presentation.screen.HeartRateZone
+import com.example.cardioproject.settings.presentation.screen.SettingsUiState
+import com.example.cardioproject.settings.presentation.screen.TimerProfileUi
+import com.example.cardioproject.settings.presentation.screen.WorkoutTag
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -84,14 +84,15 @@ fun DeviceScanBottomSheetContent(
         .fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Выбор Bluetooth-устройства",
-                modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
 
             if (isScanning) {
@@ -112,11 +113,11 @@ fun DeviceScanBottomSheetContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         if (devices.isEmpty()) {
-            Box(
+            Column (
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp),
-                contentAlignment = Alignment.Center
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text =
@@ -128,6 +129,12 @@ fun DeviceScanBottomSheetContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
+                if (isScanning) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(40.dp),
+                        strokeWidth = 2.5.dp
+                    )
+                }
             }
         } else {
             LazyColumn(

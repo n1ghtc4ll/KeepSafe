@@ -1,12 +1,10 @@
 package com.example.cardioproject.settings.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,7 +21,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -35,7 +29,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,32 +40,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cardioproject.settings.presentation.HeartRateZone
+import com.example.cardioproject.core.ui.theme.TabataPhaseColorsPalette
+import com.example.cardioproject.core.ui.theme.WhiteBg
+import com.example.cardioproject.core.ui.theme.inputBackground
+import com.example.cardioproject.core.ui.theme.tabataContainer
+import com.example.cardioproject.core.ui.components.ColorPickerDialog
 
 // ---------- Цвета из твоей стилистики ----------
-private val SettingsBackground = Color(0xFFFFFFFF)
-private val TextPrimary = Color(0xFF000000)
-private val CardBorder = Color(0xFFCAC4D0)
-private val AccentPurple = Color(0xFF6750A4)
-private val InputBackgroundGray = Color(0xFFEEEEEE)
-private val TabataBackground = Color(0xFFF3EDF7)
-private val ElementBackgroundWhite = Color(0xFFFFFFFF)
 
 // Стандартная Material-палитра для выбора цвета фазы
-private val MaterialColorsPalette = listOf(
-    0xFFF44336, 0xFFE91E63, 0xFF9C27B0, 0xFF673AB7,
-    0xFF3F51B5, 0xFF2196F3, 0xFF03A9F4, 0xFF00BCD4,
-    0xFF009688, 0xFF4CAF50, 0xFF8BC34A, 0xFFCDDC39,
-    0xFFFFEB3B, 0xFFFFC107, 0xFFFF9800, 0xFFFF5722,
-    0xFF795548, 0xFF9E9E9E, 0xFF607D8B
-)
+
 
 // ---------- Стэйт экрана ----------
 data class ProfileBuilderUiState(
@@ -114,7 +97,7 @@ fun ProfileBuilderScreen(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = SettingsBackground
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
@@ -135,16 +118,15 @@ fun ProfileBuilderScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Назад",
-                        tint = TextPrimary,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = if (state.id == null) "Создание профиля" else "Редактирование",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextPrimary
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
@@ -163,17 +145,17 @@ fun ProfileBuilderScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(TabataBackground, RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.tabataContainer, RoundedCornerShape(16.dp))
                     .padding(16.dp)
             ) {
                 Text(
                     text = "Параметры таймера",
-                    fontSize = 20.sp,
-                    color = TextPrimary
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-                HorizontalDivider(color = CardBorder, thickness = 1.dp)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 EditablePhaseRow(
@@ -254,12 +236,12 @@ fun ProfileBuilderScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AccentPurple)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(
                     text = "Сохранить",
                     color = Color.White,
-                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Normal
                 )
             }
@@ -280,6 +262,7 @@ fun ProfileBuilderScreen(
 
         ColorPickerDialog(
             initialColor = currentColor,
+            colorsPalette = TabataPhaseColorsPalette,
             onColorSelected = { selectedColorHex ->
                 onPhaseColorChange(type, selectedColorHex)
                 phaseToEditColor = null
@@ -299,17 +282,23 @@ private fun BuilderLabelTextField(label: String, value: String, onValueChange: (
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label, fontSize = 20.sp, modifier = Modifier.weight(2f))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(2f)
+        )
         Spacer(modifier = Modifier.width(16.dp))
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = InputBackgroundGray, shape = RoundedCornerShape(6.dp))
+                .background(color = MaterialTheme.colorScheme.inputBackground, shape = RoundedCornerShape(6.dp))
                 .weight(4f)
                 .padding(horizontal = 12.dp, vertical = 10.dp),
-            textStyle = TextStyle(fontSize = 16.sp, color = TextPrimary),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                color = MaterialTheme.colorScheme.onSurface
+            ),
             singleLine = true
         )
     }
@@ -354,9 +343,8 @@ private fun EditablePhaseRow(
     ) {
         Text(
             text = label,
-            fontSize = 18.sp,
-            color = TextPrimary,
-            lineHeight = 20.sp,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
 
@@ -375,7 +363,7 @@ private fun EditablePhaseRow(
             Box(
                 modifier = Modifier
                     .size(width = if (isTimeField) 100.dp else 64.dp, height = 30.dp)
-                    .background(ElementBackgroundWhite, RoundedCornerShape(6.dp)),
+                    .background(WhiteBg, RoundedCornerShape(6.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 if (isTimeField) {
@@ -394,9 +382,8 @@ private fun EditablePhaseRow(
                                     onValueChange(m * 60 + s)
                                 }
                             },
-                            textStyle = TextStyle(
-                                fontSize = 16.sp,
-                                color = AccentPurple,
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.primary,
                                 textAlign = TextAlign.Center
                             ),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -412,7 +399,7 @@ private fun EditablePhaseRow(
                                 }
                         )
 
-                        Text(":", fontSize = 16.sp, color = AccentPurple)
+                        Text(":", fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
 
                         BasicTextField(
                             value = sText,
@@ -430,9 +417,8 @@ private fun EditablePhaseRow(
                                     onValueChange(m * 60 + num)
                                 }
                             },
-                            textStyle = TextStyle(
-                                fontSize = 16.sp,
-                                color = AccentPurple,
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.primary,
                                 textAlign = TextAlign.Center
                             ),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -458,9 +444,8 @@ private fun EditablePhaseRow(
                                 onValueChange(digits.toIntOrNull() ?: 0)
                             }
                         },
-                        textStyle = TextStyle(
-                            fontSize = 16.sp,
-                            color = AccentPurple,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center
                         ),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -475,54 +460,6 @@ private fun EditablePhaseRow(
     }
 }
 
-@Composable
-private fun ColorPickerDialog(
-    initialColor: Long,
-    onColorSelected: (Long) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var selectedColor by remember { mutableStateOf(initialColor) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = "Выберите цвет фазы", color = TextPrimary) },
-        containerColor = SettingsBackground,
-        text = {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(4),
-                contentPadding = PaddingValues(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(MaterialColorsPalette) { colorValue ->
-                    val isSelected = selectedColor == colorValue
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(Color(colorValue))
-                            .border(
-                                width = if (isSelected) 3.dp else 0.dp,
-                                color = if (isSelected) TextPrimary else Color.Transparent,
-                                shape = CircleShape
-                            )
-                            .clickable { selectedColor = colorValue }
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onColorSelected(selectedColor) }) {
-                Text("Выбрать", color = AccentPurple)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Отмена", color = TextPrimary)
-            }
-        }
-    )
-}
 
 // ---------- Preview ----------
 @Preview(showBackground = true, backgroundColor = 0xFF2B2B2B)

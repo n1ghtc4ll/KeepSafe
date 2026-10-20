@@ -1,11 +1,9 @@
-package com.example.cardioproject.settings.presentation
+package com.example.cardioproject.settings.presentation.screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -30,6 +28,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,7 +45,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,28 +64,13 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
+import com.example.cardioproject.core.ui.theme.GraySurface
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-// ---------- Colors matching the mock (light theme) ----------
-
-private val BackgroundColor = Color(0xFFFFFFFF)
-private val SurfaceColor = Color(0xFFF5F5F7)
-private val AccentPurple = Color(0xFF7C6BFF)
-private val TextPrimary = Color(0xFF1A1A1E)
-private val TextSecondary = Color(0xFF737379)
-private val DividerColor = Color(0xFFE0E0E4)
-private val DestructiveRed = Color(0xFFD32F2F)
-
-private val KeepSafeLightColorScheme = lightColorScheme(
-    background = BackgroundColor,
-    surface = SurfaceColor,
-    primary = AccentPurple,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary,
-)
 
 // ---------- Data models ----------
 
@@ -168,12 +152,12 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = { SettingsTopBar(onBackClick) },
-        containerColor = BackgroundColor
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(BackgroundColor),
+                .background(MaterialTheme.colorScheme.background),
             contentPadding = PaddingValues(
                 top = padding.calculateTopPadding() + 8.dp,
                 bottom = 32.dp,
@@ -209,8 +193,8 @@ fun SettingsScreen(
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = "Профили таймера",
-                    color = TextPrimary,
-                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
@@ -235,8 +219,8 @@ fun SettingsScreen(
                     OutlinedButton(
                         onClick = { showAddTagDialog = true },
                         shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-                        border = BorderStroke(1.dp, DividerColor)
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {
                         Text("Добавить")
                     }
@@ -270,8 +254,8 @@ fun SettingsScreen(
                 Spacer(Modifier.height(16.dp))
                 Text(
                     text = "Ручная настройка зон ЧСС",
-                    color = TextPrimary,
-                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
@@ -387,7 +371,7 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingsTopBar(onBackClick: () -> Unit) {
-    Surface(color = BackgroundColor) {
+    Surface(color = MaterialTheme.colorScheme.background) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -398,13 +382,13 @@ private fun SettingsTopBar(onBackClick: () -> Unit) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Назад",
-                    tint = TextPrimary
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
             Text(
                 text = "Настройки",
-                color = TextPrimary,
-                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -415,9 +399,8 @@ private fun SettingsTopBar(onBackClick: () -> Unit) {
 private fun SectionTitle(text: String) {
     Text(
         text = text,
-        color = TextSecondary,
-        fontSize = 13.sp,
-        fontWeight = FontWeight.Medium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.labelMedium,
         modifier = Modifier.padding(top = 12.dp, bottom = 10.dp)
     )
 }
@@ -440,15 +423,19 @@ private fun BluetoothDeviceRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
-            Text(text = name, color = TextPrimary, fontSize = 15.sp)
-            Text(text = "Батарея: $battery%", color = TextSecondary, fontSize = 13.sp)
+            Text(text = name, color = MaterialTheme.colorScheme.onSurface, fontSize = 15.sp)
+            Text(
+                text = "Батарея: $battery%",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelMedium
+            )
         }
         if (isConnected) {
             OutlinedButton(
                 onClick = onDisconnect,
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-                border = BorderStroke(1.dp, DividerColor)
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Text("Отключить")
             }
@@ -462,8 +449,8 @@ private fun OutlinedFullWidthButton(text: String, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-        border = BorderStroke(1.dp, DividerColor)
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Text(text)
     }
@@ -482,15 +469,20 @@ private fun ToggleRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, color = TextPrimary, fontSize = 15.sp, modifier = Modifier.weight(1f))
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
-                checkedTrackColor = AccentPurple,
-                uncheckedThumbColor = TextSecondary,
-                uncheckedTrackColor = DividerColor
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                uncheckedTrackColor = MaterialTheme.colorScheme.outlineVariant
             )
         )
     }
@@ -502,15 +494,19 @@ private fun VolumeRow(
     onVolumeChange: (Float) -> Unit
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(text = "Громкость сигналов", color = TextPrimary, fontSize = 15.sp)
+        Text(
+            text = "Громкость сигналов",
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium
+        )
         Spacer(Modifier.height(6.dp))
         Slider(
             value = volume,
             onValueChange = onVolumeChange,
             colors = SliderDefaults.colors(
-                thumbColor = AccentPurple,
-                activeTrackColor = AccentPurple,
-                inactiveTrackColor = DividerColor
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
             )
         )
     }
@@ -526,9 +522,9 @@ private fun TimerProfilesSection(
     Column {
         if (profiles.isNotEmpty()) {
             Surface(
-                color = SurfaceColor,
+                color = GraySurface,
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, DividerColor),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
@@ -540,7 +536,11 @@ private fun TimerProfilesSection(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = profile.name, color = TextPrimary, fontSize = 15.sp)
+                            Text(
+                                text = profile.name,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                             Row {
                                 IconButton(
                                     onClick = { onEditClick(profile) },
@@ -549,7 +549,7 @@ private fun TimerProfilesSection(
                                     Icon(
                                         imageVector = Icons.Default.Edit,
                                         contentDescription = "Редактировать",
-                                        tint = TextSecondary,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -561,14 +561,14 @@ private fun TimerProfilesSection(
                                     Icon(
                                         imageVector = Icons.Default.Delete,
                                         contentDescription = "Удалить",
-                                        tint = TextSecondary,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }
                         }
                         if (index < profiles.lastIndex) {
-                            androidx.compose.material3.Divider(color = DividerColor, thickness = 1.dp)
+                            Divider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                         }
                     }
                 }
@@ -580,8 +580,8 @@ private fun TimerProfilesSection(
             OutlinedButton(
                 onClick = onAddClick,
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-                border = BorderStroke(1.dp, DividerColor)
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Text("Добавить")
             }
@@ -625,7 +625,7 @@ private fun SimpleFlowRow(
         val itemConstraints = Constraints(maxWidth = maxWidth)
         val placeables = measurables.map { it.measure(itemConstraints) }
 
-        data class FlowLine(val items: MutableList<androidx.compose.ui.layout.Placeable> = mutableListOf(), var width: Int = 0, var height: Int = 0)
+        data class FlowLine(val items: MutableList<Placeable> = mutableListOf(), var width: Int = 0, var height: Int = 0)
 
         val rows = mutableListOf(FlowLine())
         placeables.forEach { placeable ->
@@ -659,22 +659,26 @@ private fun SimpleFlowRow(
 @Composable
 private fun TagChip(tag: WorkoutTag, onEditClick: () -> Unit) {
     Surface(
-        color = SurfaceColor,
+        color = GraySurface,
         shape = RoundedCornerShape(18.dp),
-        border = BorderStroke(1.dp, DividerColor)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
             modifier = Modifier.padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = tag.name, color = TextPrimary, fontSize = 14.sp)
+            Text(
+                text = tag.name,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelLarge
+            )
             if (tag.editable) {
                 Spacer(Modifier.width(6.dp))
                 IconButton(onClick = onEditClick, modifier = Modifier.size(18.dp)) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Редактировать тег",
-                        tint = TextSecondary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(14.dp)
                     )
                 }
@@ -698,11 +702,15 @@ private fun LabeledInputRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, color = TextPrimary, fontSize = 15.sp)
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium
+        )
         Surface(
-            color = SurfaceColor,
+            color = GraySurface,
             shape = RoundedCornerShape(10.dp),
-            border = BorderStroke(1.dp, DividerColor)
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
             Row(
                 modifier = Modifier
@@ -713,14 +721,14 @@ private fun LabeledInputRow(
             ) {
                 Text(
                     text = value,
-                    color = TextSecondary,
-                    fontSize = 13.sp
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelMedium
                 )
                 if (icon != null) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = TextSecondary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -740,18 +748,18 @@ private fun HeartRateZoneRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = zone.label, color = TextPrimary, fontSize = 14.sp)
+            Text(text = zone.label, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "${zone.range.start.toInt()}-${zone.range.endInclusive.toInt()} уд/мин",
-                    color = TextSecondary,
-                    fontSize = 13.sp
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelMedium
                 )
                 Spacer(Modifier.width(4.dp))
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = null,
-                    tint = TextSecondary,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -761,9 +769,9 @@ private fun HeartRateZoneRow(
             onValueChange = onRangeChange,
             valueRange = 40f..200f,
             colors = SliderDefaults.colors(
-                thumbColor = AccentPurple,
-                activeTrackColor = AccentPurple,
-                inactiveTrackColor = DividerColor
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
             )
         )
     }
@@ -800,7 +808,7 @@ private fun TagInputDialog(
             Row {
                 if (onDelete != null) {
                     TextButton(onClick = onDelete) {
-                        Text("Удалить", color = DestructiveRed)
+                        Text("Удалить", color = MaterialTheme.colorScheme.error)
                     }
                 }
                 TextButton(onClick = onDismiss) { Text("Отмена") }
@@ -898,7 +906,7 @@ private fun GenderPickerDialog(
                     ) {
                         RadioButton(selected = selected == option, onClick = { selected = option })
                         Spacer(Modifier.width(8.dp))
-                        Text(option, color = TextPrimary)
+                        Text(option, color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -918,7 +926,7 @@ private fun GenderPickerDialog(
 @Composable
 private fun SettingsScreenPreview() {
     var state by remember { mutableStateOf(SettingsUiState()) }
-    MaterialTheme(colorScheme = KeepSafeLightColorScheme) {
+    KeepSafeProjectTheme {
         SettingsScreen(
             state = state,
             onPhaseSoundToggle = { state = state.copy(phaseSoundEnabled = it) },

@@ -26,13 +26,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cardioproject.core.ui.components.AppThemeTopBar
 import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
 import java.util.UUID
-import com.example.cardioproject.core.ui.theme.TextGray
 import com.example.cardioproject.settings.presentation.model.SettingsUiState
 import com.example.cardioproject.settings.presentation.model.TimerProfileUi
 import com.example.cardioproject.settings.presentation.model.WorkoutTag
@@ -80,6 +80,8 @@ fun SettingsScreen(
     var showBirthDateDialog by remember { mutableStateOf(false) }
     var showGenderDialog by remember { mutableStateOf(false) }
     var showHeightDialog by remember { mutableStateOf(false) }
+
+    val defaultTagColorHex = String.format("#%08X", MaterialTheme.colorScheme.primary.toArgb())
 
     Scaffold(
         topBar = { AppThemeTopBar(title = "Настройки", onBackClick = onBackClick) },
@@ -228,7 +230,7 @@ fun SettingsScreen(
         TagInputDialog(
             title = "Новый тег",
             initialName = "",
-            initialColorHex = TextGray.value.toHexString(),
+            initialColorHex = defaultTagColorHex,
             onConfirm = { name, colorHex ->
                 onAddTag(name, colorHex)
                 showAddTagDialog = false
@@ -295,7 +297,7 @@ fun SettingsScreen(
 
 // ---------- Preview ----------
 
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF, widthDp = 360, heightDp = 900)
+@Preview(showBackground = true, widthDp = 360, heightDp = 900)
 @Composable
 private fun SettingsScreenPreview() {
     var state by remember { mutableStateOf(SettingsUiState()) }

@@ -30,13 +30,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cardioproject.core.ui.theme.TabataPhaseColorsPalette
 import com.example.cardioproject.core.ui.theme.tabataContainer
 import com.example.cardioproject.core.ui.components.ColorPickerDialog
+import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
 import com.example.cardioproject.settings.presentation.model.PhaseType
 import com.example.cardioproject.settings.presentation.model.ProfileBuilderUiState
 import com.example.cardioproject.settings.presentation.ui.components.BuilderLabelTextField
@@ -196,11 +196,13 @@ fun ProfileBuilderScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
             ) {
                 Text(
                     text = "Сохранить",
-                    color = Color.White,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Normal
                 )
@@ -233,10 +235,10 @@ fun ProfileBuilderScreen(
 }
 
 // ---------- Preview ----------
-@Preview(showBackground = true, backgroundColor = 0xFF2B2B2B)
+@Preview(showBackground = true)
 @Composable
 fun ProfileBuilderScreenPreview() {
-    MaterialTheme {
+    KeepSafeProjectTheme {
         Box(
             modifier = Modifier.padding(16.dp),
             contentAlignment = Alignment.Center

@@ -33,27 +33,39 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardioproject.core.ui.theme.GraySurface
+import com.example.cardioproject.core.ui.theme.spacing
 import com.example.cardioproject.settings.presentation.model.HeartRateZone
 
 @Composable
-fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        style = MaterialTheme.typography.labelMedium,
-        modifier = Modifier.padding(top = 12.dp, bottom = 10.dp)
-    )
+fun SectionTitle(
+    text: String,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+    ) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        content.invoke()
+    }
 }
 
 @Composable
 fun SectionDivider() {
-    Spacer(Modifier.height(4.dp))
+    Spacer(Modifier.height(MaterialTheme.spacing.extraSmall))
 }
 
 @Composable
 fun BluetoothDeviceRow(
-    name: String,
-    battery: Int,
+    name: String?,
+    battery: Int?,
     onDisconnect: () -> Unit
 ) {
     Row(
@@ -61,10 +73,14 @@ fun BluetoothDeviceRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column {
-            Text(text = name, color = MaterialTheme.colorScheme.onSurface, fontSize = 15.sp)
+        Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)) {
             Text(
-                text = "Батарея: $battery%",
+                text = name ?: "Неизвестно",
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = if (battery != null) "Батарея: $battery%" else "Батарея: —",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.labelMedium
             )
@@ -97,12 +113,11 @@ fun OutlinedFullWidthButton(text: String, onClick: () -> Unit) {
 fun ToggleRow(
     label: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -127,16 +142,21 @@ fun ToggleRow(
 
 @Composable
 fun VolumeRow(
+    label: String,
     volume: Float,
-    onVolumeChange: (Float) -> Unit
+    onVolumeChange: (Float) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+    ) {
         Text(
-            text = "Громкость сигналов",
+            text = label,
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium
         )
-        Spacer(Modifier.height(6.dp))
+        //Spacer(Modifier.height(6.dp))
         Slider(
             value = volume,
             onValueChange = onVolumeChange,
@@ -159,8 +179,7 @@ fun LabeledInputRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .let { base -> if (onClick != null) base.clickable(onClick = onClick) else base }
-            .padding(vertical = 10.dp),
+            .let { base -> if (onClick != null) base.clickable(onClick = onClick) else base },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -177,7 +196,10 @@ fun LabeledInputRow(
             Row(
                 modifier = Modifier
                     .width(120.dp)
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                    .padding(
+                        horizontal = MaterialTheme.spacing.mediumSmall,
+                        vertical = MaterialTheme.spacing.small
+                    ),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -204,7 +226,9 @@ fun HeartRateZoneRow(
     zone: HeartRateZone,
     onRangeChange: (ClosedFloatingPointRange<Float>) -> Unit
 ) {
-    Column(modifier = Modifier.padding(vertical = 6.dp)) {
+    Column(
+        //modifier = Modifier.padding(vertical = 6.dp)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -217,7 +241,7 @@ fun HeartRateZoneRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelMedium
                 )
-                Spacer(Modifier.width(4.dp))
+                //Spacer(Modifier.width(4.dp))
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = null,

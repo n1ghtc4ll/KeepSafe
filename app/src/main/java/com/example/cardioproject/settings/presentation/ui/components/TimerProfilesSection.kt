@@ -27,16 +27,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.cardioproject.core.ui.theme.GraySurface
+import com.example.cardioproject.core.ui.theme.spacing
 import com.example.cardioproject.settings.presentation.model.TimerProfileUi
 
 @Composable
 fun TimerProfilesSection(
+    label: String,
     profiles: List<TimerProfileUi>,
     onAddClick: () -> Unit,
     onEditClick: (TimerProfileUi) -> Unit,
     onDeleteClick: (TimerProfileUi) -> Unit
 ) {
-    Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+    ) {
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium
+        )
+
         if (profiles.isNotEmpty()) {
             Surface(
                 color = GraySurface,
@@ -49,7 +59,10 @@ fun TimerProfilesSection(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 12.dp, horizontal = 16.dp),
+                                .padding(
+                                    vertical = MaterialTheme.spacing.mediumSmall,
+                                    horizontal = MaterialTheme.spacing.medium
+                                ),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -70,7 +83,7 @@ fun TimerProfilesSection(
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
-                                Spacer(Modifier.width(16.dp))
+                                //Spacer(Modifier.width(16.dp))
                                 IconButton(
                                     onClick = { onDeleteClick(profile) },
                                     modifier = Modifier.size(24.dp)
@@ -93,7 +106,6 @@ fun TimerProfilesSection(
                     }
                 }
             }
-            Spacer(Modifier.height(12.dp))
         }
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {

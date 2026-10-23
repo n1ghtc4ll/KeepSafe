@@ -56,12 +56,15 @@ fun TagsFlowRow(
  */
 @Composable
 fun SimpleFlowRow(
-    modifier: Modifier = Modifier.Companion,
+    modifier: Modifier = Modifier,
     horizontalGap: Dp = 8.dp,
     verticalGap: Dp = 8.dp,
     content: @Composable () -> Unit
 ) {
-    Layout(content = content, modifier = modifier) { measurables, constraints ->
+    Layout(
+        content = content,
+        modifier = modifier
+    ) { measurables, constraints ->
         val horizontalGapPx = horizontalGap.roundToPx()
         val verticalGapPx = verticalGap.roundToPx()
         val maxWidth = constraints.maxWidth

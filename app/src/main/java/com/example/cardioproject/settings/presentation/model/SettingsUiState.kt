@@ -20,8 +20,8 @@ data class WorkoutTag(
 )
 
 data class SettingsUiState(
-    val deviceName: String = "Coospo HW9",
-    val deviceBattery: Int = 85,
+    val deviceName: String? = null,
+    val deviceBattery: Int? = null,
     val isDeviceConnected: Boolean = true,
     val phaseSoundEnabled: Boolean = true,
     val signalVolume: Float = 0.6f,

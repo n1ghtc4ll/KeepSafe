@@ -4,6 +4,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 
 val ColorScheme.tabataContainer: Color
@@ -27,9 +28,15 @@ private val KeepSafeLightColorScheme = lightColorScheme(
 // 3. Обертка темы
 @Composable
 fun KeepSafeProjectTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = KeepSafeLightColorScheme,
-        typography = Typography,
-        content = content
-    )
+    val spacing = Spacing()
+
+    CompositionLocalProvider(
+        LocalSpacing provides spacing
+    ) {
+        MaterialTheme(
+            colorScheme = KeepSafeLightColorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

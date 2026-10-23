@@ -3,6 +3,7 @@ package com.example.cardioproject.settings.presentation.screen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cardioproject.core.ui.components.AppThemeTopBar
 import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
+import com.example.cardioproject.core.ui.theme.spacing
 import java.util.UUID
 import com.example.cardioproject.settings.presentation.model.SettingsUiState
 import com.example.cardioproject.settings.presentation.model.TimerProfileUi
@@ -92,136 +94,132 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
             contentPadding = PaddingValues(
-                top = padding.calculateTopPadding() + 8.dp,
-                bottom = 32.dp,
-                start = 16.dp,
-                end = 16.dp
+                top = padding.calculateTopPadding() + MaterialTheme.spacing.small,
+                bottom = MaterialTheme.spacing.extraLarge,
+                start = MaterialTheme.spacing.medium,
+                end = MaterialTheme.spacing.medium
             ),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.large)
         ) {
             item {
-                SectionTitle("Bluetooth-устройства")
+                SectionTitle(
+                    text = "Bluetooth-устройства",
 
-                if (state.isDeviceConnected) {
-                    BluetoothDeviceRow(
-                        name = state.deviceName,
-                        battery = state.deviceBattery,
-                        onDisconnect = onDisconnectDevice
-                    )
-                } else {
-                    OutlinedFullWidthButton(
-                        text = "Поиск устройств",
-                        onClick = onSearchDevices
-                    )
-                }
-                SectionDivider()
-            }
-
-            item {
-                SectionTitle("Табата и звуки")
-                ToggleRow(
-                    label = "Звуки смены фаз таймера",
-                    checked = state.phaseSoundEnabled,
-                    onCheckedChange = onPhaseSoundToggle
-                )
-                VolumeRow(
-                    volume = state.signalVolume,
-                    onVolumeChange = onVolumeChange
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = "Профили таймера",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                TimerProfilesSection(
-                    profiles = state.timerProfiles,
-                    onAddClick = onAddProfileClick,
-                    onEditClick = onEditProfileClick,
-                    onDeleteClick = onDeleteProfileClick
-                )
-
-                SectionDivider()
-            }
-
-            item {
-                SectionTitle("Теги тренировок")
-                TagsFlowRow(
-                    tags = state.tags,
-                    onEditTag = { tag -> tagBeingEdited = tag }
-                )
-                Spacer(Modifier.height(12.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    OutlinedButton(
-                        onClick = { showAddTagDialog = true },
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ) {
-                        Text("Добавить")
+                ) {
+                    if (state.isDeviceConnected) {
+                        BluetoothDeviceRow(
+                            name = state.deviceName,
+                            battery = state.deviceBattery,
+                            onDisconnect = onDisconnectDevice
+                        )
+                    } else {
+                        OutlinedFullWidthButton(
+                            text = "Поиск устройств",
+                            onClick = onSearchDevices
+                        )
                     }
                 }
-                SectionDivider()
             }
 
             item {
-                LabeledInputRow(
-                    label = "Дата рождения",
-                    value = state.birthDate,
-                    icon = Icons.Default.DateRange,
-                    onClick = { showBirthDateDialog = true }
-                )
-                LabeledInputRow(
-                    label = "Пол",
-                    value = state.gender,
-                    onClick = { showGenderDialog = true }
-                )
-                LabeledInputRow(
-                    label = "Рост",
-                    value = state.height,
-                    onClick = { showHeightDialog = true }
-                )
-                SectionDivider()
+                SectionTitle("Табата и звуки") {
+                    ToggleRow(
+                        label = "Звуки смены фаз таймера",
+                        checked = state.phaseSoundEnabled,
+                        onCheckedChange = onPhaseSoundToggle
+                    )
+                    VolumeRow(
+                        label = "Громкость сигналов",
+                        volume = state.signalVolume,
+                        onVolumeChange = onVolumeChange
+                    )
+
+
+                    TimerProfilesSection(
+                        label = "Профили таймера",
+                        profiles = state.timerProfiles,
+                        onAddClick = onAddProfileClick,
+                        onEditClick = onEditProfileClick,
+                        onDeleteClick = onDeleteProfileClick
+                    )
+                }
             }
 
             item {
-                SectionTitle("Пульс")
-                OutlinedFullWidthButton(text = "Авторасчет зон ЧСС", onClick = onAutoCalculateZones)
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = "Ручная настройка зон ЧСС",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-
-            itemsIndexed(items = state.zones) { index, zone ->
-                HeartRateZoneRow(
-                    zone = zone,
-                    onRangeChange = { newRange -> onZoneChange(index, newRange) }
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(8.dp))
-                ToggleRow(
-                    label = "Оповещение о критическом пульсе",
-                    checked = state.criticalPulseAlertEnabled,
-                    onCheckedChange = onCriticalPulseAlertToggle
-                )
-                SectionDivider()
+                SectionTitle("Теги тренировок") {
+                    TagsFlowRow(
+                        tags = state.tags,
+                        onEditTag = { tag -> tagBeingEdited = tag }
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        OutlinedButton(
+                            onClick = { showAddTagDialog = true },
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                        ) {
+                            Text("Добавить")
+                        }
+                    }
+                }
             }
 
             item {
-                SectionTitle("Дополнительно")
-                ToggleRow(
-                    label = "Оставить экран включенным",
-                    checked = state.keepScreenOnEnabled,
-                    onCheckedChange = onKeepScreenOnToggle
-                )
+                SectionTitle(
+                    text = "Личные данные"
+                ) {
+                    LabeledInputRow(
+                        label = "Дата рождения",
+                        value = state.birthDate,
+                        icon = Icons.Default.DateRange,
+                        onClick = { showBirthDateDialog = true }
+                    )
+                    LabeledInputRow(
+                        label = "Пол",
+                        value = state.gender,
+                        onClick = { showGenderDialog = true }
+                    )
+                    LabeledInputRow(
+                        label = "Рост",
+                        value = state.height,
+                        onClick = { showHeightDialog = true }
+                    )
+                }
+            }
+
+            item {
+                SectionTitle("Пульс") {
+                    OutlinedFullWidthButton(
+                        text = "Авторасчет зон ЧСС",
+                        onClick = onAutoCalculateZones
+                    )
+
+                    state.zones.forEachIndexed { index, zone ->
+                        HeartRateZoneRow(
+                            zone = zone,
+                            onRangeChange = { newRange -> onZoneChange(index, newRange) }
+                        )
+                    }
+
+                    ToggleRow(
+                        label = "Оповещение о критическом пульсе",
+                        checked = state.criticalPulseAlertEnabled,
+                        onCheckedChange = onCriticalPulseAlertToggle
+                    )
+                }
+            }
+
+            item {
+                SectionTitle("Дополнительно") {
+                    ToggleRow(
+                        label = "Оставить экран включенным",
+                        checked = state.keepScreenOnEnabled,
+                        onCheckedChange = onKeepScreenOnToggle
+                    )
+                }
             }
         }
     }
@@ -297,7 +295,7 @@ fun SettingsScreen(
 
 // ---------- Preview ----------
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 900)
+@Preview(showBackground = true, widthDp = 360, heightDp = 2000)
 @Composable
 private fun SettingsScreenPreview() {
     var state by remember { mutableStateOf(SettingsUiState()) }

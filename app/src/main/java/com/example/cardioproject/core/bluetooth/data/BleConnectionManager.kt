@@ -47,21 +47,24 @@ class BleConnectionManager(
 
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
+                    Log.d("BLE_DEBUG", "ConnectionState = Connected")
                     _connectionState.value = ConnectionState.Connected
                     gatt?.discoverServices()
                 }
 
                 BluetoothProfile.STATE_CONNECTING -> {
+                    Log.d("BLE_DEBUG", "ConnectionState = Connecting")
                     _connectionState.value = ConnectionState.Connecting
                 }
 
                 BluetoothProfile.STATE_DISCONNECTED -> {
+                    Log.d("BLE_DEBUG", "ConnectionState = Disconnected")
                     _connectionState.value = ConnectionState.Disconnected
                     gatt?.close()
                 }
 
                 BluetoothProfile.STATE_DISCONNECTING -> {
-
+                    Log.d("BLE_DEBUG", "ConnectionState = Disconnecting")
                 }
             }
         }
@@ -155,16 +158,15 @@ class BleConnectionManager(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun disconnect() {
-        if (_connectionState.value is ConnectionState.Connecting) {
-            closeConnection()
-            _connectionState.value = ConnectionState.Disconnected
-        } else {
-            bluetoothGatt?.disconnect()
-        }
+        Log.d("BLE_DEBUG", "Пользователь нажал Отключить. Инициируем разрыв.")
+        bluetoothGatt?.disconnect()
+        closeConnection()
+        _connectionState.value = ConnectionState.Disconnected
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun closeConnection() {
+        Log.d("BLE_DEBUG", "Очистка ресурсов (close). GATT-клиент уничтожается.")
         runCatching { bluetoothGatt?.close() }
         bluetoothGatt = null
     }

@@ -28,7 +28,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.cardioproject.anthrodiary.presentation.AnthroDiaryRoute
 import com.example.cardioproject.core.navigation.Route
 import com.example.cardioproject.core.navigation.TopLevelBackStack
-import com.example.cardioproject.presentation.HeartRateMainScreen
+import com.example.cardioproject.workout.presentation.screen.HeartRateMainScreen
 import com.example.cardioproject.workout.presentation.screen.WorkoutDetailsScreen
 import com.example.cardioproject.workout.presentation.screen.WorkoutHistoryScreen
 import com.example.cardioproject.settings.presentation.screen.SettingsRoute

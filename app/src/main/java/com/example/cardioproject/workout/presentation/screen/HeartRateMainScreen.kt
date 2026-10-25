@@ -1,4 +1,4 @@
-package com.example.cardioproject.presentation
+package com.example.cardioproject.workout.presentation.screen
 
 
 import androidx.compose.foundation.background
@@ -30,6 +30,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +42,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cardioproject.workout.presentation.viewmodel.MainScreenViewModel
+import org.koin.androidx.compose.koinViewModel
 
 // Палитра — только те значения, которые нужны Главному экрану
 private val ScreenBackground = Color(0xFFF3F3F3)
@@ -54,14 +59,13 @@ private val AccentPurple = Color(0xFF6750A4)
 
 @Composable
 fun HeartRateMainScreen(
-    heartRate: Int = 190,
-    deviceName: String = "Coospo HW9",
-    batteryPercent: Int = 31,
-    isConnected: Boolean = true,
     onSettingsClick: () -> Unit = {},
     onAddMeasurementsClick: () -> Unit = {},
     onStartWorkoutClick: () -> Unit = {}
 ) {
+    val viewModel: MainScreenViewModel = koinViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -75,10 +79,13 @@ fun HeartRateMainScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            BatteryIndicator(percent = batteryPercent)
+            BatteryIndicator(percent = state.deviceBattery)
 
             Text(
-                text = if (isConnected) "Подключено\n• $deviceName" else "Нет подключения",
+                text = if (state.isDeviceConnected)
+                    "Подключено\n• ${state.deviceName ?: "Неизвестное устройство"}"
+                else
+                    "Нет подключения",
                 color = TextPrimary,
                 fontSize = 16.sp,
                 lineHeight = 19.sp,
@@ -115,7 +122,7 @@ fun HeartRateMainScreen(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "$heartRate",
+                    text = "${state.currentBpm ?: "–"}",
                     fontSize = 180.sp,
                     lineHeight = 218.sp,
                     fontWeight = FontWeight.Normal,
@@ -188,7 +195,7 @@ fun HeartRateMainScreen(
 }
 
 @Composable
-private fun BatteryIndicator(percent: Int, modifier: Modifier = Modifier) {
+private fun BatteryIndicator(percent: Int?, modifier: Modifier = Modifier) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         Box(
             modifier = Modifier
@@ -205,7 +212,7 @@ private fun BatteryIndicator(percent: Int, modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.width(5.dp))
         Text(
-            text = "$percent%",
+            text = if (percent != null) "$percent%" else "-%",
             color = TextPrimary,
             fontSize = 18.sp,
             lineHeight = 22.sp,

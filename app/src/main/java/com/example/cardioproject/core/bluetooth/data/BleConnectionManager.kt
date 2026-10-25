@@ -31,6 +31,9 @@ class BleConnectionManager(
     private val _heartRateBpm = MutableSharedFlow<Int>(extraBufferCapacity = 64)
     val heartRateBpm: SharedFlow<Int> = _heartRateBpm.asSharedFlow()
 
+    private val _batteryLevel = MutableStateFlow<Int?>(null)
+    val batteryLevel = _batteryLevel.asStateFlow()
+
     private val gattCallback = object : BluetoothGattCallback() {
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
@@ -39,8 +42,7 @@ class BleConnectionManager(
 
             if (status != BluetoothGatt.GATT_SUCCESS) {
                 Log.e("BLE_DEBUG", "GATT error: status=$status")
-                gatt?.close()
-                bluetoothGatt = null
+                closeConnection()
                 _connectionState.value = ConnectionState.Error(status, "error occurred with status: $status")
                 return
             }
@@ -60,7 +62,7 @@ class BleConnectionManager(
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     Log.d("BLE_DEBUG", "ConnectionState = Disconnected")
                     _connectionState.value = ConnectionState.Disconnected
-                    gatt?.close()
+                    closeConnection()
                 }
 
                 BluetoothProfile.STATE_DISCONNECTING -> {
@@ -106,7 +108,39 @@ class BleConnectionManager(
         ) {
             super.onDescriptorWrite(gatt, descriptor, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.d("BLE_DEBUG", "Подписка на пульс оформлена. Запрашиваем батарею.")
+                val batteryService = gatt?.getService(BleConstants.BATTERY_SERVICE_UUID)
+                val batteryChar = batteryService?.getCharacteristic(BleConstants.BATTERY_CHARACTERISTIC_UUID)
 
+                if (batteryChar != null) {
+                    try {
+                        gatt.readCharacteristic(batteryChar)
+                    } catch (e: SecurityException) {
+                        Log.e("BLE_DEBUG", "Нет прав для чтения батареи", e)
+                    }
+                } else {
+                    Log.d("BLE_DEBUG", "Датчик не поддерживает передачу уровня заряда")
+                }
+            }
+        }
+
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray,
+            status: Int
+        ) {
+            super.onCharacteristicRead(gatt, characteristic, value, status)
+            handleBatteryRead(characteristic, value, status)
+        }
+
+        private fun handleBatteryRead(characteristic: BluetoothGattCharacteristic, value: ByteArray, status: Int) {
+            if (status == BluetoothGatt.GATT_SUCCESS && characteristic.uuid == BleConstants.BATTERY_CHARACTERISTIC_UUID) {
+                if (value.isNotEmpty()) {
+                    val battery = value[0].toInt() and 0xFF
+                    Log.d("BLE_DEBUG", "Заряд батареи успешно прочитан: $battery%")
+                    _batteryLevel.value = battery
+                }
             }
         }
     }

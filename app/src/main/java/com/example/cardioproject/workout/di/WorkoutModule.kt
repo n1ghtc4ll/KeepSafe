@@ -27,7 +27,7 @@ val workoutModule = module {
             startTimerUseCase = get(),
             workoutRepository = get(),
             settingsRepository = get(),
-            heartRateDevice = get()
+            bleConnectionManager = get()
         )
     }
 

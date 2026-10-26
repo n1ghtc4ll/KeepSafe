@@ -1,8 +1,10 @@
 package com.example.cardioproject.workout.presentation.viewmodel
 
+import android.Manifest
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cardioproject.core.bluetooth.domain.HeartRateDevice
+import com.example.cardioproject.core.bluetooth.data.BleConnectionManager
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
 import com.example.cardioproject.workout.domain.model.WorkoutPhase
 import com.example.cardioproject.workout.domain.model.WorkoutSession
@@ -18,12 +20,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 class ActiveWorkoutViewModel(
     private val startTimerUseCase: StartWorkoutTimerUseCase,
     private val workoutRepository: WorkoutSessionRepository,
     private val settingsRepository: SettingsRepository,
-    private val heartRateDevice: HeartRateDevice
+    private val bleConnectionManager: BleConnectionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ActiveWorkoutUiState())
@@ -37,7 +40,7 @@ class ActiveWorkoutViewModel(
 
     init {
         viewModelScope.launch {
-            heartRateDevice.heartRate.collect { bpm ->
+            bleConnectionManager.heartRateBpm.collect { bpm ->
                 if (bpm > 0) {
                     onNewHeartRateReceived(bpm)
                 }
@@ -54,8 +57,6 @@ class ActiveWorkoutViewModel(
                 _uiState.update { it.copy(hrZones = trainingSettings.heartRateZones) }
             }
         }
-
-        startHeartRateSimulation()
 
         if (settings.isTabataEnabled && settings.tabataSetup != null) {
             timerJob = viewModelScope.launch {
@@ -77,7 +78,7 @@ class ActiveWorkoutViewModel(
             timerJob = viewModelScope.launch {
                 var elapsed = 0
                 while (true) {
-                    delay(1000)
+                    delay(1000.milliseconds)
                     elapsed++
                     _uiState.update { it.copy(
                         currentPhase = WorkoutPhase.WORKOUT,
@@ -89,24 +90,6 @@ class ActiveWorkoutViewModel(
         }
     }
 
-    // !!!! Имитация пульса для теста до интеграции с BT !!!!
-    private fun startHeartRateSimulation() {
-        heartRateJob = viewModelScope.launch {
-            while (true) {
-                val fakeBpm = Random.nextInt(110, 165)
-                // Сохраняем в локальный список для базы данных
-                heartRateHistory.add(fakeBpm)
-                // ОБЯЗАТЕЛЬНО обновляем список внутри ActiveWorkoutUiState
-                _uiState.update { state ->
-                    state.copy(
-                        currentHeartRate = fakeBpm,
-                        heartRateHistory = state.heartRateHistory + fakeBpm
-                    )
-                }
-                delay(1000)
-            }
-        }
-    }
 
     fun onNewHeartRateReceived(bpm: Int) {
         heartRateHistory.add(bpm)
@@ -149,8 +132,9 @@ class ActiveWorkoutViewModel(
         }
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun onCleared() {
         super.onCleared()
-        heartRateDevice.disconnect()
+        bleConnectionManager.disconnect()
     }
 }

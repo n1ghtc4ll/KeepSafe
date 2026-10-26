@@ -8,6 +8,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import kotlin.time.Duration.Companion.milliseconds
 
 class StartWorkoutTimerUseCase {
     operator fun invoke(setup: TabataSetup): Flow<WorkoutTimerState> = flow {
@@ -76,7 +77,7 @@ class StartWorkoutTimerUseCase {
                     currentTotal
                 )
             )
-            delay(1000L)
+            delay(1000L.milliseconds)
             timeRemaining--
             currentTotal++
         }

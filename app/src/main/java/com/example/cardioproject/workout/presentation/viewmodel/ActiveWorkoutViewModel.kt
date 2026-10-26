@@ -38,23 +38,23 @@ class ActiveWorkoutViewModel(
     private var currentSettings: WorkoutSettings? = null
     private var sessionStartTime: Long = 0
 
-    init {
-        viewModelScope.launch {
-            bleConnectionManager.heartRateBpm.collect { bpm ->
-                if (bpm > 0) {
-                    onNewHeartRateReceived(bpm)
-                }
-            }
-        }
-    }
-
     fun startWorkout(settings: WorkoutSettings) {
+        if (heartRateJob?.isActive == true) return
+
         currentSettings = settings
         sessionStartTime = System.currentTimeMillis()
 
         viewModelScope.launch {
             settingsRepository.observeSettings().collect { trainingSettings ->
                 _uiState.update { it.copy(hrZones = trainingSettings.heartRateZones) }
+            }
+        }
+
+        heartRateJob = viewModelScope.launch {
+            bleConnectionManager.heartRateBpm.collect { bpm ->
+                if (bpm > 0) {
+                    onNewHeartRateReceived(bpm)
+                }
             }
         }
 

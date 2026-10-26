@@ -45,14 +45,16 @@ class SettingsViewModel(
         viewModelScope.launch {
             combine(
                 settingsRepository.observeSettings(),
-                bleConnectionManager.connectionState
-            ) { settings, connectionState ->
-                settings to connectionState
-            }.collect { (settings, connectionState) ->
+                bleConnectionManager.connectionState,
+                bleConnectionManager.batteryLevel
+            ) { settings, connectionState, battery ->
+                Triple(settings, connectionState, battery)
+            }.collect { (settings, connectionState, battery) ->
 
                 latestSettings = settings
                 val isConnected = connectionState is ConnectionState.Connected
                 val isConnecting = connectionState is ConnectionState.Connecting
+                val activeBattery = if (isConnected) battery else null
 
                 _uiState.update { currentState ->
                     currentState.copy(
@@ -60,7 +62,7 @@ class SettingsViewModel(
                             "${settings.device.name} (Подключение...)"
                         else
                             settings.device.name,
-                        deviceBattery = settings.device.batteryLevel,
+                        deviceBattery = activeBattery,
                         isDeviceConnected = isConnected || isConnecting,
                         phaseSoundEnabled = settings.phaseSoundEnabled,
                         signalVolume = settings.signalVolume,

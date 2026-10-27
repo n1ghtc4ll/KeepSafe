@@ -8,6 +8,8 @@ import com.example.cardioproject.core.common.data.dao.TabataProfileDao
 import com.example.cardioproject.core.common.data.dao.TagDao
 import com.example.cardioproject.core.common.data.entity.TabataProfileEntity
 import com.example.cardioproject.core.common.data.entity.TagEntity
+import com.example.cardioproject.settings.data.local.dao.SavedDevicesDao
+import com.example.cardioproject.settings.data.local.entity.SavedDeviceEntity
 import com.example.cardioproject.workout.data.dao.WorkoutSessionDao
 import com.example.cardioproject.workout.data.entity.WorkoutSessionDbEntity
 
@@ -15,8 +17,9 @@ import com.example.cardioproject.workout.data.entity.WorkoutSessionDbEntity
     entities = [TagEntity::class,
         WorkoutSessionDbEntity::class,
         TabataProfileEntity::class,
-        AnthroMeasurementEntity::class],
-    version = 3,
+        AnthroMeasurementEntity::class,
+        SavedDeviceEntity::class],
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase: RoomDatabase() {
@@ -24,4 +27,5 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun workoutSessionDao(): WorkoutSessionDao
     abstract fun tabataProfileDao(): TabataProfileDao
     abstract fun anthroMeasurementDao(): AnthroMeasurementDao
+    abstract fun savedDevicesDao(): SavedDevicesDao
 }

@@ -4,6 +4,7 @@ import androidx.datastore.preferences.core.Preferences
 import com.example.cardioproject.core.common.domain.model.Tag
 import com.example.cardioproject.settings.data.local.SettingsPreferencesDataSource
 import com.example.cardioproject.settings.data.local.dto.HeartRateZoneDto
+import com.example.cardioproject.settings.data.local.entity.SavedDeviceEntity
 import com.example.cardioproject.settings.domain.model.DeviceInfo
 import com.example.cardioproject.settings.domain.model.HeartRateZone
 import com.example.cardioproject.settings.domain.model.TrainingSettings
@@ -15,15 +16,22 @@ fun WorkoutTag.toDto() = WorkoutTagDto(id = id, name = name, isEditable = isEdit
 fun HeartRateZoneDto.toDomain() = HeartRateZone(index = index, label = label, lowerBpm = lowerBpm, upperBpm = upperBpm)
 fun HeartRateZone.toDto() = HeartRateZoneDto(index = index, label = label, lowerBpm = lowerBpm, upperBpm = upperBpm)
 
+fun DeviceInfo.toEntity() = SavedDeviceEntity(
+    macAddress = macAddress,
+    name = name
+)
+
+fun SavedDeviceEntity.toDomain() = DeviceInfo(
+    name = name,
+    macAddress = name,
+    batteryLevel = null,
+    isConnected = false
+)
+
 fun Preferences.toTrainingSettings(
     source: SettingsPreferencesDataSource,
     tagsList: List<Tag>
 ): TrainingSettings = TrainingSettings(
-    device = DeviceInfo(
-        name = source.deviceName(this),
-        batteryLevel = source.deviceBattery(this),
-        isConnected = source.deviceConnected(this)
-    ),
     phaseSoundEnabled = source.phaseSoundEnabled(this),
     signalVolume = source.signalVolume(this),
     tags = tagsList,

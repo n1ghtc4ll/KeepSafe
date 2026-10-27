@@ -1,6 +1,8 @@
 package com.example.cardioproject.settings.di
 
+import com.example.cardioproject.core.common.data.db.AppDatabase
 import com.example.cardioproject.settings.data.local.SettingsPreferencesDataSource
+import com.example.cardioproject.settings.data.local.dao.SavedDevicesDao
 import com.example.cardioproject.settings.data.repository.SettingsRepositoryImpl
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
 import com.example.cardioproject.settings.domain.usecase.AutoCalculateHeartRateZonesUseCase
@@ -25,8 +27,9 @@ import org.koin.dsl.module
 val settingsModule = module {
 
     single { SettingsPreferencesDataSource(context = get()) }
+    single<SettingsRepository> { SettingsRepositoryImpl(get(), get(), get(), get()) }
 
-    single<SettingsRepository> { SettingsRepositoryImpl(get(), get(), get()) }
+    single { get<AppDatabase>().savedDevicesDao() }
 
     factory { UpdateSignalVolumeUseCase(get()) }
     factory { TagInteractor(get()) }

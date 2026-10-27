@@ -1,15 +1,17 @@
 package com.example.cardioproject.settings.data.repository
 
-import androidx.compose.ui.graphics.Color
+import android.net.MacAddress
 import com.example.cardioproject.core.common.data.dao.TabataProfileDao
 import com.example.cardioproject.core.common.data.dao.TagDao
-import com.example.cardioproject.core.common.data.entity.TagEntity
 import com.example.cardioproject.core.common.data.mapper.toDomain
 import com.example.cardioproject.core.common.data.mapper.toEntity
 import com.example.cardioproject.core.common.domain.model.TabataProfile
 import com.example.cardioproject.core.common.domain.model.Tag
 import com.example.cardioproject.settings.data.local.SettingsPreferencesDataSource
+import com.example.cardioproject.settings.data.local.dao.SavedDevicesDao
+import com.example.cardioproject.settings.data.mapper.toDomain
 import com.example.cardioproject.settings.data.mapper.toDto
+import com.example.cardioproject.settings.data.mapper.toEntity
 import com.example.cardioproject.settings.data.mapper.toTrainingSettings
 import com.example.cardioproject.settings.domain.model.DeviceInfo
 import com.example.cardioproject.settings.domain.model.HeartRateZone
@@ -18,34 +20,53 @@ import com.example.cardioproject.settings.domain.model.UserProfile
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class SettingsRepositoryImpl(
     private val dataSource: SettingsPreferencesDataSource,
     private val tagDao: TagDao,
-    private val tabataProfileDao: TabataProfileDao
+    private val tabataProfileDao: TabataProfileDao,
+    private val savedDevicesDao: SavedDevicesDao
 ) : SettingsRepository {
 
     override fun observeSettings(): Flow<TrainingSettings> {
         return combine(
             dataSource.preferencesFlow,
-            tagDao.getAllTags()// Замени на свой метод из TagDao
+            tagDao.getAllTags()
         ) { prefs, tagEntities ->
 
-            // Маппим Entity из БД в доменную модель настроек
             val domainTags = tagEntities.map {
                 it.toDomain()
             }
 
             prefs.toTrainingSettings(dataSource, domainTags)
         }
-
-        //dataSource.preferencesFlow.map { prefs -> prefs.toTrainingSettings(dataSource) }
     }
 
-    override suspend fun updateDeviceInfo(device: DeviceInfo) {
-        dataSource.updateDeviceInfo(device.name, device.macAddress, device.batteryLevel, device.isConnected)
+    override fun getDevices(): Flow<List<DeviceInfo>> {
+        return savedDevicesDao.getDevices().map {
+            it.map {
+                entity -> entity.toDomain()
+            }
+        }
+    }
+
+    override fun getSelectedDevice(): Flow<DeviceInfo?> {
+        return savedDevicesDao.getSelectedDevice().map {
+            it?.toDomain()
+        }
+    }
+
+    override suspend fun insertDevice(device: DeviceInfo) {
+        savedDevicesDao.insertDevice(device.toEntity())
+    }
+
+    override suspend fun deleteDevice(macAddress: String) {
+        savedDevicesDao.deleteDevice(macAddress)
+    }
+
+    override suspend fun selectDevice(macAddress: String) {
+        savedDevicesDao.selectDevice(macAddress)
     }
 
     override suspend fun updatePhaseSoundEnabled(enabled: Boolean) {
@@ -99,7 +120,6 @@ class SettingsRepositoryImpl(
     }
 
     override suspend fun deleteTabataProfile(id: String) {
-        // Убедись, что добавил метод deleteTabataProfileById(id: String) в свой TabataProfileDao!
         tabataProfileDao.deleteTabataProfileById(id)
     }
 }

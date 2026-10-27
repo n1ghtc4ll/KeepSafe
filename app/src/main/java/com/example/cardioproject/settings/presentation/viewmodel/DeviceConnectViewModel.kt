@@ -57,7 +57,7 @@ class DeviceConnectViewModel(
         viewModelScope.launch {
             val currentDevice = settingsRepository.observeSettings().first().device
             if (currentDevice.macAddress.isNotBlank() && currentDevice.isConnected != isConnected) {
-                settingsRepository.updateDeviceInfo(currentDevice.copy(isConnected = isConnected))
+                settingsRepository.selectDevice(currentDevice.copy(isConnected = isConnected))
             }
         }
     }
@@ -99,7 +99,7 @@ class DeviceConnectViewModel(
             scanJob = null
             _isScanning.value = false
 
-            settingsRepository.updateDeviceInfo(device)
+            settingsRepository.selectDevice(device)
 
             delay(150.milliseconds)
             bleConnectionManager.connect(device.macAddress)

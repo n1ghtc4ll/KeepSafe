@@ -12,12 +12,18 @@ import kotlinx.coroutines.flow.Flow
  * Контракт хранения настроек тренировки. Реализация — в data-слое (SettingsRepositoryImpl).
  *
  * Важно: этот репозиторий НЕ управляет Bluetooth-подключением — это зона ответственности
- * отдельного BLE-модуля. Сюда только приходит [updateDeviceInfo] с последним известным
+ * отдельного BLE-модуля. Сюда только приходит [selectDevice] с последним известным
  * состоянием устройства (имя/заряд/статус подключения).
  */
 interface SettingsRepository {
     fun observeSettings(): Flow<TrainingSettings>
-    suspend fun updateDeviceInfo(device: DeviceInfo)
+
+    fun getDevices(): Flow<List<DeviceInfo>>
+    fun getSelectedDevice(): Flow<DeviceInfo?>
+    suspend fun insertDevice(device: DeviceInfo)
+    suspend fun selectDevice(macAddress: String)
+    suspend fun deleteDevice(macAddress: String)
+
     suspend fun updatePhaseSoundEnabled(enabled: Boolean)
     suspend fun updateSignalVolume(volume: Float)
     suspend fun updateProfile(profile: UserProfile)

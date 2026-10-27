@@ -26,10 +26,10 @@ class SettingsPreferencesDataSource(
     private val json = Json { ignoreUnknownKeys = true }
 
     private object Keys {
-        val DEVICE_NAME = stringPreferencesKey("device_name")
+/*        val DEVICE_NAME = stringPreferencesKey("device_name")
         val DEVICE_MAC = stringPreferencesKey("device_mac")
         val DEVICE_BATTERY = intPreferencesKey("device_battery")
-        val DEVICE_CONNECTED = booleanPreferencesKey("device_connected")
+        val DEVICE_CONNECTED = booleanPreferencesKey("device_connected")*/
 
         val PHASE_SOUND_ENABLED = booleanPreferencesKey("phase_sound_enabled")
         val SIGNAL_VOLUME = floatPreferencesKey("signal_volume")
@@ -46,14 +46,16 @@ class SettingsPreferencesDataSource(
 
     val preferencesFlow: Flow<Preferences> = context.trainingSettingsDataStore.data
 
-    suspend fun updateDeviceInfo(name: String, macAddress: String, batteryLevel: Int, isConnected: Boolean) {
+/*
+    suspend fun updateDeviceInfo(name: String, macAddress: String, batteryLevel: Int?, isConnected: Boolean) {
         context.trainingSettingsDataStore.edit { prefs ->
             prefs[Keys.DEVICE_NAME] = name
             prefs[Keys.DEVICE_MAC] = macAddress
-            prefs[Keys.DEVICE_BATTERY] = batteryLevel
+            prefs[Keys.DEVICE_BATTERY] = batteryLevel ?: 0
             prefs[Keys.DEVICE_CONNECTED] = isConnected
         }
     }
+*/
 
     suspend fun updatePhaseSoundEnabled(enabled: Boolean) {
         context.trainingSettingsDataStore.edit { prefs -> prefs[Keys.PHASE_SOUND_ENABLED] = enabled }
@@ -87,10 +89,10 @@ class SettingsPreferencesDataSource(
         context.trainingSettingsDataStore.edit { prefs -> prefs[Keys.KEEP_SCREEN_ON_ENABLED] = enabled }
     }
 
-    fun deviceName(prefs: Preferences) = prefs[Keys.DEVICE_NAME] ?: ""
+/*    fun deviceName(prefs: Preferences) = prefs[Keys.DEVICE_NAME] ?: ""
     fun deviceMac(prefs: Preferences): String = prefs[Keys.DEVICE_MAC] ?: ""
     fun deviceBattery(prefs: Preferences) = prefs[Keys.DEVICE_BATTERY] ?: 0
-    fun deviceConnected(prefs: Preferences) = prefs[Keys.DEVICE_CONNECTED] ?: false
+    fun deviceConnected(prefs: Preferences) = prefs[Keys.DEVICE_CONNECTED] ?: false*/
 
     fun phaseSoundEnabled(prefs: Preferences) = prefs[Keys.PHASE_SOUND_ENABLED] ?: true
     fun signalVolume(prefs: Preferences) = prefs[Keys.SIGNAL_VOLUME] ?: 0.6f

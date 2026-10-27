@@ -11,7 +11,7 @@ import kotlin.String
 data class DeviceInfo(
     val name: String,
     val macAddress: String = "",
-    val batteryLevel: Int,
+    val batteryLevel: Int?,
     val isConnected: Boolean
 ) {
     companion object {
@@ -51,7 +51,6 @@ data class UserProfile(
  * маппится в SettingsUiState для отображения на экране.
  */
 data class TrainingSettings(
-    val device: DeviceInfo = DeviceInfo.Unknown,
     val phaseSoundEnabled: Boolean = true,
     val signalVolume: Float = 0.6f,
     val tags: List<Tag> = emptyList(),

@@ -7,8 +7,6 @@ import com.example.cardioproject.anthrodiary.domain.repository.AnthroDiaryReposi
 import com.example.cardioproject.core.common.data.db.AppDatabase
 import com.example.cardioproject.core.navigation.Route
 import com.example.cardioproject.core.navigation.TopLevelBackStack
-import com.example.cardioproject.settings.data.repository.SettingsRepositoryImpl
-import com.example.cardioproject.settings.domain.repository.SettingsRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -29,6 +27,5 @@ val mainModule = module {
     single { get<AppDatabase>().tabataProfileDao() }
     single { get<AppDatabase>().anthroMeasurementDao() }
 
-    single<SettingsRepository> { SettingsRepositoryImpl(get(), get(), get()) }
     single<AnthroDiaryRepository> { AnthroDiaryRepositoryImpl(dao = get()) }
 }

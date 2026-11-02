@@ -62,6 +62,18 @@ import com.example.cardioproject.workout.domain.model.WorkoutSettings
 import com.example.cardioproject.workout.presentation.model.WorkoutSettingsUiState
 import com.example.cardioproject.workout.presentation.viewmodel.WorkoutSettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.runtime.withFrameNanos
 
 private val SettingsBackground = Color(0xFFFFFFFF)
 private val TextPrimary = Color(0xFF000000)
@@ -116,7 +128,7 @@ fun WorkoutSettingsScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = 24.dp, horizontal = 16.dp),
+                .padding(vertical = 16.dp, horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -161,7 +173,7 @@ fun WorkoutSettingsScreenContent(
                 onItemSelected = { onTagSelect(it) }
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -241,6 +253,11 @@ fun WorkoutSettingsScreenContent(
                         is TabataSetup.Custom -> setup.relaxTimeSec
                         null -> 0
                     }
+                    val breakValue = when (setup) {
+                        is TabataSetup.Preset -> setup.profile.breakTimeSec
+                        is TabataSetup.Custom -> setup.breakTimeSec
+                        null -> 0
+                    }
                     val coolDownValue = when (setup) {
                         is TabataSetup.Preset -> setup.profile.coolDownTimeSec
                         is TabataSetup.Custom -> setup.coolDownTimeSec
@@ -277,7 +294,13 @@ fun WorkoutSettingsScreenContent(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     EditableTabataRow(
-                        label = "Перезарядка", value = coolDownValue, isReadOnly = isReadOnly, showIcon = true,
+                        label = "Перезарядка", value = breakValue, isReadOnly = isReadOnly, showIcon = true,
+                        onValueChange = { onCustomParamChange("break", it) }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    EditableTabataRow(
+                        label = "Заминка", value = coolDownValue, isReadOnly = isReadOnly, showIcon = true,
                         onValueChange = { onCustomParamChange("coolDown", it) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -289,7 +312,7 @@ fun WorkoutSettingsScreenContent(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Button(
                 onClick = onStartClick,
@@ -313,26 +336,48 @@ fun WorkoutSettingsScreenContent(
 }
 
 @Composable
-fun LabelTextField(label: String, value: String, onValueChange: (String) -> Unit) {
+fun LabelTextField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit
+) {
     Row(
         modifier = Modifier
-            .height(44.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .height(44.dp),
         verticalAlignment = Alignment.CenterVertically
-    )
-    {
-        Text(text = label, fontSize = 20.sp, modifier = Modifier.weight(2f))
+    ) {
+        Text(
+            text = label,
+            fontSize = 20.sp,
+            modifier = Modifier.weight(2f)
+        )
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color(0xFFEEEEEE), shape = RoundedCornerShape(6.dp))
                 .weight(4f)
-        )
+                .height(44.dp)
+                .background(
+                    color = Color(0xFFEEEEEE),
+                    shape = RoundedCornerShape(6.dp)
+                )
+                .padding(horizontal = 12.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                textStyle = TextStyle(
+                    fontSize = 16.sp,
+                    color = Color.Black
+                ),
+                cursorBrush = SolidColor(Color.Black),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
@@ -462,6 +507,9 @@ fun ProfileDropdownMenu(
     }
 }
 
+
+
+
 @Composable
 private fun EditableTabataRow(
     label: String,
@@ -475,22 +523,28 @@ private fun EditableTabataRow(
     var singleText by remember { mutableStateOf("") }
     var singleFocused by remember { mutableStateOf(false) }
 
-    var mText by remember { mutableStateOf("00") }
-    var sText by remember { mutableStateOf("00") }
+    var mText by remember { mutableStateOf(TextFieldValue("00")) }
+    var sText by remember { mutableStateOf(TextFieldValue("00")) }
+
     var mFocused by remember { mutableStateOf(false) }
     var sFocused by remember { mutableStateOf(false) }
 
+    val mFocusRequester = remember { FocusRequester() }
+    val sFocusRequester = remember { FocusRequester() }
+
     LaunchedEffect(value, isReadOnly) {
         if (isTimeField) {
-            val m = value / 60
-            val s = value % 60
+            val minutes = value / 60
+            val seconds = value % 60
+
             if (isReadOnly || (!mFocused && !sFocused)) {
-                mText = String.format("%02d", m)
-                sText = String.format("%02d", s)
+                mText = TextFieldValue(String.format("%02d", minutes))
+                sText = TextFieldValue(String.format("%02d", seconds))
             }
         } else {
             if (isReadOnly || !singleFocused) {
-                singleText = if (value == 0 && !isReadOnly) "" else value.toString()
+                singleText =
+                    if (value == 0 && !isReadOnly) "" else value.toString()
             }
         }
     }
@@ -521,8 +575,14 @@ private fun EditableTabataRow(
 
             Box(
                 modifier = Modifier
-                    .size(width = if (isTimeField) 100.dp else 64.dp, height = 30.dp)
-                    .background(ElementBackgroundWhite, RoundedCornerShape(6.dp)),
+                    .size(
+                        width = if (isTimeField) 100.dp else 64.dp,
+                        height = 30.dp
+                    )
+                    .background(
+                        ElementBackgroundWhite,
+                        RoundedCornerShape(6.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 if (isTimeField) {
@@ -532,15 +592,18 @@ private fun EditableTabataRow(
                     ) {
                         BasicTextField(
                             value = mText,
-                            onValueChange = { newM ->
+                            onValueChange = { newValue ->
                                 if (!isReadOnly) {
-                                    val digits = newM.filter { it.isDigit() }
-                                    if (digits.length <= 3) {
-                                        mText = digits
-                                        val m = digits.toIntOrNull() ?: 0
-                                        val s = sText.toIntOrNull() ?: 0
-                                        onValueChange(m * 60 + s)
-                                    }
+                                    val digits = newValue.text.filter { it.isDigit() }.take(3)
+                                    mText = newValue.copy(
+                                        text = digits,
+                                        selection = TextRange(digits.length)
+                                    )
+
+                                    val minutes = digits.toIntOrNull() ?: 0
+                                    val seconds = sText.text.toIntOrNull() ?: 0
+
+                                    onValueChange(minutes * 60 + seconds)
                                 }
                             },
                             readOnly = isReadOnly,
@@ -549,37 +612,70 @@ private fun EditableTabataRow(
                                 color = if (isReadOnly) TextPrimary else AccentPurple,
                                 textAlign = TextAlign.Center
                             ),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.NumberPassword
+                            ),
                             singleLine = true,
                             modifier = Modifier
                                 .width(36.dp)
-                                .onFocusChanged { focusState ->
-                                    mFocused = focusState.isFocused
-                                    if (!focusState.isFocused && !isReadOnly) {
-                                        val m = mText.toIntOrNull() ?: 0
-                                        mText = String.format("%02d", m)
+                                .focusRequester(mFocusRequester)
+                                .onFocusChanged {
+                                    val wasFocused = mFocused
+                                    mFocused = it.isFocused
+
+                                    if (wasFocused && !it.isFocused && !isReadOnly) {
+                                        val minutes = mText.text.toIntOrNull() ?: 0
+                                        mText = TextFieldValue(
+                                            String.format("%02d", minutes)
+                                        )
+                                    }
+                                }
+                                .pointerInput(isReadOnly) {
+                                    if (!isReadOnly) {
+                                        while (true) {
+                                            val tapped = awaitPointerEventScope {
+                                                awaitFirstDown(pass = PointerEventPass.Initial)
+
+                                                waitForUpOrCancellation(
+                                                    pass = PointerEventPass.Initial
+                                                ) != null
+                                            }
+
+                                            if (tapped) {
+                                                mFocusRequester.requestFocus()
+
+                                                withFrameNanos { }
+
+                                                mText = mText.copy(
+                                                    selection = TextRange(0, mText.text.length)
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                         )
 
-                        Text(":", fontSize = 16.sp, color = if (isReadOnly) TextPrimary else AccentPurple)
+                        Text(
+                            ":",
+                            fontSize = 16.sp,
+                            color = if (isReadOnly) TextPrimary else AccentPurple
+                        )
 
                         BasicTextField(
                             value = sText,
-                            onValueChange = { newS ->
+                            onValueChange = { newValue ->
                                 if (!isReadOnly) {
-                                    val digits = newS.filter { it.isDigit() }
-                                    if (digits.length <= 2) {
-                                        var num = digits.toIntOrNull() ?: 0
-                                        if (num > 59) {
-                                            num = 59
-                                            sText = "59"
-                                        } else {
-                                            sText = digits
-                                        }
-                                        val m = mText.toIntOrNull() ?: 0
-                                        onValueChange(m * 60 + num)
-                                    }
+                                    val digits = newValue.text.filter { it.isDigit() }.take(2)
+                                    val seconds = (digits.toIntOrNull() ?: 0)
+                                        .coerceAtMost(59)
+
+                                    sText = newValue.copy(
+                                        text = digits,
+                                        selection = TextRange(digits.length)
+                                    )
+
+                                    val minutes = mText.text.toIntOrNull() ?: 0
+                                    onValueChange(minutes * 60 + seconds)
                                 }
                             },
                             readOnly = isReadOnly,
@@ -588,15 +684,46 @@ private fun EditableTabataRow(
                                 color = if (isReadOnly) TextPrimary else AccentPurple,
                                 textAlign = TextAlign.Center
                             ),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.NumberPassword
+                            ),
                             singleLine = true,
                             modifier = Modifier
                                 .width(28.dp)
-                                .onFocusChanged { focusState ->
-                                    sFocused = focusState.isFocused
-                                    if (!focusState.isFocused && !isReadOnly) {
-                                        val s = sText.toIntOrNull() ?: 0
-                                        sText = String.format("%02d", s)
+                                .focusRequester(sFocusRequester)
+                                .onFocusChanged {
+                                    val wasFocused = sFocused
+                                    sFocused = it.isFocused
+
+                                    if (wasFocused && !it.isFocused && !isReadOnly) {
+                                        val seconds = (sText.text.toIntOrNull() ?: 0)
+                                            .coerceAtMost(59)
+                                        sText = TextFieldValue(
+                                            String.format("%02d", seconds)
+                                        )
+                                    }
+                                }
+                                .pointerInput(isReadOnly) {
+                                    if (!isReadOnly) {
+                                        while (true) {
+                                            val tapped = awaitPointerEventScope {
+                                                awaitFirstDown(pass = PointerEventPass.Initial)
+
+                                                waitForUpOrCancellation(
+                                                    pass = PointerEventPass.Initial
+                                                ) != null
+                                            }
+
+                                            if (tapped) {
+                                                sFocusRequester.requestFocus()
+
+                                                withFrameNanos { }
+
+                                                sText = sText.copy(
+                                                    selection = TextRange(0, sText.text.length)
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                         )
@@ -619,17 +746,22 @@ private fun EditableTabataRow(
                             color = if (isReadOnly) TextPrimary else AccentPurple,
                             textAlign = TextAlign.Center
                         ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.NumberPassword
+                        ),
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .onFocusChanged { singleFocused = it.isFocused }
+                            .onFocusChanged {
+                                singleFocused = it.isFocused
+                            }
                     )
                 }
             }
         }
     }
 }
+
 
 @Preview(showBackground = true, backgroundColor = 0xFF2B2B2B)
 @Composable

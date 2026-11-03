@@ -3,16 +3,11 @@ package com.example.cardioproject.settings.presentation.screen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -34,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.example.cardioproject.core.ui.components.AppThemeTopBar
 import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
 import com.example.cardioproject.core.ui.theme.spacing
+import com.example.cardioproject.settings.presentation.model.DeviceInfoUi
 import java.util.UUID
 import com.example.cardioproject.settings.presentation.model.SettingsUiState
 import com.example.cardioproject.settings.presentation.model.TimerProfileUi
@@ -44,7 +40,7 @@ import com.example.cardioproject.settings.presentation.ui.components.GenderPicke
 import com.example.cardioproject.settings.presentation.ui.components.HeartRateZoneRow
 import com.example.cardioproject.settings.presentation.ui.components.LabeledInputRow
 import com.example.cardioproject.settings.presentation.ui.components.OutlinedFullWidthButton
-import com.example.cardioproject.settings.presentation.ui.components.SectionDivider
+import com.example.cardioproject.settings.presentation.ui.components.SavedDevicesCard
 import com.example.cardioproject.settings.presentation.ui.components.SectionTitle
 import com.example.cardioproject.settings.presentation.ui.components.TagInputDialog
 import com.example.cardioproject.settings.presentation.ui.components.TagsFlowRow
@@ -64,6 +60,8 @@ fun SettingsScreen(
     onDeleteProfileClick: (TimerProfileUi) -> Unit = {},
     onDisconnectDevice: () -> Unit = {},
     onSearchDevices: () -> Unit = {},
+    onConnectSavedDevice: (DeviceInfoUi) -> Unit = {},
+    onDeleteSavedDevice: (DeviceInfoUi) -> Unit = {},
     onPhaseSoundToggle: (Boolean) -> Unit = {},
     onVolumeChange: (Float) -> Unit = {},
     onAddTag: (String, String) -> Unit = { _, _ -> },
@@ -106,10 +104,10 @@ fun SettingsScreen(
                     text = "Bluetooth-устройства",
 
                 ) {
-                    if (state.isDeviceConnected) {
+                    if (state.activeDevice != null) {
                         BluetoothDeviceRow(
-                            name = state.deviceName,
-                            battery = state.deviceBattery,
+                            name = state.activeDevice.name,
+                            battery = state.activeDevice.battery,
                             onDisconnect = onDisconnectDevice
                         )
                     } else {
@@ -118,6 +116,13 @@ fun SettingsScreen(
                             onClick = onSearchDevices
                         )
                     }
+
+                    SavedDevicesCard(
+                        devices = state.savedDevices,
+                        connectedAddress = state.activeDevice?.macAddress,
+                        onConnect = onConnectSavedDevice,
+                        onDelete = onDeleteSavedDevice
+                    )
                 }
             }
 
@@ -298,7 +303,22 @@ fun SettingsScreen(
 @Preview(showBackground = true, widthDp = 360, heightDp = 2000)
 @Composable
 private fun SettingsScreenPreview() {
-    var state by remember { mutableStateOf(SettingsUiState()) }
+    var state by remember {
+        mutableStateOf(
+            SettingsUiState(
+                savedDevices = listOf(
+                    DeviceInfoUi(
+                        macAddress = "",
+                        name = "device1"
+                    ),
+                    DeviceInfoUi(
+                        macAddress = "",
+                        name = "device2"
+                    )
+                )
+            )
+        )
+    }
     KeepSafeProjectTheme {
         SettingsScreen(
             state = state,

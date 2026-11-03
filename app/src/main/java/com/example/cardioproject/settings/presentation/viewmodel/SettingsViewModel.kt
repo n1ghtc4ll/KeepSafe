@@ -8,6 +8,7 @@ import com.example.cardioproject.core.bluetooth.data.BleConnectionManager
 import com.example.cardioproject.core.bluetooth.domain.ConnectionState
 import com.example.cardioproject.core.common.domain.model.TabataProfile
 import com.example.cardioproject.core.common.domain.model.Tag
+import com.example.cardioproject.settings.domain.model.DeviceInfo
 import com.example.cardioproject.settings.domain.model.HeartRateZone as DomainHeartRateZone
 import com.example.cardioproject.settings.domain.model.TrainingSettings
 import com.example.cardioproject.settings.domain.repository.SettingsRepository
@@ -15,13 +16,16 @@ import com.example.cardioproject.settings.domain.usecase.AutoCalculateHeartRateZ
 import com.example.cardioproject.settings.domain.usecase.TagInteractor
 import com.example.cardioproject.settings.domain.usecase.UpdateHeartRateZoneUseCase
 import com.example.cardioproject.settings.domain.usecase.UpdateSignalVolumeUseCase
+import com.example.cardioproject.settings.presentation.model.ActiveDeviceUi
 import com.example.cardioproject.settings.presentation.model.HeartRateZone
+import com.example.cardioproject.settings.presentation.model.DeviceInfoUi
 import com.example.cardioproject.settings.presentation.model.SettingsUiState
 import com.example.cardioproject.settings.presentation.model.TimerProfileUi
 import com.example.cardioproject.settings.presentation.model.WorkoutTag
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -45,25 +49,33 @@ class SettingsViewModel(
         viewModelScope.launch {
             combine(
                 settingsRepository.observeSettings(),
+                settingsRepository.getDevices(),
+                settingsRepository.getSelectedDevice(),
                 bleConnectionManager.connectionState,
                 bleConnectionManager.batteryLevel
-            ) { settings, connectionState, battery ->
-                Triple(settings, connectionState, battery)
-            }.collect { (settings, connectionState, battery) ->
-
+            ) { settings, savedDevices, selectedDevice, connectionState, battery ->
                 latestSettings = settings
                 val isConnected = connectionState is ConnectionState.Connected
                 val isConnecting = connectionState is ConnectionState.Connecting
                 val activeBattery = if (isConnected) battery else null
 
+                val currentActiveDevice =
+                    if (selectedDevice != null && (isConnected || isConnecting))
+                        ActiveDeviceUi(
+                            name =
+                                if (isConnecting)
+                                    "${selectedDevice.name} (Подключение...)"
+                                else
+                                    selectedDevice.name,
+                            macAddress = selectedDevice.macAddress,
+                            battery = activeBattery
+                        )
+                    else null
+
                 _uiState.update { currentState ->
                     currentState.copy(
-                        deviceName = if (isConnecting)
-                            "${settings.device.name} (Подключение...)"
-                        else
-                            settings.device.name,
-                        deviceBattery = activeBattery,
-                        isDeviceConnected = isConnected || isConnecting,
+                        savedDevices = savedDevices.map { it.toUi() },
+                        activeDevice = currentActiveDevice,
                         phaseSoundEnabled = settings.phaseSoundEnabled,
                         signalVolume = settings.signalVolume,
                         birthDate = settings.profile.birthDate,
@@ -74,7 +86,7 @@ class SettingsViewModel(
                         keepScreenOnEnabled = settings.keepScreenOnEnabled
                     )
                 }
-            }
+            }.collect()
         }
 
         // 2. Подписываемся на профили Табаты (Room)
@@ -90,6 +102,10 @@ class SettingsViewModel(
                 _uiState.update { it.copy(tags = tags.map(Tag::toUiTag)) }
             }
         }
+    }
+
+    fun onDeleteSavedDevice(device: DeviceInfoUi) {
+        viewModelScope.launch { settingsRepository.deleteDevice(device.macAddress) }
     }
 
     fun onPhaseSoundToggle(enabled: Boolean) {
@@ -201,4 +217,9 @@ private fun Tag.toUiTag() = WorkoutTag(
     name = this.name,
     color = this.color,
     editable = true
+)
+
+private fun DeviceInfo.toUi() = DeviceInfoUi(
+    macAddress = macAddress,
+    name = name
 )

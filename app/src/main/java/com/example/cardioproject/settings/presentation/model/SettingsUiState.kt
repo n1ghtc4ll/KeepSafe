@@ -2,6 +2,17 @@ package com.example.cardioproject.settings.presentation.model
 
 import java.util.UUID
 
+data class DeviceInfoUi(
+    val macAddress: String,
+    val name: String
+)
+
+data class ActiveDeviceUi(
+    val name: String,
+    val macAddress: String,
+    val battery: Int?
+)
+
 data class HeartRateZone(
     val label: String,
     var range: ClosedFloatingPointRange<Float>
@@ -20,9 +31,8 @@ data class WorkoutTag(
 )
 
 data class SettingsUiState(
-    val deviceName: String? = null,
-    val deviceBattery: Int? = null,
-    val isDeviceConnected: Boolean = true,
+    val savedDevices: List<DeviceInfoUi> = emptyList(),
+    val activeDevice: ActiveDeviceUi? = null,
     val phaseSoundEnabled: Boolean = true,
     val signalVolume: Float = 0.6f,
     val tags: List<WorkoutTag> = listOf(

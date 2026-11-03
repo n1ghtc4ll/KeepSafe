@@ -1,6 +1,7 @@
 package com.example.cardioproject.settings.data.repository
 
 import android.net.MacAddress
+import android.util.Log
 import com.example.cardioproject.core.common.data.dao.TabataProfileDao
 import com.example.cardioproject.core.common.data.dao.TagDao
 import com.example.cardioproject.core.common.data.mapper.toDomain

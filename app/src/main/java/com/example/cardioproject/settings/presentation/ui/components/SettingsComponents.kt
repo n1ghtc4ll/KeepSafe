@@ -1,5 +1,6 @@
 package com.example.cardioproject.settings.presentation.ui.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,9 +14,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.outlined.Bluetooth
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RangeSlider
@@ -26,15 +34,21 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardioproject.core.ui.theme.GraySurface
 import com.example.cardioproject.core.ui.theme.spacing
 import com.example.cardioproject.settings.presentation.model.HeartRateZone
+import com.example.cardioproject.settings.presentation.model.DeviceInfoUi
 
 @Composable
 fun SectionTitle(
@@ -92,6 +106,106 @@ fun BluetoothDeviceRow(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
             Text("Отключить")
+        }
+    }
+}
+
+@Composable
+fun SavedDevicesCard(
+    modifier: Modifier = Modifier,
+    devices: List<DeviceInfoUi>,
+    connectedAddress: String?,
+    onConnect: (DeviceInfoUi) -> Unit,
+    onDelete: (DeviceInfoUi) -> Unit
+) {
+    var expanded by remember { mutableStateOf(true) }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .animateContentSize()
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable {
+                    if (devices.isNotEmpty())
+                        expanded = !expanded
+                }
+                .padding(MaterialTheme.spacing.small)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Сохраненные устройства",
+                style = MaterialTheme.typography.labelMedium,
+            )
+
+            Icon(
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = "Развернуть",
+            )
+        }
+
+        if (expanded and devices.isNotEmpty()) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                ) {
+                devices.forEach { device ->
+                    SavedDeviceUnit(
+                        device = device,
+                        isConnected = device.macAddress == connectedAddress,
+                        onConnect = onConnect,
+                        onDelete = onDelete
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SavedDeviceUnit(
+    device: DeviceInfoUi,
+    isConnected: Boolean,
+    onConnect: (DeviceInfoUi) -> Unit,
+    onDelete: (DeviceInfoUi) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = MaterialTheme.spacing.small),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = device.name,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(1f)
+        )
+
+        IconButton(
+            onClick = { onConnect(device) },
+            enabled = !isConnected
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Bluetooth,
+                contentDescription = "Подключить"
+            )
+        }
+
+        IconButton(
+            onClick = { onDelete(device) },
+            enabled = !isConnected
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Delete,
+                contentDescription = "Удалить"
+            )
         }
     }
 }

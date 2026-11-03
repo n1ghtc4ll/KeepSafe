@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.cardioproject.settings.domain.model.DeviceInfo
+import com.example.cardioproject.settings.presentation.model.DeviceInfoUi
 import com.example.cardioproject.settings.presentation.viewmodel.DeviceConnectViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -76,10 +77,10 @@ fun DeviceScanBottomSheet(
 @Composable
 fun DeviceScanBottomSheetContent(
     modifier: Modifier = Modifier,
-    onDeviceClick: (DeviceInfo) -> Unit = { },
+    onDeviceClick: (DeviceInfoUi) -> Unit = { },
     onRetryClick: () -> Unit = { },
     onDismiss: () -> Unit = { },
-    devices: List<DeviceInfo>,
+    devices: List<DeviceInfoUi>,
     isScanning: Boolean
 ) {
     Column(modifier = modifier
@@ -161,7 +162,7 @@ fun DeviceScanBottomSheetContent(
 @Composable
 fun DeviceItem(
     modifier: Modifier = Modifier,
-    device: DeviceInfo,
+    device: DeviceInfoUi,
     onClick: () -> Unit
 ) {
     ListItem(
@@ -176,16 +177,12 @@ fun DeviceItem(
 fun DeviceScanBottomSheetPreview() {
     DeviceScanBottomSheetContent(
         devices = listOf(
-            DeviceInfo(
+            DeviceInfoUi(
                 name = "device0",
-                macAddress = "AA:AA:AA:AA:AA",
-                batteryLevel = 0,
-                isConnected = false),
-            DeviceInfo(
+                macAddress = "AA:AA:AA:AA:AA"),
+            DeviceInfoUi(
                 name = "device1",
-                macAddress = "BB:BB:BB:BB:BB",
-                batteryLevel = 0,
-                isConnected = false)
+                macAddress = "BB:BB:BB:BB:BB")
         ),
         isScanning = true
     )

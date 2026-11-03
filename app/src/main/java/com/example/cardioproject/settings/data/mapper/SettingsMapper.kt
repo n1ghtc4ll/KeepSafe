@@ -23,7 +23,7 @@ fun DeviceInfo.toEntity() = SavedDeviceEntity(
 
 fun SavedDeviceEntity.toDomain() = DeviceInfo(
     name = name,
-    macAddress = name,
+    macAddress = macAddress,
     batteryLevel = null,
     isConnected = false
 )

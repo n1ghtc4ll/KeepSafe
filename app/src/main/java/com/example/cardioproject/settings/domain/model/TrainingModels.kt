@@ -11,7 +11,7 @@ import kotlin.String
 data class DeviceInfo(
     val name: String,
     val macAddress: String = "",
-    val batteryLevel: Int?,
+    val batteryLevel: Int? = null,
     val isConnected: Boolean
 ) {
     companion object {

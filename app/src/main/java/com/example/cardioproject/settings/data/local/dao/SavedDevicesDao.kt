@@ -1,5 +1,6 @@
 package com.example.cardioproject.settings.data.local.dao
 
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy

@@ -86,6 +86,8 @@ fun SettingsRoute(
         state = state,
         onBackClick = onBackClick,
         onSearchDevices = ::onSearchDevicesClick,
+        onConnectSavedDevice = deviceViewModel::selectAndConnectDevice,
+        onDeleteSavedDevice = viewModel::onDeleteSavedDevice,
         onAddProfileClick = { onNavigateToProfileBuilder(null) },
         onEditProfileClick = { profile -> onNavigateToProfileBuilder(profile.id) },
         onDeleteProfileClick = viewModel::onDeleteProfile,

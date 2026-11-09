@@ -20,16 +20,17 @@ class MainScreenViewModel(
         bleConnectionManager.heartRateBpm.onStart { emit(0) },
         bleConnectionManager.connectionState,
         bleConnectionManager.batteryLevel,
-        //settingsRepository.observeSettings(),
+        settingsRepository.observeSettings(),
         settingsRepository.getSelectedDevice()
-    ) { bpm, connectionState, batteryLevel, selectedDevice ->
+    ) { bpm, connectionState, batteryLevel, settings, selectedDevice ->
         val isConnected = connectionState is ConnectionState.Connected
 
         MainScreenUiState(
             currentBpm = if (isConnected) bpm else null,
             deviceName = selectedDevice?.name?.ifBlank { null },
             deviceBattery = if (isConnected) batteryLevel else null,
-            isDeviceConnected = isConnected
+            isDeviceConnected = isConnected,
+            hrZones = settings.heartRateZones
         )
     }.stateIn(
         scope = viewModelScope,

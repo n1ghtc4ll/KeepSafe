@@ -1,5 +1,7 @@
 package com.example.cardioproject.workout.presentation.screen
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,6 +52,7 @@ import com.example.cardioproject.workout.domain.model.WorkoutPhase
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
 import com.example.cardioproject.workout.presentation.model.ActiveWorkoutUiState
 import com.example.cardioproject.workout.presentation.util.getColorForPhase
+import com.example.cardioproject.workout.presentation.util.getZoneColorForBpm
 import com.example.cardioproject.workout.presentation.util.totalReps
 import com.example.cardioproject.workout.presentation.util.totalSets
 import com.example.cardioproject.workout.presentation.viewmodel.ActiveWorkoutViewModel
@@ -148,6 +151,7 @@ fun WorkoutScreenContent(
 
             HeartRateCard(
                 heartRate = uiState.currentHeartRate,
+                zones = uiState.hrZones,
                 modifier = Modifier.weight(1f)
             )
 
@@ -215,12 +219,21 @@ fun WorkoutScreenContent(
 }
 
 @Composable
-private fun HeartRateCard(heartRate: Int, modifier: Modifier = Modifier) {
+private fun HeartRateCard(
+    modifier: Modifier = Modifier,
+    heartRate: Int,
+    zones: List<HeartRateZone>
+) {
+    val targetColor = getZoneColorForBpm(heartRate, zones)
+    val animatedColor by animateColorAsState(
+        targetValue = targetColor,
+        animationSpec = tween(500)
+    )
 
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFFFFFFFF),
-            Color(0xFF6BBA62)
+            animatedColor
         )
     )
 
@@ -445,7 +458,7 @@ fun convertSecToTimeString(timeSeconds: Int): String {
 }
 
 
-@Preview(showBackground = true, apiLevel = 36)
+@Preview(showBackground = true, apiLevel = 37)
 @Composable
 fun WorkoutScreenContentPreview() {
     WorkoutScreenContent(

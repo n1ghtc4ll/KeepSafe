@@ -12,6 +12,12 @@ val DividerGray = Color(0xFFE0E0E4)
 val AlertRed = Color(0xFFD32F2F)
 val TabataPurpleBg = Color(0xFFF3EDF7)
 
+val UnknownZoneColor = Color.White
+val Zone1Blue = Color(0xFF0B7DBE)
+val Zone2Green = Color(0xFF2F8900)
+val Zone3Yellow = Color(0xFF8A7600)
+val Zone4Red = Color(0xFFEA1D00)
+
 val TabataPhaseColorsPalette = listOf(
     0xFFF44336, 0xFFE91E63, 0xFF9C27B0, 0xFF673AB7,
     0xFF3F51B5, 0xFF2196F3, 0xFF03A9F4, 0xFF00BCD4,

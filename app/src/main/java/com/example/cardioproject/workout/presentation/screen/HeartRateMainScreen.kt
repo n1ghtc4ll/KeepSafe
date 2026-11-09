@@ -1,6 +1,8 @@
 package com.example.cardioproject.workout.presentation.screen
 
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cardioproject.workout.presentation.util.getZoneColorForBpm
 import com.example.cardioproject.workout.presentation.viewmodel.MainScreenViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -65,6 +68,12 @@ fun HeartRateMainScreen(
 ) {
     val viewModel: MainScreenViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val targetColor = getZoneColorForBpm(state.currentBpm, state.hrZones)
+    val animatedColor by animateColorAsState(
+        targetValue = targetColor,
+        animationSpec = tween(500)
+    )
 
     Column(
         modifier = Modifier
@@ -113,7 +122,7 @@ fun HeartRateMainScreen(
                     Brush.verticalGradient(
                         0f to Color.White,
                         0.35f to Color.White,
-                        1f to CardGradientEnd
+                        1f to animatedColor
                     )
                 )
                 .border(1.dp, CardBorder, RoundedCornerShape(16.dp))

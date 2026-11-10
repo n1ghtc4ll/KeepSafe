@@ -1,10 +1,7 @@
 package com.example.cardioproject.workout.presentation.screen
 
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,39 +23,26 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.cardioproject.workout.presentation.util.getZoneColorForBpm
+import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
+import com.example.cardioproject.workout.presentation.model.MainScreenUiState
 import com.example.cardioproject.workout.presentation.viewmodel.MainScreenViewModel
+import com.example.cardioproject.workout.ui.components.HeartRateCard
 import org.koin.androidx.compose.koinViewModel
 
-// Палитра — только те значения, которые нужны Главному экрану
-private val ScreenBackground = Color(0xFFF3F3F3)
-private val TextPrimary = Color(0xFF000000)
-private val TextDark = Color(0xFF1D1B20)
-private val BatteryColor = Color(0xFF1C1B1F)
-private val CardBorder = Color(0xFFCAC4D0)
-private val CardGradientEnd = Color(0xFF4CAF50)
-private val DividerColor = Color(0xFF79747E)
-private val MutedMauve = Color(0xFF625B71)
-private val AccentPurple = Color(0xFF6750A4)
 
 @Composable
 fun HeartRateMainScreen(
@@ -69,20 +53,28 @@ fun HeartRateMainScreen(
     val viewModel: MainScreenViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val targetColor = getZoneColorForBpm(state.currentBpm, state.hrZones)
-    val animatedColor by animateColorAsState(
-        targetValue = targetColor,
-        animationSpec = tween(500)
+    HeartRateMainScreenContent(
+        state = state,
+        onSettingsClick = onSettingsClick,
+        onAddMeasurementsClick = onAddMeasurementsClick,
+        onStartWorkoutClick = onStartWorkoutClick
     )
+}
 
+@Composable
+fun HeartRateMainScreenContent(
+    state: MainScreenUiState = MainScreenUiState(),
+    onSettingsClick: () -> Unit = {},
+    onAddMeasurementsClick: () -> Unit = {},
+    onStartWorkoutClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(ScreenBackground)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(30.dp)
     ) {
-        // Батарея · статус подключения · настройки
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -95,10 +87,8 @@ fun HeartRateMainScreen(
                     "Подключено\n• ${state.deviceName ?: "Неизвестное устройство"}"
                 else
                     "Нет подключения",
-                color = TextPrimary,
-                fontSize = 16.sp,
-                lineHeight = 19.sp,
-                fontWeight = FontWeight.Normal,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center
             )
 
@@ -106,96 +96,61 @@ fun HeartRateMainScreen(
                 Icon(
                     imageVector = Icons.Filled.Settings,
                     contentDescription = "Настройки",
-                    tint = TextDark,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(40.dp)
                 )
             }
         }
 
-        // Карточка с текущим пульсом
-        Box(
+        HeartRateCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 300.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    Brush.verticalGradient(
-                        0f to Color.White,
-                        0.35f to Color.White,
-                        1f to animatedColor
-                    )
-                )
-                .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
-                .padding(start = 30.dp, top = 20.dp, end = 30.dp, bottom = 30.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "${state.currentBpm ?: "–"}",
-                    fontSize = 180.sp,
-                    lineHeight = 218.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = TextPrimary
-                )
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(),
-                    thickness = 1.dp,
-                    color = DividerColor
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                Text(
-                    text = "уд/мин",
-                    fontSize = 20.sp,
-                    lineHeight = 24.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = TextPrimary
-                )
-            }
-        }
+                .heightIn(min = 300.dp),
+            contentPadding = PaddingValues(start = 30.dp, top = 20.dp, end = 30.dp, bottom = 30.dp),
+            heartRate = state.currentBpm,
+            zones = state.hrZones
+        )
 
-        // Кнопка добавления замеров
         Button(
             onClick = onAddMeasurementsClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(69.dp),
+                .height(70.dp),
             shape = RoundedCornerShape(24.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MutedMauve),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
             contentPadding = PaddingValues(horizontal = 20.dp)
         ) {
             Icon(
                 imageVector = Icons.Filled.Add,
                 contentDescription = null,
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onSecondary,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(15.dp))
             Text(
                 text = "Добавить новые замеры",
-                color = Color.White,
-                fontSize = 24.sp,
-                lineHeight = 29.sp,
-                fontWeight = FontWeight.Medium
+                color = MaterialTheme.colorScheme.onSecondary,
+                style = MaterialTheme.typography.headlineSmall
             )
         }
 
-        // Круглая кнопка старта тренировки
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
             Box(
                 modifier = Modifier
                     .size(200.dp)
                     .clip(CircleShape)
-                    .background(AccentPurple)
+                    .background(MaterialTheme.colorScheme.primary)
                     .clickable(onClick = onStartWorkoutClick),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Начать тренировку",
                     modifier = Modifier.width(150.dp),
-                    color = Color.White,
-                    fontSize = 26.sp,
-                    lineHeight = 31.sp,
-                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center
                 )
             }
@@ -210,22 +165,26 @@ private fun BatteryIndicator(percent: Int?, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .width(40.dp)
                 .height(22.dp)
-                .background(BatteryColor, RoundedCornerShape(3.dp))
+                .background(
+                    MaterialTheme.colorScheme.onSurface,
+                    RoundedCornerShape(3.dp)
+                )
         )
         Box(
             modifier = Modifier
                 .padding(start = 1.dp)
                 .width(3.dp)
                 .height(8.dp)
-                .background(BatteryColor, RoundedCornerShape(1.dp))
+                .background(
+                    MaterialTheme.colorScheme.onSurface,
+                    RoundedCornerShape(1.dp)
+                )
         )
         Spacer(modifier = Modifier.width(5.dp))
         Text(
             text = if (percent != null) "$percent%" else "-%",
-            color = TextPrimary,
-            fontSize = 18.sp,
-            lineHeight = 22.sp,
-            fontWeight = FontWeight.Normal
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleSmall
         )
     }
 }
@@ -233,7 +192,7 @@ private fun BatteryIndicator(percent: Int?, modifier: Modifier = Modifier) {
 @Preview(showBackground = true, widthDp = 412, heightDp = 917)
 @Composable
 fun HeartRateMainScreenPreview() {
-    MaterialTheme {
-        HeartRateMainScreen()
+    KeepSafeProjectTheme {
+        HeartRateMainScreenContent()
     }
 }

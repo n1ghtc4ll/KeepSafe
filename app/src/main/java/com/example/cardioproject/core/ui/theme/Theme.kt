@@ -13,7 +13,6 @@ val ColorScheme.tabataContainer: Color
 val ColorScheme.inputBackground: Color
     @Composable get() = GrayInput
 
-// 2. Стандартные роли Material
 private val KeepSafeLightColorScheme = lightColorScheme(
     primary = PurplePrimary,
     background = WhiteBg,
@@ -25,7 +24,6 @@ private val KeepSafeLightColorScheme = lightColorScheme(
     error = AlertRed
 )
 
-// 3. Обертка темы
 @Composable
 fun KeepSafeProjectTheme(content: @Composable () -> Unit) {
     val spacing = Spacing()

@@ -1,32 +1,29 @@
 package com.example.cardioproject.workout.presentation.screen
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -43,19 +40,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
 import com.example.cardioproject.settings.domain.model.HeartRateZone
-import com.example.cardioproject.workout.domain.model.TabataSetup
 import com.example.cardioproject.workout.domain.model.WorkoutPhase
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
 import com.example.cardioproject.workout.presentation.model.ActiveWorkoutUiState
 import com.example.cardioproject.workout.presentation.util.getColorForPhase
-import com.example.cardioproject.workout.presentation.util.getZoneColorForBpm
 import com.example.cardioproject.workout.presentation.util.totalReps
 import com.example.cardioproject.workout.presentation.util.totalSets
 import com.example.cardioproject.workout.presentation.viewmodel.ActiveWorkoutViewModel
+import com.example.cardioproject.workout.ui.components.HeartRateCard
 import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
 
@@ -124,22 +122,22 @@ fun WorkoutScreenContent(
                 title = {
                     Text(
                         text = trainingName,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 20.sp
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             contentDescription = "Назад"
                         )
                     }
                 },
             )
         },
-
-        containerColor = Color(0xFFF3F3F3)
+        containerColor = MaterialTheme.colorScheme.surface
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -150,9 +148,10 @@ fun WorkoutScreenContent(
         ) {
 
             HeartRateCard(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(vertical = 8.dp),
                 heartRate = uiState.currentHeartRate,
-                zones = uiState.hrZones,
-                modifier = Modifier.weight(1f)
+                zones = uiState.hrZones
             )
 
             Row(
@@ -164,10 +163,16 @@ fun WorkoutScreenContent(
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB73225)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Стоп", fontSize = 18.sp, color = Color.White)
+                    Text(
+                        text = "Стоп",
+                        color = MaterialTheme.colorScheme.onError,
+                        style = MaterialTheme.typography.titleSmall
+                    )
                 }
 
                 Button(
@@ -175,10 +180,16 @@ fun WorkoutScreenContent(
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6B52A3)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Пауза", fontSize = 18.sp, color = Color.White)
+                    Text(
+                        text = "Пауза",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.titleSmall
+                    )
                 }
             }
 
@@ -196,98 +207,35 @@ fun WorkoutScreenContent(
             HeartRateChartWithZones(
                 heartRateHistory = uiState.heartRateHistory,
                 zones = uiState.hrZones,
-                modifier = Modifier.padding(vertical = 8.dp).weight(1f)
+                modifier = Modifier.weight(1f)
             )
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
-                    .background(Color(0xFFF0F0F0), RoundedCornerShape(12.dp))
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp)),
+                    .background(
+                        MaterialTheme.colorScheme.surfaceContainer,
+                        RoundedCornerShape(12.dp)
+                    )
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant,
+                        RoundedCornerShape(12.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = time,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
     }
 }
 
-@Composable
-private fun HeartRateCard(
-    modifier: Modifier = Modifier,
-    heartRate: Int,
-    zones: List<HeartRateZone>
-) {
-    val targetColor = getZoneColorForBpm(heartRate, zones)
-    val animatedColor by animateColorAsState(
-        targetValue = targetColor,
-        animationSpec = tween(500)
-    )
-
-    val gradientBrush = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFFFFFFF),
-            animatedColor
-        )
-    )
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(gradientBrush, RoundedCornerShape(12.dp))
-            .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp))
-            .padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = heartRate.toString(),
-            fontSize = 120.sp,
-            fontWeight = FontWeight.Light,
-            color = Color.Black,
-            lineHeight = 110.sp
-        )
-
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .padding(vertical = 4.dp),
-            thickness = 1.dp,
-            color = Color(0x40000000)
-        )
-
-        Text(
-            text = "уд/мин",
-            fontSize = 16.sp,
-            color = Color.Black
-        )
-    }
-}
-
-@Composable
-fun ZonesGraphCard(
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Color.White, RoundedCornerShape(12.dp))
-            .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "График с зонами",
-            fontSize = 18.sp,
-            color = Color.Black
-        )
-    }
-}
 
 @Composable
 fun TabataTimer(
@@ -300,7 +248,7 @@ fun TabataTimer(
 ) {
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFFFFFFFF),
+            Color.White,
             themeColor
         )
     )
@@ -309,12 +257,16 @@ fun TabataTimer(
         modifier = modifier
             .fillMaxWidth()
             .background(gradientBrush, RoundedCornerShape(16.dp))
-            .border(1.dp, Color.LightGray, RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
             .padding(vertical = 5.dp, horizontal = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = convertSecToTimeString(timeRemaining), fontSize = 110.sp, maxLines = 1)
+        Text(
+            text = convertSecToTimeString(timeRemaining),
+            fontSize = 110.sp,
+            maxLines = 1
+        )
 
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
@@ -324,7 +276,7 @@ fun TabataTimer(
                 Text(text = "Цикл: $repInfo", fontSize = 28.sp)
             }
             Spacer(modifier = Modifier.size(8.dp))
-            Text(text = phase.phaseName, fontSize = 28.sp)
+            Text(text = phase.phaseName, modifier = Modifier.fillMaxSize(), fontSize = 28.sp)
         }
     }
 }
@@ -342,8 +294,7 @@ fun HeartRateChartWithZones(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFFF5F5F7), RoundedCornerShape(12.dp))
-            .padding(12.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp))
     ) {
         // Основная область: Шкала Y слева + сам графический Canvas справа
         Row(
@@ -355,15 +306,29 @@ fun HeartRateChartWithZones(
             // Шкала Y слева (фиксированной ширины, текст выровнен по правому краю)
             Column(
                 modifier = Modifier
-                    .width(36.dp)
                     .fillMaxHeight()
                     .padding(end = 4.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.End
             ) {
-                Text(text = "${maxBpm.toInt()}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
-                Text(text = "${((maxBpm + minBpm) / 2).toInt()}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
-                Text(text = "${minBpm.toInt()}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                Text(
+                    text = "${maxBpm.toInt()}",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "${((maxBpm + minBpm) / 2).toInt()}",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "${minBpm.toInt()}",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             // Сам график внутри Box
@@ -441,10 +406,22 @@ fun HeartRateChartWithZones(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             val totalSeconds = heartRateHistory.size
-            Text(text = "0с", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color.DarkGray)
+            Text(
+                text = "0с",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelSmall
+            )
             if (totalSeconds > 5) {
-                Text(text = "${totalSeconds / 2}с", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color.DarkGray)
-                Text(text = "${totalSeconds}с", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color.DarkGray)
+                Text(
+                    text = "${totalSeconds / 2}с",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelSmall
+                )
+                Text(
+                    text = "${totalSeconds}с",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelSmall
+                )
             }
         }
     }
@@ -461,12 +438,14 @@ fun convertSecToTimeString(timeSeconds: Int): String {
 @Preview(showBackground = true, apiLevel = 37)
 @Composable
 fun WorkoutScreenContentPreview() {
-    WorkoutScreenContent(
-        ActiveWorkoutUiState(),
-        "00:00:00",
-        "Название тренировки",
-        false,
-        Color(0xFF6BBA62),
-        Pair(1, 1)
-    )
+    KeepSafeProjectTheme {
+        WorkoutScreenContent(
+            ActiveWorkoutUiState(),
+            "00:00:00",
+            "Название тренировки",
+            true,
+            Color(0xFF6BBA62),
+            Pair(1, 1)
+        )
+    }
 }

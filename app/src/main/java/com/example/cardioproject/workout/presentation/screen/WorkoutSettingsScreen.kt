@@ -5,12 +5,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -57,19 +59,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardioproject.core.common.domain.model.TabataProfile
 import com.example.cardioproject.core.common.domain.model.Tag
+import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
+import com.example.cardioproject.core.ui.theme.spacing
 import com.example.cardioproject.workout.domain.model.TabataSetup
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
 import com.example.cardioproject.workout.presentation.model.WorkoutSettingsUiState
 import com.example.cardioproject.workout.presentation.viewmodel.WorkoutSettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
-
-private val SettingsBackground = Color(0xFFFFFFFF)
-private val TextPrimary = Color(0xFF000000)
-private val CardBorder = Color(0xFFCAC4D0)
-private val AccentPurple = Color(0xFF6750A4)
-private val InputBackgroundGray = Color(0xFFEEEEEE)
-private val TabataBackground = Color(0xFFF3EDF7)
-private val ElementBackgroundWhite = Color(0xFFFFFFFF)
 
 
 @Composable
@@ -108,20 +104,21 @@ fun WorkoutSettingsScreenContent(
     onCustomParamChange: (String, Int) -> Unit = { _, _ -> }
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().imePadding(),
         shape = RoundedCornerShape(16.dp),
-        color = SettingsBackground
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
                 .padding(vertical = 16.dp, horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.mediumLarge)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
             ) {
                 IconButton(
                     onClick = onBackClick,
@@ -130,195 +127,214 @@ fun WorkoutSettingsScreenContent(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Назад",
-                        tint = TextPrimary,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = "Настройка тренировки",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextPrimary
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            LabelTextField(
-                label = "Название",
-                value = uiState.title,
-                onValueChange = onTitleChange
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LabelDropdownMenu(
-                label = "Тег",
-                items = uiState.availableTags,
-                selectedItem = uiState.selectedTag,
-                itemLabel = { it.name },
-                onItemSelected = { onTagSelect(it) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
             ) {
-                Text(
-                    text = "Табата-таймер",
-                    fontSize = 20.sp,
-                    color = TextPrimary
+                LabelTextField(
+                    label = "Название",
+                    value = uiState.title,
+                    onValueChange = onTitleChange
                 )
-                Switch(
-                    checked = uiState.isTabataEnabled,
-                    onCheckedChange = onTabataToggle,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = AccentPurple
-                    )
+
+                LabelDropdownMenu(
+                    label = "Тег",
+                    items = uiState.availableTags,
+                    selectedItem = uiState.selectedTag,
+                    itemLabel = { it.name },
+                    onItemSelected = { onTagSelect(it) }
                 )
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (uiState.isTabataEnabled) {
-                val setup = uiState.tabataSetup
-                val isReadOnly = setup is TabataSetup.Preset
-                val currentProfile = (setup as? TabataSetup.Preset)?.profile
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(TabataBackground, RoundedCornerShape(16.dp))
-                        .padding(16.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Параметры таймера",
+                        text = "Табата-таймер",
                         fontSize = 20.sp,
-                        color = TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider(color = CardBorder, thickness = 1.dp)
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "Готовые профили",
-                        fontSize = 20.sp,
-                        color = TextPrimary
+                    Switch(
+                        checked = uiState.isTabataEnabled,
+                        onCheckedChange = onTabataToggle,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
+                        )
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-                    ProfileDropdownMenu(
-                        items = uiState.availableProfiles,
-                        selectedProfile = currentProfile,
-                        onItemSelected = onProfileSelect
-                    )
+                if (uiState.isTabataEnabled) {
+                    val setup = uiState.tabataSetup
+                    val isReadOnly = setup is TabataSetup.Preset
+                    val currentProfile = (setup as? TabataSetup.Preset)?.profile
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                MaterialTheme.colorScheme.surfaceContainer,
+                                RoundedCornerShape(16.dp)
+                            )
+                            .padding(MaterialTheme.spacing.medium)
+                    ) {
+                        Text(
+                            text = "Параметры таймера",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.titleMedium
+                        )
 
-                    val warmUpValue = when (setup) {
-                        is TabataSetup.Preset -> setup.profile.warmUpTimeSec
-                        is TabataSetup.Custom -> setup.warmUpTimeSec
-                        null -> 0
+                        Spacer(modifier = Modifier.height(8.dp))
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            thickness = 1.dp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "Готовые профили",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        ProfileDropdownMenu(
+                            items = uiState.availableProfiles,
+                            selectedProfile = currentProfile,
+                            onItemSelected = onProfileSelect
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        val warmUpValue = when (setup) {
+                            is TabataSetup.Preset -> setup.profile.warmUpTimeSec
+                            is TabataSetup.Custom -> setup.warmUpTimeSec
+                            null -> 0
+                        }
+                        val repsValue = when (setup) {
+                            is TabataSetup.Preset -> setup.profile.repsCount
+                            is TabataSetup.Custom -> setup.repsCount
+                            null -> 0
+                        }
+                        val workoutValue = when (setup) {
+                            is TabataSetup.Preset -> setup.profile.workoutTimeSec
+                            is TabataSetup.Custom -> setup.workoutTimeSec
+                            null -> 0
+                        }
+                        val relaxValue = when (setup) {
+                            is TabataSetup.Preset -> setup.profile.relaxTimeSec
+                            is TabataSetup.Custom -> setup.relaxTimeSec
+                            null -> 0
+                        }
+                        val breakValue = when (setup) {
+                            is TabataSetup.Preset -> setup.profile.breakTimeSec
+                            is TabataSetup.Custom -> setup.breakTimeSec
+                            null -> 0
+                        }
+                        val coolDownValue = when (setup) {
+                            is TabataSetup.Preset -> setup.profile.coolDownTimeSec
+                            is TabataSetup.Custom -> setup.coolDownTimeSec
+                            null -> 0
+                        }
+                        val setsValue = when (setup) {
+                            is TabataSetup.Preset -> setup.profile.setsCount
+                            is TabataSetup.Custom -> setup.setsCount
+                            null -> 0
+                        }
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.mediumSmall)
+                        ) {
+                            EditableTabataRow(
+                                label = "Пауза перед\nтренировкой",
+                                value = warmUpValue,
+                                isReadOnly = isReadOnly,
+                                showIcon = true,
+                                onValueChange = { onCustomParamChange("warmUp", it) }
+                            )
+
+                            EditableTabataRow(
+                                label = "Кол-во интервалов",
+                                value = repsValue,
+                                isReadOnly = isReadOnly,
+                                showIcon = false,
+                                onValueChange = { onCustomParamChange("reps", it) }
+                            )
+
+                            EditableTabataRow(
+                                label = "Упражнение",
+                                value = workoutValue,
+                                isReadOnly = isReadOnly,
+                                showIcon = true,
+                                onValueChange = { onCustomParamChange("workout", it) }
+                            )
+
+                            EditableTabataRow(
+                                label = "Отдых",
+                                value = relaxValue,
+                                isReadOnly = isReadOnly,
+                                showIcon = true,
+                                onValueChange = { onCustomParamChange("relax", it) }
+                            )
+
+                            EditableTabataRow(
+                                label = "Перезарядка",
+                                value = breakValue,
+                                isReadOnly = isReadOnly,
+                                showIcon = true,
+                                onValueChange = { onCustomParamChange("break", it) }
+                            )
+
+                            EditableTabataRow(
+                                label = "Заминка",
+                                value = coolDownValue,
+                                isReadOnly = isReadOnly,
+                                showIcon = true,
+                                onValueChange = { onCustomParamChange("coolDown", it) }
+                            )
+
+                            EditableTabataRow(
+                                label = "Кол-во кругов",
+                                value = setsValue,
+                                isReadOnly = isReadOnly,
+                                showIcon = false,
+                                onValueChange = { onCustomParamChange("sets", it) }
+                            )
+                        }
                     }
-                    val repsValue = when (setup) {
-                        is TabataSetup.Preset -> setup.profile.repsCount
-                        is TabataSetup.Custom -> setup.repsCount
-                        null -> 0
-                    }
-                    val workoutValue = when (setup) {
-                        is TabataSetup.Preset -> setup.profile.workoutTimeSec
-                        is TabataSetup.Custom -> setup.workoutTimeSec
-                        null -> 0
-                    }
-                    val relaxValue = when (setup) {
-                        is TabataSetup.Preset -> setup.profile.relaxTimeSec
-                        is TabataSetup.Custom -> setup.relaxTimeSec
-                        null -> 0
-                    }
-                    val breakValue = when (setup) {
-                        is TabataSetup.Preset -> setup.profile.breakTimeSec
-                        is TabataSetup.Custom -> setup.breakTimeSec
-                        null -> 0
-                    }
-                    val coolDownValue = when (setup) {
-                        is TabataSetup.Preset -> setup.profile.coolDownTimeSec
-                        is TabataSetup.Custom -> setup.coolDownTimeSec
-                        null -> 0
-                    }
-                    val setsValue = when (setup) {
-                        is TabataSetup.Preset -> setup.profile.setsCount
-                        is TabataSetup.Custom -> setup.setsCount
-                        null -> 0
-                    }
-
-                    EditableTabataRow(
-                        label = "Пауза перед\nтренировкой", value = warmUpValue, isReadOnly = isReadOnly, showIcon = true,
-                        onValueChange = { onCustomParamChange("warmUp", it) }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    EditableTabataRow(
-                        label = "Кол-во интервалов", value = repsValue, isReadOnly = isReadOnly, showIcon = false,
-                        onValueChange = { onCustomParamChange("reps", it) }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    EditableTabataRow(
-                        label = "Упражнение", value = workoutValue, isReadOnly = isReadOnly, showIcon = true,
-                        onValueChange = { onCustomParamChange("workout", it) }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    EditableTabataRow(
-                        label = "Отдых", value = relaxValue, isReadOnly = isReadOnly, showIcon = true,
-                        onValueChange = { onCustomParamChange("relax", it) }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    EditableTabataRow(
-                        label = "Перезарядка", value = breakValue, isReadOnly = isReadOnly, showIcon = true,
-                        onValueChange = { onCustomParamChange("break", it) }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    EditableTabataRow(
-                        label = "Заминка", value = coolDownValue, isReadOnly = isReadOnly, showIcon = true,
-                        onValueChange = { onCustomParamChange("coolDown", it) }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    EditableTabataRow(
-                        label = "Кол-во кругов", value = setsValue, isReadOnly = isReadOnly, showIcon = false,
-                        onValueChange = { onCustomParamChange("sets", it) }
-                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
             Button(
                 onClick = onStartClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AccentPurple)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                contentPadding = PaddingValues(vertical = MaterialTheme.spacing.small)
             ) {
                 Text(
                     text = "Начать",
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Normal
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.headlineSmall
                 )
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -426,7 +442,10 @@ fun ProfileDropdownMenu(
         modifier = Modifier
             .fillMaxWidth()
             .height(40.dp)
-            .background(ElementBackgroundWhite, RoundedCornerShape(6.dp))
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                shape = RoundedCornerShape(6.dp)
+            )
             .clickable { expanded = true }
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center
@@ -439,22 +458,22 @@ fun ProfileDropdownMenu(
             Text(
                 text = selectedProfile?.name ?: "Свой таймер",
                 fontSize = 16.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
             Icon(
                 imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
                 contentDescription = null,
-                tint = Color.Black
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
 
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(Color.White)
+            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainerLowest)
         ) {
             DropdownMenuItem(
-                text = { Text("Свой таймер", color = TextPrimary) },
+                text = { Text("Свой таймер", color = MaterialTheme.colorScheme.onSurface) },
                 onClick = {
                     onItemSelected(null)
                     expanded = false
@@ -462,7 +481,7 @@ fun ProfileDropdownMenu(
             )
             items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(item.name, color = TextPrimary) },
+                    text = { Text(item.name, color = MaterialTheme.colorScheme.onSurface) },
                     onClick = {
                         onItemSelected(item)
                         expanded = false
@@ -513,27 +532,31 @@ private fun EditableTabataRow(
     ) {
         Text(
             text = label,
-            fontSize = 18.sp,
-            color = TextPrimary,
-            lineHeight = 20.sp,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.weight(1f)
         )
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        ) {
             if (showIcon) {
                 Icon(
                     imageVector = Icons.Filled.InvertColors,
                     contentDescription = null,
-                    tint = TextPrimary,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(24.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
             }
 
             Box(
                 modifier = Modifier
                     .size(width = if (isTimeField) 100.dp else 64.dp, height = 30.dp)
-                    .background(ElementBackgroundWhite, RoundedCornerShape(6.dp)),
+                    .background(
+                        MaterialTheme.colorScheme.surfaceContainerLowest,
+                        RoundedCornerShape(6.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 if (isTimeField) {
@@ -557,7 +580,9 @@ private fun EditableTabataRow(
                             readOnly = isReadOnly,
                             textStyle = TextStyle(
                                 fontSize = 16.sp,
-                                color = if (isReadOnly) TextPrimary else AccentPurple,
+                                color =
+                                    if (isReadOnly) MaterialTheme.colorScheme.onSurface
+                                    else MaterialTheme.colorScheme.primary,
                                 textAlign = TextAlign.Center
                             ),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -573,7 +598,13 @@ private fun EditableTabataRow(
                                 }
                         )
 
-                        Text(":", fontSize = 16.sp, color = if (isReadOnly) TextPrimary else AccentPurple)
+                        Text(
+                            text = ":",
+                            fontSize = 16.sp,
+                            color =
+                                if (isReadOnly) MaterialTheme.colorScheme.onSurface
+                                else MaterialTheme.colorScheme.primary
+                        )
 
                         BasicTextField(
                             value = sText,
@@ -596,7 +627,9 @@ private fun EditableTabataRow(
                             readOnly = isReadOnly,
                             textStyle = TextStyle(
                                 fontSize = 16.sp,
-                                color = if (isReadOnly) TextPrimary else AccentPurple,
+                                color =
+                                    if (isReadOnly) MaterialTheme.colorScheme.onSurface
+                                    else MaterialTheme.colorScheme.primary,
                                 textAlign = TextAlign.Center
                             ),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -627,7 +660,9 @@ private fun EditableTabataRow(
                         readOnly = isReadOnly,
                         textStyle = TextStyle(
                             fontSize = 16.sp,
-                            color = if (isReadOnly) TextPrimary else AccentPurple,
+                            color =
+                                if (isReadOnly) MaterialTheme.colorScheme.onSurface
+                                else MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center
                         ),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -645,7 +680,7 @@ private fun EditableTabataRow(
 @Preview(showBackground = true, backgroundColor = 0xFF2B2B2B)
 @Composable
 fun WorkoutSettingsScreenContentPreview() {
-    MaterialTheme {
+    KeepSafeProjectTheme {
         Box(
             modifier = Modifier.padding(16.dp),
             contentAlignment = Alignment.Center

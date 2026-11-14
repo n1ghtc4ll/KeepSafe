@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
-import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
 class ActiveWorkoutViewModel(
@@ -63,7 +62,7 @@ class ActiveWorkoutViewModel(
                 startTimerUseCase(settings.tabataSetup).collect { timerState ->
                     _uiState.update { it.copy(
                         currentPhase = timerState.currentPhase,
-                        timeRemainingSec = timerState.timeRemainingSec,
+                        tabataTimerRemainingSec = timerState.timeRemainingSec,
                         currentSet = timerState.currentSet,
                         currentRep = timerState.currentRep,
                         totalElapsedTimeSec = timerState.totalElapsedTimeSec
@@ -83,7 +82,7 @@ class ActiveWorkoutViewModel(
                     _uiState.update { it.copy(
                         currentPhase = WorkoutPhase.WORKOUT,
                         totalElapsedTimeSec = elapsed,
-                        timeRemainingSec = elapsed
+                        tabataTimerRemainingSec = elapsed
                     )}
                 }
             }

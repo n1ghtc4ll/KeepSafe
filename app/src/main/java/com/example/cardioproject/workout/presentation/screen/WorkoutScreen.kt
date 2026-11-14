@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -41,14 +40,17 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
+import com.example.cardioproject.core.ui.theme.spacing
 import com.example.cardioproject.settings.domain.model.HeartRateZone
 import com.example.cardioproject.workout.domain.model.WorkoutPhase
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
 import com.example.cardioproject.workout.presentation.model.ActiveWorkoutUiState
+import com.example.cardioproject.workout.presentation.util.formatAsMinutesSeconds
 import com.example.cardioproject.workout.presentation.util.getColorForPhase
 import com.example.cardioproject.workout.presentation.util.totalReps
 import com.example.cardioproject.workout.presentation.util.totalSets
@@ -77,15 +79,8 @@ fun WorkoutScreen(
         }
     }
 
-    val formattedTime = uiState.timeRemainingSec.let { seconds ->
-        val minutes = seconds / 60
-        val remainingSeconds = seconds % 60
-        String.format("%02d:%02d", minutes, remainingSeconds)
-    }
-
     WorkoutScreenContent(
         uiState = uiState,
-        time = formattedTime,
         trainingName = settings.title,
         isTabataEnabled = settings.isTabataEnabled,
         tabataThemeColor = dynamicPhaseColor,
@@ -106,7 +101,6 @@ fun WorkoutScreen(
 @Composable
 fun WorkoutScreenContent(
     uiState: ActiveWorkoutUiState,
-    time: String,
     trainingName: String,
     isTabataEnabled: Boolean,
     tabataThemeColor: Color,
@@ -120,11 +114,26 @@ fun WorkoutScreenContent(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = trainingName,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = trainingName,
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+
+                        Text(
+                            text = uiState.totalElapsedFormatted,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -196,7 +205,7 @@ fun WorkoutScreenContent(
             if (isTabataEnabled) {
                 TabataTimer(
                     modifier = Modifier.weight(1f),
-                    timeRemaining = uiState.timeRemainingSec,
+                    formattedTimeRemaining = uiState.tabataRemainingFormatted,
                     phase = uiState.currentPhase,
                     setInfo = Pair(uiState.currentSet, setRepCount.first),
                     repInfo = Pair(uiState.currentRep, setRepCount.second),
@@ -209,29 +218,6 @@ fun WorkoutScreenContent(
                 zones = uiState.hrZones,
                 modifier = Modifier.weight(1f)
             )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(
-                        MaterialTheme.colorScheme.surfaceContainer,
-                        RoundedCornerShape(12.dp)
-                    )
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.outlineVariant,
-                        RoundedCornerShape(12.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = time,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
         }
     }
 }
@@ -240,8 +226,8 @@ fun WorkoutScreenContent(
 @Composable
 fun TabataTimer(
     modifier: Modifier = Modifier,
-    timeRemaining: Int = 0,
-    phase: WorkoutPhase = WorkoutPhase.WARMUP,
+    formattedTimeRemaining: String,
+    phase: WorkoutPhase,
     setInfo: Pair<Int, Int>,
     repInfo: Pair<Int, Int>,
     themeColor: Color = Color(0xFF6BBA62)
@@ -263,20 +249,35 @@ fun TabataTimer(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = convertSecToTimeString(timeRemaining),
+            text = formattedTimeRemaining,
             fontSize = 110.sp,
             maxLines = 1
         )
 
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column() {
-                Text(text = "Сет: $setInfo", fontSize = 28.sp)
-                Text(text = "Цикл: $repInfo", fontSize = 28.sp)
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Сет: $setInfo",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    text = "Цикл: $repInfo",
+                    style = MaterialTheme.typography.titleLarge
+                )
             }
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(text = phase.phaseName, modifier = Modifier.fillMaxSize(), fontSize = 28.sp)
+            Text(
+                text = phase.phaseName,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Right,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -427,25 +428,16 @@ fun HeartRateChartWithZones(
     }
 }
 
-fun convertSecToTimeString(timeSeconds: Int): String {
-    val minutes = timeSeconds / 60
-    val seconds = timeSeconds % 60
-
-    return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
-}
-
-
 @Preview(showBackground = true, apiLevel = 37)
 @Composable
 fun WorkoutScreenContentPreview() {
     KeepSafeProjectTheme {
         WorkoutScreenContent(
-            ActiveWorkoutUiState(),
-            "00:00:00",
-            "Название тренировки",
-            true,
-            Color(0xFF6BBA62),
-            Pair(1, 1)
+            uiState = ActiveWorkoutUiState(),
+            trainingName = "Название тренировки",
+            isTabataEnabled = true,
+            tabataThemeColor = Color(0xFF6BBA62),
+            setRepCount = Pair(1, 1)
         )
     }
 }

@@ -1,23 +1,27 @@
 package com.example.cardioproject.settings.presentation.model
 
+import com.example.cardioproject.workout.domain.model.TabataSetup
+
 data class ProfileBuilderUiState(
     val id: String? = null,
     val name: String = "",
-    val setsCount: Int = 1,
-    val repsCount: Int = 8,
+    val tabataSetup: TabataSetup.Custom = TabataSetup.Custom(
+        setsCount = 1,
+        repsCount = 8,
 
-    val warmUpTimeSec: Int = 30,
-    val warmUpColorHex: Long = 0xFFFF9800, // Orange
+        warmUpTimeSec = 30,
+        warmUpColorHex = 0xFFFF9800,
 
-    val workoutTimeSec: Int = 45,
-    val workoutColorHex: Long = 0xFF4CAF50, // Green
+        workoutTimeSec = 45,
+        workoutColorHex = 0xFF4CAF50,
 
-    val relaxTimeSec: Int = 15,
-    val relaxColorHex: Long = 0xFF2196F3, // Blue
+        relaxTimeSec = 15,
+        relaxColorHex = 0xFF2196F3,
 
-    val breakTimeSec: Int = 60,
-    val breakColorHex: Long = 0xFF9C27B0, // Purple
+        breakTimeSec = 60,
+        breakColorHex = 0xFF9C27B0,
 
-    val coolDownTimeSec: Int = 120,
-    val coolDownColorHex: Long = 0xFF00BCD4  // Cyan
+        coolDownTimeSec = 120,
+        coolDownColorHex = 0xFF00BCD4
+    )
 )

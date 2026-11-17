@@ -43,9 +43,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardioproject.core.ui.theme.GraySurface
+import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
 import com.example.cardioproject.core.ui.theme.spacing
 import com.example.cardioproject.settings.presentation.model.HeartRateZone
 import com.example.cardioproject.settings.presentation.model.DeviceInfoUi
@@ -69,11 +71,6 @@ fun SectionTitle(
 
         content.invoke()
     }
-}
-
-@Composable
-fun SectionDivider() {
-    Spacer(Modifier.height(MaterialTheme.spacing.extraSmall))
 }
 
 @Composable
@@ -348,31 +345,149 @@ fun HeartRateZoneRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = zone.label, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
+            Text(
+                text = zone.label,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelLarge
+            )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "${zone.range.start.toInt()}-${zone.range.endInclusive.toInt()} уд/мин",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelMedium
                 )
-                //Spacer(Modifier.width(4.dp))
+            }
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        ) {
+            RangeSlider(
+                value = zone.range,
+                onValueChange = onRangeChange,
+                modifier = Modifier.weight(1f),
+                valueRange = 40f..200f,
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
+                )
+            )
+            IconButton(
+                onClick = {  }
+            ) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
                 )
             }
         }
-        RangeSlider(
-            value = zone.range,
-            onValueChange = onRangeChange,
-            valueRange = 40f..200f,
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SectionTitlePreview() {
+    KeepSafeProjectTheme {
+        SectionTitle(text = "Section1") {
+            HeartRateZoneRow(
+                zone = HeartRateZone(
+                    label = "",
+                    range = 40f..100f
+                ),
+                onRangeChange = { }
             )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BluetoothDeviceRowPreview() {
+    KeepSafeProjectTheme {
+        BluetoothDeviceRow(
+            name = "Device1",
+            battery = 0,
+            onDisconnect = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SavedDevicesCardPreview() {
+    KeepSafeProjectTheme {
+        SavedDevicesCard(
+            devices = listOf(
+                DeviceInfoUi(
+                    macAddress = "AA:AA:AA:AA:AA",
+                    name = "Device1"
+                ),
+                DeviceInfoUi(
+                    macAddress = "BB:BB:BB:BB:BB",
+                    name = "Device2"
+                )
+            ),
+            connectedAddress = "BB:BB:BB:BB:BB",
+            onConnect = { },
+            onDelete = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HeartRateZoneRowPreview() {
+    KeepSafeProjectTheme {
+        HeartRateZoneRow(
+            zone = HeartRateZone(
+                label = "",
+                range = 40f..100f
+            ),
+            onRangeChange = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LabeledInputRowPreview() {
+    KeepSafeProjectTheme {
+        LabeledInputRow(
+            label = "Field1",
+            value = "Value1"
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun OutlinedFullWidthButtonPreview() {
+    KeepSafeProjectTheme {
+        OutlinedFullWidthButton(text = "Button1", onClick = { })
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ToggleRowPreview() {
+    KeepSafeProjectTheme {
+        ToggleRow(
+            label = "Toggle1",
+            checked = false,
+            onCheckedChange = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun VolumeRowPreview() {
+    KeepSafeProjectTheme {
+        VolumeRow(
+            label = "Volume1",
+            volume = 0.3f,
+            onVolumeChange = { }
         )
     }
 }

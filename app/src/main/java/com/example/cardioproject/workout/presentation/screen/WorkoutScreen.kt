@@ -84,7 +84,10 @@ fun WorkoutScreen(
         trainingName = settings.title,
         isTabataEnabled = settings.isTabataEnabled,
         tabataThemeColor = dynamicPhaseColor,
-        setRepCount = Pair(settings.tabataSetup.totalSets, settings.tabataSetup.totalReps),
+        setRepCount = Pair(
+            settings.tabataSetup?.totalSets ?: 1,
+            settings.tabataSetup?.totalReps ?: 1
+        ),
         onBackClick = {
             viewModel.stopWorkout()
         },
@@ -109,7 +112,6 @@ fun WorkoutScreenContent(
     onStopClick: () -> Unit = {},
     onPauseClick: () -> Unit = {},
 ) {
-
     Scaffold(
         topBar = {
             TopAppBar(

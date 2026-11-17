@@ -21,6 +21,4 @@ sealed interface TabataSetup {
         val coolDownTimeSec: Int = 0,
         val coolDownColorHex: Long = 0xFF4DB6AC
     ) : TabataSetup
-
-
 }

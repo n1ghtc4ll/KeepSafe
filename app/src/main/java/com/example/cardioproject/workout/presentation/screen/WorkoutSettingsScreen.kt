@@ -1,37 +1,21 @@
 package com.example.cardioproject.workout.presentation.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,44 +24,25 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardioproject.core.common.domain.model.TabataProfile
 import com.example.cardioproject.core.common.domain.model.Tag
+import com.example.cardioproject.core.ui.components.LabelDropdownMenu
 import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
 import com.example.cardioproject.core.ui.theme.spacing
-import com.example.cardioproject.workout.domain.model.TabataSetup
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
 import com.example.cardioproject.workout.presentation.model.WorkoutSettingsUiState
 import com.example.cardioproject.workout.presentation.viewmodel.WorkoutSettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.runtime.withFrameNanos
+import com.example.cardioproject.core.ui.components.LabelTextField
+import com.example.cardioproject.core.ui.components.TabataParams
+import com.example.cardioproject.settings.presentation.model.PhaseType
 
 
 @Composable
@@ -99,7 +64,8 @@ fun WorkoutSettingsScreen(
         onTagSelect = viewModel::onTagSelected,
         onTabataToggle = viewModel::onTabataToggled,
         onProfileSelect = viewModel::onProfileSelected,
-        onCustomParamChange = viewModel::onCustomParamChanged
+        onCustomParamChange = viewModel::onCustomParamChanged,
+        onCustomPhaseColorChange = viewModel::onCustomPhaseColorChanged,
     )
 }
 
@@ -107,16 +73,19 @@ fun WorkoutSettingsScreen(
 @Composable
 fun WorkoutSettingsScreenContent(
     uiState: WorkoutSettingsUiState = WorkoutSettingsUiState(),
-    onBackClick: () -> Unit = {},
-    onStartClick: () -> Unit = {},
-    onTitleChange: (String) -> Unit = {},
-    onTagSelect: (Tag?) -> Unit = {},
-    onTabataToggle: (Boolean) -> Unit = {},
-    onProfileSelect: (TabataProfile?) -> Unit = {},
-    onCustomParamChange: (String, Int) -> Unit = { _, _ -> }
+    onBackClick: () -> Unit = {  },
+    onStartClick: () -> Unit = {  },
+    onTitleChange: (String) -> Unit = {  },
+    onTagSelect: (Tag?) -> Unit = {  },
+    onTabataToggle: (Boolean) -> Unit = {  },
+    onProfileSelect: (TabataProfile?) -> Unit = {  },
+    onCustomParamChange: (String, Int) -> Unit = { _, _ -> },
+    onCustomPhaseColorChange: (PhaseType, Long) -> Unit = { _, _ -> },
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth().imePadding(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .imePadding(),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface
     ) {
@@ -130,20 +99,18 @@ fun WorkoutSettingsScreenContent(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
             ) {
                 IconButton(
                     onClick = onBackClick,
-                    modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Назад",
                         tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(24.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(16.dp))
+
                 Text(
                     text = "Настройка тренировки",
                     style = MaterialTheme.typography.titleLarge,
@@ -194,142 +161,14 @@ fun WorkoutSettingsScreenContent(
 
                 if (uiState.isTabataEnabled) {
                     val setup = uiState.tabataSetup
-                    val isReadOnly = setup is TabataSetup.Preset
-                    val currentProfile = (setup as? TabataSetup.Preset)?.profile
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                MaterialTheme.colorScheme.surfaceContainer,
-                                RoundedCornerShape(16.dp)
-                            )
-                            .padding(MaterialTheme.spacing.medium)
-                    ) {
-                        Text(
-                            text = "Параметры таймера",
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outlineVariant,
-                            thickness = 1.dp
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = "Готовые профили",
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        ProfileDropdownMenu(
-                            items = uiState.availableProfiles,
-                            selectedProfile = currentProfile,
-                            onItemSelected = onProfileSelect
-                        )
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        val warmUpValue = when (setup) {
-                            is TabataSetup.Preset -> setup.profile.warmUpTimeSec
-                            is TabataSetup.Custom -> setup.warmUpTimeSec
-                            null -> 0
-                        }
-                        val repsValue = when (setup) {
-                            is TabataSetup.Preset -> setup.profile.repsCount
-                            is TabataSetup.Custom -> setup.repsCount
-                            null -> 0
-                        }
-                        val workoutValue = when (setup) {
-                            is TabataSetup.Preset -> setup.profile.workoutTimeSec
-                            is TabataSetup.Custom -> setup.workoutTimeSec
-                            null -> 0
-                        }
-                        val relaxValue = when (setup) {
-                            is TabataSetup.Preset -> setup.profile.relaxTimeSec
-                            is TabataSetup.Custom -> setup.relaxTimeSec
-                            null -> 0
-                        }
-                        val breakValue = when (setup) {
-                            is TabataSetup.Preset -> setup.profile.breakTimeSec
-                            is TabataSetup.Custom -> setup.breakTimeSec
-                            null -> 0
-                        }
-                        val coolDownValue = when (setup) {
-                            is TabataSetup.Preset -> setup.profile.coolDownTimeSec
-                            is TabataSetup.Custom -> setup.coolDownTimeSec
-                            null -> 0
-                        }
-                        val setsValue = when (setup) {
-                            is TabataSetup.Preset -> setup.profile.setsCount
-                            is TabataSetup.Custom -> setup.setsCount
-                            null -> 0
-                        }
-
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.mediumSmall)
-                        ) {
-                            EditableTabataRow(
-                                label = "Пауза перед\nтренировкой",
-                                value = warmUpValue,
-                                isReadOnly = isReadOnly,
-                                showIcon = true,
-                                onValueChange = { onCustomParamChange("warmUp", it) }
-                            )
-
-                            EditableTabataRow(
-                                label = "Кол-во интервалов",
-                                value = repsValue,
-                                isReadOnly = isReadOnly,
-                                showIcon = false,
-                                onValueChange = { onCustomParamChange("reps", it) }
-                            )
-
-                            EditableTabataRow(
-                                label = "Упражнение",
-                                value = workoutValue,
-                                isReadOnly = isReadOnly,
-                                showIcon = true,
-                                onValueChange = { onCustomParamChange("workout", it) }
-                            )
-
-                            EditableTabataRow(
-                                label = "Отдых",
-                                value = relaxValue,
-                                isReadOnly = isReadOnly,
-                                showIcon = true,
-                                onValueChange = { onCustomParamChange("relax", it) }
-                            )
-
-                            EditableTabataRow(
-                                label = "Перезарядка",
-                                value = breakValue,
-                                isReadOnly = isReadOnly,
-                                showIcon = true,
-                                onValueChange = { onCustomParamChange("break", it) }
-                            )
-
-                            EditableTabataRow(
-                                label = "Заминка",
-                                value = coolDownValue,
-                                isReadOnly = isReadOnly,
-                                showIcon = true,
-                                onValueChange = { onCustomParamChange("coolDown", it) }
-                            )
-
-                            EditableTabataRow(
-                                label = "Кол-во кругов",
-                                value = setsValue,
-                                isReadOnly = isReadOnly,
-                                showIcon = false,
-                                onValueChange = { onCustomParamChange("sets", it) }
-                            )
-                        }
-                    }
+                    TabataParams(
+                        tabataSetup = setup,
+                        availableProfiles = uiState.availableProfiles,
+                        onCustomParamChange = onCustomParamChange,
+                        onCustomParamColorChange = onCustomPhaseColorChange,
+                        onProfileSelect = onProfileSelect
+                    )
                 }
             }
 
@@ -347,439 +186,6 @@ fun WorkoutSettingsScreenContent(
                     color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.headlineSmall
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun LabelTextField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(44.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            fontSize = 20.sp,
-            modifier = Modifier.weight(2f)
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Box(
-            modifier = Modifier
-                .weight(4f)
-                .height(44.dp)
-                .background(
-                    color = Color(0xFFEEEEEE),
-                    shape = RoundedCornerShape(6.dp)
-                )
-                .padding(horizontal = 12.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                singleLine = true,
-                textStyle = TextStyle(
-                    fontSize = 16.sp,
-                    color = Color.Black
-                ),
-                cursorBrush = SolidColor(Color.Black),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun <T> LabelDropdownMenu(
-    label: String,
-    items: List<T>,
-    selectedItem: T?,
-    itemLabel: (T) -> String,
-    onItemSelected: (T?) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier
-            .height(44.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    )
-    {
-        Text(text = label, fontSize = 20.sp, modifier = Modifier.weight(2f))
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Box(
-            modifier = Modifier
-                .weight(3f)
-                .fillMaxHeight()
-                .background(Color(0xFFEEEEEE), RoundedCornerShape(6.dp))
-                .clickable { expanded = true }
-                .padding(horizontal = 12.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = selectedItem?.let { itemLabel(it) } ?: "Выбрать",
-                    fontSize = 16.sp,
-                    color = Color.Black
-                )
-                Icon(
-                    imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
-                    contentDescription = null,
-                    tint = Color.Black
-                )
-            }
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.background(Color.White)
-            ) {
-                items.forEach { item ->
-                    DropdownMenuItem(
-                        text = { Text(itemLabel(item)) },
-                        onClick = {
-                            onItemSelected(item)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ProfileDropdownMenu(
-    items: List<TabataProfile>,
-    selectedProfile: TabataProfile?,
-    onItemSelected: (TabataProfile?) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp)
-            .background(
-                color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                shape = RoundedCornerShape(6.dp)
-            )
-            .clickable { expanded = true }
-            .padding(horizontal = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = selectedProfile?.name ?: "Свой таймер",
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Icon(
-                imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainerLowest)
-        ) {
-            DropdownMenuItem(
-                text = { Text("Свой таймер", color = MaterialTheme.colorScheme.onSurface) },
-                onClick = {
-                    onItemSelected(null)
-                    expanded = false
-                }
-            )
-            items.forEach { item ->
-                DropdownMenuItem(
-                    text = { Text(item.name, color = MaterialTheme.colorScheme.onSurface) },
-                    onClick = {
-                        onItemSelected(item)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun EditableTabataRow(
-    label: String,
-    value: Int,
-    isReadOnly: Boolean,
-    showIcon: Boolean,
-    onValueChange: (Int) -> Unit
-) {
-    val isTimeField = showIcon
-
-    var singleText by remember { mutableStateOf("") }
-    var singleFocused by remember { mutableStateOf(false) }
-
-    var mText by remember { mutableStateOf(TextFieldValue("00")) }
-    var sText by remember { mutableStateOf(TextFieldValue("00")) }
-
-    var mFocused by remember { mutableStateOf(false) }
-    var sFocused by remember { mutableStateOf(false) }
-
-    val mFocusRequester = remember { FocusRequester() }
-    val sFocusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(value, isReadOnly) {
-        if (isTimeField) {
-            val minutes = value / 60
-            val seconds = value % 60
-
-            if (isReadOnly || (!mFocused && !sFocused)) {
-                mText = TextFieldValue(String.format("%02d", minutes))
-                sText = TextFieldValue(String.format("%02d", seconds))
-            }
-        } else {
-            if (isReadOnly || !singleFocused) {
-                singleText =
-                    if (value == 0 && !isReadOnly) "" else value.toString()
-            }
-        }
-    }
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.weight(1f)
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-        ) {
-            if (showIcon) {
-                Icon(
-                    imageVector = Icons.Filled.InvertColors,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .size(width = if (isTimeField) 100.dp else 64.dp, height = 30.dp)
-                    .background(
-                        MaterialTheme.colorScheme.surfaceContainerLowest,
-                        RoundedCornerShape(6.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isTimeField) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        BasicTextField(
-                            value = mText,
-                            onValueChange = { newValue ->
-                                if (!isReadOnly) {
-                                    val digits = newValue.text.filter { it.isDigit() }.take(3)
-                                    mText = newValue.copy(
-                                        text = digits,
-                                        selection = TextRange(digits.length)
-                                    )
-
-                                    val minutes = digits.toIntOrNull() ?: 0
-                                    val seconds = sText.text.toIntOrNull() ?: 0
-
-                                    onValueChange(minutes * 60 + seconds)
-                                }
-                            },
-                            readOnly = isReadOnly,
-                            textStyle = TextStyle(
-                                fontSize = 16.sp,
-                                color =
-                                    if (isReadOnly) MaterialTheme.colorScheme.onSurface
-                                    else MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center
-                            ),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.NumberPassword
-                            ),
-                            singleLine = true,
-                            modifier = Modifier
-                                .width(36.dp)
-                                .focusRequester(mFocusRequester)
-                                .onFocusChanged {
-                                    val wasFocused = mFocused
-                                    mFocused = it.isFocused
-
-                                    if (wasFocused && !it.isFocused && !isReadOnly) {
-                                        val minutes = mText.text.toIntOrNull() ?: 0
-                                        mText = TextFieldValue(
-                                            String.format("%02d", minutes)
-                                        )
-                                    }
-                                }
-                                .pointerInput(isReadOnly) {
-                                    if (!isReadOnly) {
-                                        while (true) {
-                                            val tapped = awaitPointerEventScope {
-                                                awaitFirstDown(pass = PointerEventPass.Initial)
-
-                                                waitForUpOrCancellation(
-                                                    pass = PointerEventPass.Initial
-                                                ) != null
-                                            }
-
-                                            if (tapped) {
-                                                mFocusRequester.requestFocus()
-
-                                                withFrameNanos { }
-
-                                                mText = mText.copy(
-                                                    selection = TextRange(0, mText.text.length)
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                        )
-
-                        Text(
-                            text = ":",
-                            fontSize = 16.sp,
-                            color =
-                                if (isReadOnly) MaterialTheme.colorScheme.onSurface
-                                else MaterialTheme.colorScheme.primary
-                        )
-
-                        BasicTextField(
-                            value = sText,
-                            onValueChange = { newValue ->
-                                if (!isReadOnly) {
-                                    val digits = newValue.text.filter { it.isDigit() }.take(2)
-                                    val seconds = (digits.toIntOrNull() ?: 0)
-                                        .coerceAtMost(59)
-
-                                    sText = newValue.copy(
-                                        text = digits,
-                                        selection = TextRange(digits.length)
-                                    )
-
-                                    val minutes = mText.text.toIntOrNull() ?: 0
-                                    onValueChange(minutes * 60 + seconds)
-                                }
-                            },
-                            readOnly = isReadOnly,
-                            textStyle = TextStyle(
-                                fontSize = 16.sp,
-                                color =
-                                    if (isReadOnly) MaterialTheme.colorScheme.onSurface
-                                    else MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center
-                            ),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.NumberPassword
-                            ),
-                            singleLine = true,
-                            modifier = Modifier
-                                .width(28.dp)
-                                .focusRequester(sFocusRequester)
-                                .onFocusChanged {
-                                    val wasFocused = sFocused
-                                    sFocused = it.isFocused
-
-                                    if (wasFocused && !it.isFocused && !isReadOnly) {
-                                        val seconds = (sText.text.toIntOrNull() ?: 0)
-                                            .coerceAtMost(59)
-                                        sText = TextFieldValue(
-                                            String.format("%02d", seconds)
-                                        )
-                                    }
-                                }
-                                .pointerInput(isReadOnly) {
-                                    if (!isReadOnly) {
-                                        while (true) {
-                                            val tapped = awaitPointerEventScope {
-                                                awaitFirstDown(pass = PointerEventPass.Initial)
-
-                                                waitForUpOrCancellation(
-                                                    pass = PointerEventPass.Initial
-                                                ) != null
-                                            }
-
-                                            if (tapped) {
-                                                sFocusRequester.requestFocus()
-
-                                                withFrameNanos { }
-
-                                                sText = sText.copy(
-                                                    selection = TextRange(0, sText.text.length)
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                        )
-                    }
-                } else {
-                    BasicTextField(
-                        value = singleText,
-                        onValueChange = { newText ->
-                            if (!isReadOnly) {
-                                val digits = newText.filter { it.isDigit() }
-                                if (digits.length <= 3) {
-                                    singleText = digits
-                                    onValueChange(digits.toIntOrNull() ?: 0)
-                                }
-                            }
-                        },
-                        readOnly = isReadOnly,
-                        textStyle = TextStyle(
-                            fontSize = 16.sp,
-                            color =
-                                if (isReadOnly) MaterialTheme.colorScheme.onSurface
-                                else MaterialTheme.colorScheme.primary,
-                            textAlign = TextAlign.Center
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.NumberPassword
-                        ),
-                        singleLine = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusChanged {
-                                singleFocused = it.isFocused
-                            }
-                    )
-                }
             }
         }
     }

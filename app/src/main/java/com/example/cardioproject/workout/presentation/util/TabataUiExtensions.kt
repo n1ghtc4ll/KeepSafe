@@ -29,46 +29,68 @@ fun TabataSetup?.getColorForPhase(phase: WorkoutPhase): Color {
     return Color(hexValue)
 }
 
-val TabataSetup?.totalSets: Int
+val TabataSetup.totalSets: Int
     get() = when (this) {
         is TabataSetup.Custom -> this.setsCount
         is TabataSetup.Preset -> this.profile.setsCount
-        null -> 1
     }
-
-val TabataSetup?.totalReps: Int
+val TabataSetup.totalReps: Int
     get() = when (this) {
         is TabataSetup.Custom -> this.repsCount
         is TabataSetup.Preset -> this.profile.repsCount
-        null -> 1
     }
 
-val TabataSetup.workoutColor: Color
+val TabataSetup.workoutTimeSec: Int
     get() = when (this) {
-        is TabataSetup.Custom -> Color(this.workoutColorHex)
-        is TabataSetup.Preset -> Color(this.profile.workoutColorHex)
+        is TabataSetup.Custom -> this.workoutTimeSec
+        is TabataSetup.Preset -> this.profile.workoutTimeSec
+    }
+val TabataSetup.workoutColorHex: Long
+    get() = when (this) {
+        is TabataSetup.Custom -> this.workoutColorHex
+        is TabataSetup.Preset -> this.profile.workoutColorHex
     }
 
-val TabataSetup.warmUpColor: Color
+val TabataSetup.warmUpTimeSec: Int
     get() = when (this) {
-        is TabataSetup.Custom -> Color(this.warmUpColorHex)
-        is TabataSetup.Preset -> Color(this.profile.warmUpColorHex)
+        is TabataSetup.Custom -> this.warmUpTimeSec
+        is TabataSetup.Preset -> this.profile.warmUpTimeSec
+    }
+val TabataSetup.warmUpColorHex: Long
+    get() = when (this) {
+        is TabataSetup.Custom -> this.warmUpColorHex
+        is TabataSetup.Preset -> this.profile.warmUpColorHex
     }
 
-val TabataSetup.relaxColor: Color
+val TabataSetup.relaxTimeSec: Int
     get() = when (this) {
-        is TabataSetup.Custom -> Color(this.relaxColorHex)
-        is TabataSetup.Preset -> Color(this.profile.relaxColorHex)
+        is TabataSetup.Custom -> this.relaxTimeSec
+        is TabataSetup.Preset -> this.profile.relaxTimeSec
+    }
+val TabataSetup.relaxColorHex: Long
+    get() = when (this) {
+        is TabataSetup.Custom -> this.relaxColorHex
+        is TabataSetup.Preset -> this.profile.relaxColorHex
     }
 
-val TabataSetup.breakColor: Color
+val TabataSetup.breakTimeSec: Int
     get() = when (this) {
-        is TabataSetup.Custom -> Color(this.breakColorHex)
-        is TabataSetup.Preset -> Color(this.profile.breakColorHex)
+        is TabataSetup.Custom -> this.breakTimeSec
+        is TabataSetup.Preset -> this.profile.breakTimeSec
+    }
+val TabataSetup.breakColorHex: Long
+    get() = when (this) {
+        is TabataSetup.Custom -> this.breakColorHex
+        is TabataSetup.Preset -> this.profile.breakColorHex
     }
 
-val TabataSetup.coolDownColor: Color
+val TabataSetup.coolDownTimeSec: Int
     get() = when (this) {
-        is TabataSetup.Custom -> Color(this.coolDownColorHex)
-        is TabataSetup.Preset -> Color(this.profile.coolDownColorHex)
+        is TabataSetup.Custom -> this.coolDownTimeSec
+        is TabataSetup.Preset -> this.profile.coolDownTimeSec
+    }
+val TabataSetup.coolDownColorHex: Long
+    get() = when (this) {
+        is TabataSetup.Custom -> this.coolDownColorHex
+        is TabataSetup.Preset -> this.profile.coolDownColorHex
     }

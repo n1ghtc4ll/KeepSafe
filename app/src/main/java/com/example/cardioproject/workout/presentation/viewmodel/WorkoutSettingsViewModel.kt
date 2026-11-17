@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cardioproject.core.common.domain.model.TabataProfile
 import com.example.cardioproject.core.common.domain.model.Tag
+import com.example.cardioproject.settings.presentation.model.PhaseType
 import com.example.cardioproject.workout.domain.model.TabataSetup
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
 import com.example.cardioproject.workout.domain.usecase.GetWorkoutSetupDataUseCase
@@ -89,6 +90,22 @@ class WorkoutSettingsViewModel(
                 "sets" -> currentSetup.copy(setsCount = newValue)
                 "break" -> currentSetup.copy(breakTimeSec = newValue)
                 else -> currentSetup
+            }
+            state.copy(tabataSetup = updatedSetup)
+        }
+    }
+
+    fun onCustomPhaseColorChanged(phase: PhaseType, colorHex: Long) {
+        _uiState.update { state ->
+            val currentSetup = state.tabataSetup
+            if (currentSetup !is TabataSetup.Custom) return@update state
+
+            val updatedSetup = when (phase) {
+                PhaseType.WARM_UP -> currentSetup.copy(warmUpColorHex = colorHex)
+                PhaseType.WORKOUT -> currentSetup.copy(workoutColorHex = colorHex)
+                PhaseType.RELAX -> currentSetup.copy(relaxColorHex = colorHex)
+                PhaseType.BREAK -> currentSetup.copy(breakColorHex = colorHex)
+                PhaseType.COOL_DOWN -> currentSetup.copy(coolDownColorHex = colorHex)
             }
             state.copy(tabataSetup = updatedSetup)
         }

@@ -45,7 +45,10 @@ class ActiveWorkoutViewModel(
 
         viewModelScope.launch {
             settingsRepository.observeSettings().collect { trainingSettings ->
-                _uiState.update { it.copy(hrZones = trainingSettings.heartRateZones) }
+                _uiState.update { it.copy(
+                    hrZones = trainingSettings.heartRateZones,
+                    keepScreenOn = trainingSettings.keepScreenOnEnabled
+                ) }
             }
         }
 

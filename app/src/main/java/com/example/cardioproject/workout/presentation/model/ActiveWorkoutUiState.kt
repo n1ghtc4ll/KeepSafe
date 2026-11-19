@@ -14,7 +14,8 @@ data class ActiveWorkoutUiState(
     val currentHeartRate: Int = 0,
     val heartRateHistory: List<Int> = emptyList(),
     val hrZones: List<HeartRateZone> = emptyList(),
-    val isPaused: Boolean = false
+    val isPaused: Boolean = false,
+    val keepScreenOn: Boolean = false
 ) {
     val tabataRemainingFormatted: String
         get() = tabataTimerRemainingSec.formatAsMinutesSeconds()

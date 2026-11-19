@@ -27,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,6 +39,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,6 +70,14 @@ fun WorkoutScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     val dynamicPhaseColor = settings.tabataSetup.getColorForPhase(uiState.currentPhase)
+
+    val view = LocalView.current
+    DisposableEffect(uiState.keepScreenOn) {
+        view.keepScreenOn = uiState.keepScreenOn
+        onDispose {
+            view.keepScreenOn = false
+        }
+    }
 
     LaunchedEffect(settings) {
         viewModel.startWorkout(settings)

@@ -3,8 +3,8 @@ package com.example.cardioproject.workout.presentation.viewmodel
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cardioproject.workout.presentation.screen.WorkoutSession
-import com.example.cardioproject.workout.presentation.screen.WorkoutTag
+import com.example.cardioproject.workout.presentation.model.WorkoutSessionUi
+import com.example.cardioproject.workout.presentation.model.WorkoutTagUi
 import com.example.cardioproject.workout.domain.repository.WorkoutSessionRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -31,10 +31,10 @@ class WorkoutHistoryViewModel(
                 val durationString = String.format(Locale.getDefault(), "%02d:%02d:%02d", h, m, s)
 
                 val uiTag = domainSession.tag?.let { tag ->
-                    WorkoutTag(tag.id, tag.name, Color.Red)
-                } ?: WorkoutTag("0", "Без тега", Color.Gray)
+                    WorkoutTagUi(tag.id, tag.name, Color.Red)
+                } ?: WorkoutTagUi("0", "Без тега", Color.Gray)
 
-                WorkoutSession(
+                WorkoutSessionUi(
                     id = domainSession.id,
                     title = "Тренировка",
                     date = dateFormat.format(dateObj),

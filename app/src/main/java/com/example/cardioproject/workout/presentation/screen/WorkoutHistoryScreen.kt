@@ -17,12 +17,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -37,6 +36,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -51,49 +51,33 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.cardioproject.core.ui.components.AppThemeTopBar
+import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
+import com.example.cardioproject.core.ui.theme.spacing
+import com.example.cardioproject.workout.presentation.model.WorkoutSessionUi
+import com.example.cardioproject.workout.presentation.model.WorkoutTagUi
 import java.util.UUID
 
-private val BackgroundF3 = Color(0xFFF3F3F3)
-private val ButtonPurple = Color(0xFF6750A4)
-private val TextBlack = Color(0xFF1D1B20)
-private val CardWhite = Color(0xFFFFFFFF)
-
-data class WorkoutTag(
-    val id: String,
-    var name: String,
-    var color: Color
-)
-
-data class WorkoutSession(
-    val id: String,
-    var title: String,
-    val date: String,
-    val time: String,
-    val duration: String,
-    var tag: WorkoutTag,
-    var isSelected: Boolean = false
-)
 
 // Глобальные моковые теги для доступа из разных экранов
 val defaultTags = mutableStateListOf(
-    WorkoutTag("t1", "Общая", Color(0xFF009951)),
-    WorkoutTag("t2", "Силовая", Color(0xFFC00F0C)),
-    WorkoutTag("t3", "Легкая", Color(0xFFE6A000))
+    WorkoutTagUi("t1", "Общая", Color(0xFF009951)),
+    WorkoutTagUi("t2", "Силовая", Color(0xFFC00F0C)),
+    WorkoutTagUi("t3", "Легкая", Color(0xFFE6A000))
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutHistoryScreen(
-    workouts: List<WorkoutSession>,
+    workouts: List<WorkoutSessionUi>,
     onBackClick: () -> Unit = {},
     onWorkoutClick: (String) -> Unit = {},
-    onAddWorkout: (WorkoutSession) -> Unit = {},
-    onEditWorkout: (WorkoutSession) -> Unit = {},
-    onDeleteWorkout: (WorkoutSession) -> Unit = {}
+    onAddWorkout: (WorkoutSessionUi) -> Unit = {},
+    onEditWorkout: (WorkoutSessionUi) -> Unit = {},
+    onDeleteWorkout: (WorkoutSessionUi) -> Unit = {}
 ) {
     var showFilterDialog by remember { mutableStateOf(false) }
     var showPeriodDialog by remember { mutableStateOf(false) }
@@ -101,9 +85,8 @@ fun WorkoutHistoryScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedTypeFilter by remember { mutableStateOf("Все") }
 
-    // Состояния для добавления/редактирования
     var showEditDialog by remember { mutableStateOf(false) }
-    var workoutToEdit by remember { mutableStateOf<WorkoutSession?>(null) }
+    var workoutToEdit by remember { mutableStateOf<WorkoutSessionUi?>(null) }
 
     val filteredWorkouts = workouts.filter { session ->
         val matchesSearch = session.title.contains(searchQuery, ignoreCase = true)
@@ -112,14 +95,20 @@ fun WorkoutHistoryScreen(
     }
 
     Scaffold(
+        topBar = {
+            AppThemeTopBar(
+                title = "История тренировок",
+                onBackClick = onBackClick
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
                     workoutToEdit = null
                     showEditDialog = true
                 },
-                containerColor = ButtonPurple,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
                 Icon(Icons.Filled.Add, "Добавить тренировку")
             }
@@ -128,31 +117,16 @@ fun WorkoutHistoryScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(BackgroundF3)
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(
+                    vertical = MaterialTheme.spacing.small,
+                    horizontal = MaterialTheme.spacing.medium
+                ),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "Назад", tint = TextBlack)
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "История тренировок",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextBlack
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.mediumSmall),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
@@ -161,14 +135,15 @@ fun WorkoutHistoryScreen(
                         .weight(1f)
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ButtonPurple)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
-                    Icon(Icons.Filled.List, contentDescription = null, tint = Color.White)
+                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Фильтр", fontSize = 16.sp, color = Color.White)
+                    Text(text = "Фильтр", style = MaterialTheme.typography.bodyLarge)
                 }
-
-                Spacer(modifier = Modifier.width(12.dp))
 
                 Button(
                     onClick = { showPeriodDialog = true },
@@ -176,23 +151,28 @@ fun WorkoutHistoryScreen(
                         .weight(1f)
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ButtonPurple)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
-                    Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color.White)
+                    Icon(Icons.Filled.DateRange, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Период", fontSize = 16.sp, color = Color.White)
+                    Text(text = "Период", style = MaterialTheme.typography.bodyLarge)
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
             if (filteredWorkouts.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Тренировок не найдено", color = Color.Gray, fontSize = 16.sp)
+                    Text(
+                        text = "Тренировок не найдено",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                 }
             } else {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.mediumSmall),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(filteredWorkouts) { session ->
@@ -205,7 +185,6 @@ fun WorkoutHistoryScreen(
                             },
                             onDeleteClick = { onDeleteWorkout(session) },
                             onCheckedChange = { isChecked ->
-                                // Обновляем состояние isSelected у конкретной сессии
                                 onEditWorkout(session.copy(isSelected = isChecked))
                             }
                         )
@@ -242,12 +221,12 @@ fun WorkoutHistoryScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showPeriodDialog = false }) {
-                    Text("Применить", color = ButtonPurple)
+                    Text("Применить", color = MaterialTheme.colorScheme.primary)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showPeriodDialog = false }) {
-                    Text("Отмена", color = Color.Gray)
+                    Text("Отмена", color = MaterialTheme.colorScheme.secondary)
                 }
             }
         )
@@ -290,7 +269,7 @@ fun WorkoutHistoryScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showFilterDialog = false }) {
-                    Text("Готово", color = ButtonPurple)
+                    Text("Готово", color = MaterialTheme.colorScheme.primary)
                 }
             }
         )
@@ -314,9 +293,9 @@ fun WorkoutHistoryScreen(
 
 @Composable
 fun WorkoutEditDialog(
-    initialSession: WorkoutSession?,
+    initialSession: WorkoutSessionUi?,
     onDismiss: () -> Unit,
-    onSave: (WorkoutSession) -> Unit
+    onSave: (WorkoutSessionUi) -> Unit
 ) {
     var title by remember { mutableStateOf(initialSession?.title ?: "") }
     var date by remember { mutableStateOf(initialSession?.date ?: "01.01.2023") }
@@ -330,7 +309,9 @@ fun WorkoutEditDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (initialSession == null) "Добавить тренировку" else "Редактировать тренировку") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.mediumSmall)
+            ) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
@@ -373,7 +354,7 @@ fun WorkoutEditDialog(
                             .clickable { expandedTag = true },
                         trailingIcon = {
                             IconButton(onClick = { expandedTag = true }) {
-                                Icon(Icons.Filled.List, contentDescription = null)
+                                Icon(Icons.AutoMirrored.Filled.List, contentDescription = null)
                             }
                         }
                     )
@@ -397,7 +378,7 @@ fun WorkoutEditDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    val newSession = WorkoutSession(
+                    val newSession = WorkoutSessionUi(
                         id = initialSession?.id ?: UUID.randomUUID().toString(),
                         title = title.ifBlank { "Без названия" },
                         date = date,
@@ -409,12 +390,12 @@ fun WorkoutEditDialog(
                     onSave(newSession)
                 }
             ) {
-                Text("Сохранить", color = ButtonPurple)
+                Text("Сохранить", color = MaterialTheme.colorScheme.primary)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Отмена", color = Color.Gray)
+                Text("Отмена", color = MaterialTheme.colorScheme.secondary)
             }
         }
     )
@@ -423,7 +404,7 @@ fun WorkoutEditDialog(
 
 @Composable
 fun WorkoutItem(
-    session: WorkoutSession,
+    session: WorkoutSessionUi,
     onClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
@@ -434,102 +415,149 @@ fun WorkoutItem(
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardWhite),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(MaterialTheme.spacing.medium)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Информация о тренировке
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.mediumSmall)
                 ) {
                     Text(
                         text = session.title,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextBlack
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Дата:",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Gray
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = session.date, fontSize = 14.sp, color = TextBlack)
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Text(
-                            text = "Время:",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Gray
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = session.time, fontSize = 14.sp, color = TextBlack)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+                        ) {
+                            Text(
+                                text = "Дата:",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = session.date,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+                        ) {
+                            Text(
+                                text = "Время:",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = session.time,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+                    ) {
                         Text(
                             text = "Длительность:",
-                            fontSize = 14.sp,
-                            fontStyle = FontStyle.Italic,
-                            color = Color.Gray
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = session.duration,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = TextBlack
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
                     Box(
                         modifier = Modifier
                             .background(session.tag.color, RoundedCornerShape(8.dp))
-                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                            .padding(
+                                horizontal = MaterialTheme.spacing.mediumSmall,
+                                vertical = MaterialTheme.spacing.small
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = session.tag.name,
                             color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                 }
 
-                // Чекбокс выбора
                 Checkbox(
                     checked = session.isSelected,
                     onCheckedChange = onCheckedChange,
-                    colors = CheckboxDefaults.colors(checkedColor = ButtonPurple)
+                    colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
                 )
             }
 
-            // Кнопки управления (Изменить / Удалить)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small, Alignment.End)
             ) {
                 IconButton(onClick = onEditClick, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Редактировать", tint = Color.Gray)
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Редактировать",
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
                 IconButton(onClick = onDeleteClick, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Удалить", tint = Color.Red)
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Удалить",
+                        tint = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun WorkoutHistoryScreenPreview() {
+    KeepSafeProjectTheme {
+        WorkoutHistoryScreen(
+            workouts = listOf(
+                WorkoutSessionUi(
+                    id = "",
+                    title = "Workout1",
+                    date = "01.01.2000",
+                    time = "00:00",
+                    duration = "00:00",
+                    tag = WorkoutTagUi("t1", "Общая", Color(0xFF009951))
+                ),
+                WorkoutSessionUi(
+                    id = "",
+                    title = "Workout2",
+                    date = "02.01.2000",
+                    time = "00:00",
+                    duration = "00:00",
+                    tag = WorkoutTagUi("t2", "Силовая", Color(0xFFC00F0C))
+                )
+            )
+        )
     }
 }

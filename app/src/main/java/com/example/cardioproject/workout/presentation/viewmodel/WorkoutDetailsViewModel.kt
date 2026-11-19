@@ -3,8 +3,8 @@ package com.example.cardioproject.workout.presentation.viewmodel
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cardioproject.workout.presentation.screen.WorkoutSession
-import com.example.cardioproject.workout.presentation.screen.WorkoutTag
+import com.example.cardioproject.workout.presentation.model.WorkoutSessionUi
+import com.example.cardioproject.workout.presentation.model.WorkoutTagUi
 import com.example.cardioproject.workout.domain.repository.WorkoutSessionRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -33,10 +33,10 @@ class WorkoutDetailsViewModel(
             val durationString = String.format(Locale.getDefault(), "%02d:%02d:%02d", h, m, s)
 
             val uiTag = domainSession.tag?.let { tag ->
-                WorkoutTag(tag.id, tag.name, Color.Red)
-            } ?: WorkoutTag("0", "Без тега", Color.Gray)
+                WorkoutTagUi(tag.id, tag.name, Color.Red)
+            } ?: WorkoutTagUi("0", "Без тега", Color.Gray)
 
-            WorkoutSession(
+            WorkoutSessionUi(
                 id = domainSession.id,
                 title = uiTag.name, // Используем имя тега вместо отсутствующего title
                 date = dateFormat.format(dateObj),
@@ -52,7 +52,7 @@ class WorkoutDetailsViewModel(
             initialValue = null
         )
 
-    fun updateTag(newTag: WorkoutTag) {
+    fun updateTag(newTag: WorkoutTagUi) {
         viewModelScope.launch {
             // Чтобы не потерять пульс, сначала берем актуальную сущность, меняем тег и сохраняем
             // В идеале здесь нужен метод updateTag в самом Dao, но для скорости сойдет и так

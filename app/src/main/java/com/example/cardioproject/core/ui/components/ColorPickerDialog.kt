@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.cardioproject.core.ui.theme.spacing
 
 @Composable
 fun ColorPickerDialog(
@@ -37,13 +38,13 @@ fun ColorPickerDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = "Выберите цвет фазы", color = MaterialTheme.colorScheme.onSurface) },
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surface,
         text = {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
-                contentPadding = PaddingValues(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                contentPadding = PaddingValues(MaterialTheme.spacing.small),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
             ) {
                 items(colorsPalette) { colorValue ->
                     val isSelected = selectedColor == colorValue
@@ -69,7 +70,7 @@ fun ColorPickerDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Отмена", color = MaterialTheme.colorScheme.onSurface)
+                Text("Отмена", color = MaterialTheme.colorScheme.secondary)
             }
         }
     )

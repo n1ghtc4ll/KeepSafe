@@ -53,6 +53,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cardioproject.workout.presentation.model.WorkoutSessionUi
+import com.example.cardioproject.workout.presentation.model.WorkoutTagUi
 import java.util.UUID
 
 private val BackgroundColor = Color(0xFFF4F4F6)
@@ -71,9 +73,9 @@ private val TagColors = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutDetailsScreen(
-    workout: WorkoutSession,
+    workout: WorkoutSessionUi,
     onBackClick: () -> Unit = {},
-    onWorkoutUpdated: (WorkoutSession) -> Unit = {}
+    onWorkoutUpdated: (WorkoutSessionUi) -> Unit = {}
 ) {
     // Инициализируем состояния значениями из переданной тренировки
     var workoutTitle by remember(workout.id) { mutableStateOf(workout.title) }
@@ -269,8 +271,8 @@ fun WorkoutDetailsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagManagementDialog(
-    currentTag: WorkoutTag,
-    onTagSelected: (WorkoutTag) -> Unit,
+    currentTag: WorkoutTagUi,
+    onTagSelected: (WorkoutTagUi) -> Unit,
     onDismiss: () -> Unit
 ) {
     var tags by remember { mutableStateOf(defaultTags.toList()) }
@@ -358,7 +360,7 @@ fun TagManagementDialog(
                         Button(
                             onClick = {
                                 if (newTagName.isNotBlank()) {
-                                    val newTag = WorkoutTag(
+                                    val newTag = WorkoutTagUi(
                                         UUID.randomUUID().toString(),
                                         newTagName,
                                         newTagColor
@@ -453,7 +455,7 @@ fun HeartRateGraph() {
 @Preview(showBackground = true)
 @Composable
 fun WorkoutDetailsPreview() {
-    val sampleWorkout = WorkoutSession(
+    val sampleWorkout = WorkoutSessionUi(
         id = "1",
         title = "Утренняя пробежка",
         date = "15.07.2023",

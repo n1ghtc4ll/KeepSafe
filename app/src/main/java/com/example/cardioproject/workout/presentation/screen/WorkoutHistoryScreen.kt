@@ -58,15 +58,16 @@ import com.example.cardioproject.core.ui.components.AppThemeTopBar
 import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
 import com.example.cardioproject.core.ui.theme.spacing
 import com.example.cardioproject.workout.presentation.model.WorkoutSessionUi
-import com.example.cardioproject.workout.presentation.model.WorkoutTagUi
+import androidx.core.graphics.toColorInt
+import com.example.cardioproject.core.common.presentation.model.WorkoutTagUi
 import java.util.UUID
 
 
 // Глобальные моковые теги для доступа из разных экранов
 val defaultTags = mutableStateListOf(
-    WorkoutTagUi("t1", "Общая", Color(0xFF009951)),
-    WorkoutTagUi("t2", "Силовая", Color(0xFFC00F0C)),
-    WorkoutTagUi("t3", "Легкая", Color(0xFFE6A000))
+    WorkoutTagUi("t1", "Общая", "#009951", false),
+    WorkoutTagUi("t2", "Силовая", "#C00F0C", false),
+    WorkoutTagUi("t3", "Легкая", "#E6A000", false)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -490,7 +491,10 @@ fun WorkoutItem(
 
                     Box(
                         modifier = Modifier
-                            .background(session.tag.color, RoundedCornerShape(8.dp))
+                            .background(
+                                try { Color(session.tag.color.toColorInt()) } catch(_: Exception) { MaterialTheme.colorScheme.primary },
+                                RoundedCornerShape(8.dp)
+                            )
                             .padding(
                                 horizontal = MaterialTheme.spacing.mediumSmall,
                                 vertical = MaterialTheme.spacing.small
@@ -547,7 +551,7 @@ fun WorkoutHistoryScreenPreview() {
                     date = "01.01.2000",
                     time = "00:00",
                     duration = "00:00",
-                    tag = WorkoutTagUi("t1", "Общая", Color(0xFF009951))
+                    tag = WorkoutTagUi("t1", "Общая", "#009951", false)
                 ),
                 WorkoutSessionUi(
                     id = "",
@@ -555,7 +559,7 @@ fun WorkoutHistoryScreenPreview() {
                     date = "02.01.2000",
                     time = "00:00",
                     duration = "00:00",
-                    tag = WorkoutTagUi("t2", "Силовая", Color(0xFFC00F0C))
+                    tag = WorkoutTagUi("t2", "Силовая", "#C00F0C", false)
                 )
             )
         )

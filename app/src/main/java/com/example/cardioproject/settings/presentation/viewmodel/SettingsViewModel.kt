@@ -21,7 +21,8 @@ import com.example.cardioproject.settings.presentation.model.HeartRateZone
 import com.example.cardioproject.settings.presentation.model.DeviceInfoUi
 import com.example.cardioproject.settings.presentation.model.SettingsUiState
 import com.example.cardioproject.settings.presentation.model.TimerProfileUi
-import com.example.cardioproject.settings.presentation.model.WorkoutTag
+import com.example.cardioproject.core.common.presentation.model.WorkoutTagUi
+import com.example.cardioproject.core.common.presentation.model.toUiTag
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -123,7 +124,7 @@ class SettingsViewModel(
         }
     }
 
-    fun onEditTag(tag: WorkoutTag, newName: String, color: String) {
+    fun onEditTag(tag: WorkoutTagUi, newName: String, color: String) {
         if (newName.isBlank()) return
         viewModelScope.launch {
             val updatedTag = Tag(
@@ -135,7 +136,7 @@ class SettingsViewModel(
         }
     }
 
-    fun onDeleteTag(tag: WorkoutTag) {
+    fun onDeleteTag(tag: WorkoutTagUi) {
         viewModelScope.launch {
             tagInteractor.deleteWorkoutTag(tag.id)
         }
@@ -210,13 +211,6 @@ private fun DomainHeartRateZone.toUiZone() = HeartRateZone(
 private fun TabataProfile.toUiProfile() = TimerProfileUi(
     id = this.id,
     name = this.name
-)
-
-private fun Tag.toUiTag() = WorkoutTag(
-    id = this.id,
-    name = this.name,
-    color = this.color,
-    editable = true
 )
 
 private fun DeviceInfo.toUi() = DeviceInfoUi(

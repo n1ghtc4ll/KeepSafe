@@ -3,7 +3,9 @@ package com.example.cardioproject.workout.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cardioproject.core.common.domain.model.TabataProfile
-import com.example.cardioproject.core.common.domain.model.Tag
+import com.example.cardioproject.core.common.presentation.model.WorkoutTagUi
+import com.example.cardioproject.core.common.presentation.model.toDomain
+import com.example.cardioproject.core.common.presentation.model.toUiTag
 import com.example.cardioproject.settings.presentation.model.PhaseType
 import com.example.cardioproject.workout.domain.model.TabataSetup
 import com.example.cardioproject.workout.domain.model.WorkoutSettings
@@ -34,7 +36,7 @@ class WorkoutSettingsViewModel(
                     } ?: TabataSetup.Custom()
 
                     currentState.copy(
-                        availableTags = setupData.tags,
+                        availableTags = setupData.tags.map { it.toUiTag(editable = false) },
                         availableProfiles = setupData.tabataProfiles,
                         tabataSetup = currentState.tabataSetup ?: defaultSetup
                     )
@@ -47,7 +49,7 @@ class WorkoutSettingsViewModel(
         _uiState.update { it.copy(title = newTitle) }
     }
 
-    fun onTagSelected(tag: Tag?) {
+    fun onTagSelected(tag: WorkoutTagUi?) {
         _uiState.update { it.copy(selectedTag = tag) }
     }
 
@@ -115,7 +117,7 @@ class WorkoutSettingsViewModel(
         val state = _uiState.value
         return WorkoutSettings(
             title = state.title.ifBlank { "Тренировка" },
-            selectedTag = state.selectedTag,
+            selectedTag = state.selectedTag?.toDomain(),
             isTabataEnabled = state.isTabataEnabled,
             tabataSetup = if (state.isTabataEnabled) state.tabataSetup else null
         )

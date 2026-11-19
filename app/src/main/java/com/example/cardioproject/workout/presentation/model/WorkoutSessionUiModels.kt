@@ -1,12 +1,6 @@
 package com.example.cardioproject.workout.presentation.model
 
-import androidx.compose.ui.graphics.Color
-
-data class WorkoutTagUi(
-    val id: String,
-    var name: String,
-    var color: Color
-)
+import com.example.cardioproject.core.common.presentation.model.WorkoutTagUi
 
 data class WorkoutSessionUi(
     val id: String,

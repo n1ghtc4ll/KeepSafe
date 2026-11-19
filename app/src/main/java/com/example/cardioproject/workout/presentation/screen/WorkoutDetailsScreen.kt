@@ -20,8 +20,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -30,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -54,7 +55,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardioproject.workout.presentation.model.WorkoutSessionUi
-import com.example.cardioproject.workout.presentation.model.WorkoutTagUi
+import androidx.core.graphics.toColorInt
+import com.example.cardioproject.core.common.presentation.model.WorkoutTagUi
 import java.util.UUID
 
 private val BackgroundColor = Color(0xFFF4F4F6)
@@ -97,7 +99,7 @@ fun WorkoutDetailsScreen(
         ) {
             IconButton(onClick = onBackClick) {
                 Icon(
-                    imageVector = Icons.Filled.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Назад",
                     tint = TextDark
                 )
@@ -171,7 +173,10 @@ fun WorkoutDetailsScreen(
             Spacer(modifier = Modifier.width(12.dp))
             Box(
                 modifier = Modifier
-                    .background(currentTag.color, RoundedCornerShape(10.dp))
+                    .background(
+                        try { Color(currentTag.color.toColorInt()) } catch(_: Exception) { MaterialTheme.colorScheme.primary },
+                        RoundedCornerShape(10.dp)
+                    )
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -302,7 +307,10 @@ fun TagManagementDialog(
                                 )
                                 Box(
                                     modifier = Modifier
-                                        .background(tag.color, RoundedCornerShape(8.dp))
+                                        .background(
+                                            try { Color(tag.color.toColorInt()) } catch(_: Exception) { MaterialTheme.colorScheme.primary },
+                                            RoundedCornerShape(8.dp)
+                                        )
                                         .padding(horizontal = 8.dp, vertical = 4.dp)
                                 ) {
                                     Text(tag.name, color = Color.White, fontSize = 12.sp)
@@ -360,10 +368,12 @@ fun TagManagementDialog(
                         Button(
                             onClick = {
                                 if (newTagName.isNotBlank()) {
+                                    val colorHex = String.format("#%08X", (0xFFFFFFFF and newTagColor.value.toLong()))
                                     val newTag = WorkoutTagUi(
                                         UUID.randomUUID().toString(),
                                         newTagName,
-                                        newTagColor
+                                        colorHex,
+                                        true
                                     )
                                     tags = tags + newTag
                                     defaultTags.add(newTag)
@@ -461,7 +471,7 @@ fun WorkoutDetailsPreview() {
         date = "15.07.2023",
         time = "08:00",
         duration = "00:45:00",
-        tag = defaultTags[0]
+        tag = WorkoutTagUi("t1", "Общая", "#009951", false)
     )
     WorkoutDetailsScreen(workout = sampleWorkout)
 }

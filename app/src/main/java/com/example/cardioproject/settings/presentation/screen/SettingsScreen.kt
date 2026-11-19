@@ -33,7 +33,7 @@ import com.example.cardioproject.settings.presentation.model.DeviceInfoUi
 import java.util.UUID
 import com.example.cardioproject.settings.presentation.model.SettingsUiState
 import com.example.cardioproject.settings.presentation.model.TimerProfileUi
-import com.example.cardioproject.settings.presentation.model.WorkoutTag
+import com.example.cardioproject.core.common.presentation.model.WorkoutTagUi
 import com.example.cardioproject.settings.presentation.ui.components.BirthDatePickerDialog
 import com.example.cardioproject.settings.presentation.ui.components.BluetoothDeviceRow
 import com.example.cardioproject.settings.presentation.ui.components.GenderPickerDialog
@@ -65,8 +65,8 @@ fun SettingsScreen(
     onPhaseSoundToggle: (Boolean) -> Unit = {},
     onVolumeChange: (Float) -> Unit = {},
     onAddTag: (String, String) -> Unit = { _, _ -> },
-    onEditTag: (WorkoutTag, String, String) -> Unit = { _, _, _ -> },
-    onDeleteTag: (WorkoutTag) -> Unit = {},
+    onEditTag: (WorkoutTagUi, String, String) -> Unit = { _, _, _ -> },
+    onDeleteTag: (WorkoutTagUi) -> Unit = {},
     onZoneChange: (Int, ClosedFloatingPointRange<Float>) -> Unit = { _, _ -> },
     onAutoCalculateZones: () -> Unit = {},
     onCriticalPulseAlertToggle: (Boolean) -> Unit = {},
@@ -76,7 +76,7 @@ fun SettingsScreen(
     onHeightChange: (String) -> Unit = {},
 ) {
     var showAddTagDialog by remember { mutableStateOf(false) }
-    var tagBeingEdited by remember { mutableStateOf<WorkoutTag?>(null) }
+    var tagBeingEdited by remember { mutableStateOf<WorkoutTagUi?>(null) }
     var showBirthDateDialog by remember { mutableStateOf(false) }
     var showGenderDialog by remember { mutableStateOf(false) }
     var showHeightDialog by remember { mutableStateOf(false) }
@@ -325,7 +325,7 @@ private fun SettingsScreenPreview() {
             onPhaseSoundToggle = { state = state.copy(phaseSoundEnabled = it) },
             onVolumeChange = { state = state.copy(signalVolume = it) },
             onAddTag = { name, color ->
-                state = state.copy(tags = state.tags + WorkoutTag(
+                state = state.copy(tags = state.tags + WorkoutTagUi(
                     id = UUID.randomUUID().toString(),
                     name = name,
                     color = "#FF0000"

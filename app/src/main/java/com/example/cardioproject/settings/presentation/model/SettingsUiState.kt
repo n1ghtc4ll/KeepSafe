@@ -1,5 +1,6 @@
 package com.example.cardioproject.settings.presentation.model
 
+import com.example.cardioproject.core.common.presentation.model.WorkoutTagUi
 import java.util.UUID
 
 data class DeviceInfoUi(
@@ -23,23 +24,16 @@ data class TimerProfileUi(
     val name: String
 )
 
-data class WorkoutTag(
-    val id: String,
-    val name: String,
-    val color: String, // Добавили цвет, так как он есть в TagEntity
-    val editable: Boolean = true
-)
-
 data class SettingsUiState(
     val savedDevices: List<DeviceInfoUi> = emptyList(),
     val activeDevice: ActiveDeviceUi? = null,
     val phaseSoundEnabled: Boolean = true,
     val signalVolume: Float = 0.6f,
-    val tags: List<WorkoutTag> = listOf(
-        WorkoutTag(UUID.randomUUID().toString(), "Общая", "#6750A4", false),
-        WorkoutTag(UUID.randomUUID().toString(), "Силовая", "#6750A4", false),
-        WorkoutTag(UUID.randomUUID().toString(), "Легкая", "#6750A4", false),
-        WorkoutTag(UUID.randomUUID().toString(), "Вело", "#6750A4", false)
+    val tags: List<WorkoutTagUi> = listOf(
+        WorkoutTagUi(UUID.randomUUID().toString(), "Общая", "#6750A4", false),
+        WorkoutTagUi(UUID.randomUUID().toString(), "Силовая", "#6750A4", false),
+        WorkoutTagUi(UUID.randomUUID().toString(), "Легкая", "#6750A4", false),
+        WorkoutTagUi(UUID.randomUUID().toString(), "Вело", "#6750A4", false)
     ),
     val timerProfiles: List<TimerProfileUi> = listOf(
         TimerProfileUi("1", "Профиль 1"),

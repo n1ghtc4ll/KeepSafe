@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardioproject.core.common.domain.model.TabataProfile
-import com.example.cardioproject.core.common.domain.model.Tag
+import com.example.cardioproject.core.common.presentation.model.WorkoutTagUi
 import com.example.cardioproject.core.ui.components.LabelDropdownMenu
 import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
 import com.example.cardioproject.core.ui.theme.spacing
@@ -76,7 +76,7 @@ fun WorkoutSettingsScreenContent(
     onBackClick: () -> Unit = {  },
     onStartClick: () -> Unit = {  },
     onTitleChange: (String) -> Unit = {  },
-    onTagSelect: (Tag?) -> Unit = {  },
+    onTagSelect: (WorkoutTagUi?) -> Unit = {  },
     onTabataToggle: (Boolean) -> Unit = {  },
     onProfileSelect: (TabataProfile?) -> Unit = {  },
     onCustomParamChange: (String, Int) -> Unit = { _, _ -> },

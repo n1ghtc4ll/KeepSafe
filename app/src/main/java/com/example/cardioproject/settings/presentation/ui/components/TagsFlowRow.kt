@@ -30,12 +30,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import com.example.cardioproject.core.ui.theme.GraySurface
-import com.example.cardioproject.settings.presentation.model.WorkoutTag
+import com.example.cardioproject.core.common.presentation.model.WorkoutTagUi
 
 @Composable
 fun TagsFlowRow(
-    tags: List<WorkoutTag>,
-    onEditTag: (WorkoutTag) -> Unit
+    tags: List<WorkoutTagUi>,
+    onEditTag: (WorkoutTagUi) -> Unit
 ) {
     SimpleFlowRow(
         modifier = Modifier.fillMaxWidth(),
@@ -109,7 +109,7 @@ fun SimpleFlowRow(
 }
 
 @Composable
-fun TagChip(tag: WorkoutTag, onEditClick: () -> Unit) {
+fun TagChip(tag: WorkoutTagUi, onEditClick: () -> Unit) {
     val tagColor = try {
         Color(tag.color.toColorInt())
     } catch (e: Exception) {

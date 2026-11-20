@@ -105,7 +105,7 @@ fun WorkoutScreen(
             viewModel.stopWorkout()
         },
         onPauseClick = {
-
+            viewModel.togglePause()
         }
     )
 }
@@ -202,13 +202,13 @@ fun WorkoutScreenContent(
                         .weight(1f)
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = if (uiState.isPaused) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "Пауза",
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        text = if (uiState.isPaused) "Продолжить" else "Пауза",
+                        color = if (uiState.isPaused) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onPrimary,
                         style = MaterialTheme.typography.titleSmall
                     )
                 }

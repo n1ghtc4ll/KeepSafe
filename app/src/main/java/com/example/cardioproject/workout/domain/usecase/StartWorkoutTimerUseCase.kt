@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.flow
 import kotlin.time.Duration.Companion.milliseconds
 
 class StartWorkoutTimerUseCase {
-    operator fun invoke(setup: TabataSetup): Flow<WorkoutTimerState> = flow {
+    operator fun invoke(setup: TabataSetup, isPaused: () -> Boolean = { false }): Flow<WorkoutTimerState> = flow {
         var totalElapsedTime = 0
         val setsCount: Int
         val repsCount: Int
@@ -42,19 +42,19 @@ class StartWorkoutTimerUseCase {
             }
         }
 
-        totalElapsedTime = runPhase(WorkoutPhase.WARMUP, warmUpTimeSec, 1, 1, totalElapsedTime)
+        totalElapsedTime = runPhase(WorkoutPhase.WARMUP, warmUpTimeSec, 1, 1, totalElapsedTime, isPaused)
 
         for (set in 1..setsCount) {
             for (rep in 1..repsCount) {
-                totalElapsedTime = runPhase(WorkoutPhase.WORKOUT, workoutTimeSec, set, rep, totalElapsedTime)
+                totalElapsedTime = runPhase(WorkoutPhase.WORKOUT, workoutTimeSec, set, rep, totalElapsedTime, isPaused)
 
                 if (rep < repsCount)
-                    totalElapsedTime = runPhase(WorkoutPhase.BREAK, breakTimeSec, set, rep, totalElapsedTime)
+                    totalElapsedTime = runPhase(WorkoutPhase.BREAK, breakTimeSec, set, rep, totalElapsedTime, isPaused)
             }
-            totalElapsedTime = runPhase(WorkoutPhase.RELAX, relaxTimeSec, set, repsCount, totalElapsedTime)
+            totalElapsedTime = runPhase(WorkoutPhase.RELAX, relaxTimeSec, set, repsCount, totalElapsedTime, isPaused)
         }
 
-        totalElapsedTime = runPhase(WorkoutPhase.COOLDOWN, coolDownTimeSec, setsCount, repsCount, totalElapsedTime)
+        totalElapsedTime = runPhase(WorkoutPhase.COOLDOWN, coolDownTimeSec, setsCount, repsCount, totalElapsedTime, isPaused)
         emit(WorkoutTimerState(WorkoutPhase.FINISHED, 0, setsCount, repsCount, totalElapsedTime))
     }
 
@@ -63,7 +63,8 @@ class StartWorkoutTimerUseCase {
         durationSec: Int,
         currentSet: Int,
         currentRep: Int,
-        startElapsedTime: Int
+        startElapsedTime: Int,
+        isPaused: () -> Boolean
     ): Int {
         var currentTotal = startElapsedTime
         var timeRemaining = durationSec
@@ -77,7 +78,15 @@ class StartWorkoutTimerUseCase {
                     currentTotal
                 )
             )
-            delay(1000L.milliseconds)
+            
+            var msWaited = 0
+            while (msWaited < 1000) {
+                delay(100L.milliseconds)
+                if (!isPaused()) {
+                    msWaited += 100
+                }
+            }
+            
             timeRemaining--
             currentTotal++
         }

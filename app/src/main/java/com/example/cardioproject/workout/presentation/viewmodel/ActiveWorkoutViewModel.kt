@@ -82,7 +82,7 @@ class ActiveWorkoutViewModel(
             timerJob = viewModelScope.launch {
                 var previousPhase: WorkoutPhase? = null
                 
-                startTimerUseCase(settings.tabataSetup).collect { timerState ->
+                startTimerUseCase(settings.tabataSetup, { _uiState.value.isPaused }).collect { timerState ->
                     if (previousPhase != null && previousPhase != timerState.currentPhase && timerState.currentPhase != WorkoutPhase.FINISHED) {
                         playPhaseChangeSound()
                     }
@@ -105,7 +105,13 @@ class ActiveWorkoutViewModel(
             timerJob = viewModelScope.launch {
                 var elapsed = 0
                 while (true) {
-                    delay(1000.milliseconds)
+                    var msWaited = 0
+                    while (msWaited < 1000) {
+                        delay(100.milliseconds)
+                        if (!_uiState.value.isPaused) {
+                            msWaited += 100
+                        }
+                    }
                     elapsed++
                     _uiState.update { it.copy(
                         currentPhase = WorkoutPhase.WORKOUT,
@@ -144,6 +150,10 @@ class ActiveWorkoutViewModel(
                 heartRateHistory = state.heartRateHistory + bpm
             )
         }
+    }
+
+    fun togglePause() {
+        _uiState.update { it.copy(isPaused = !it.isPaused) }
     }
 
     fun stopWorkout() {

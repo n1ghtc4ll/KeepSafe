@@ -19,6 +19,10 @@ class WorkoutSessionRepositoryImpl(
         workoutDao.insertWorkout(session.toEntity())
     }
 
+    override suspend fun updateWorkout(session: WorkoutSession) {
+        workoutDao.updateWorkout(session.toEntity())
+    }
+
     override fun getWorkoutHistory(): Flow<List<WorkoutSession>> {
         return workoutDao.getAllWorkouts().map { workoutEntityList ->
             workoutEntityList.map { workoutEntity ->

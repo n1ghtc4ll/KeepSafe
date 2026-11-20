@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
@@ -74,6 +76,7 @@ val defaultTags = mutableStateListOf(
 @Composable
 fun WorkoutHistoryScreen(
     workouts: List<WorkoutSessionUi>,
+    availableTags: List<WorkoutTagUi> = defaultTags,
     onBackClick: () -> Unit = {},
     onWorkoutClick: (String) -> Unit = {},
     onAddWorkout: (WorkoutSessionUi) -> Unit = {},
@@ -236,9 +239,9 @@ fun WorkoutHistoryScreen(
     if (showFilterDialog) {
         AlertDialog(
             onDismissRequest = { showFilterDialog = false },
-            title = { Text("Фильтр тренировок") },
-            text = {
+            title = { 
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text("Фильтр тренировок")
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
@@ -247,9 +250,12 @@ fun WorkoutHistoryScreen(
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
-
-                    Text("Тип тренировки:", fontWeight = FontWeight.Bold)
-                    val types = listOf("Все") + defaultTags.map { it.name }
+                    Text("Тип тренировки:", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                }
+            },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    val types = listOf("Все") + availableTags.map { it.name }
                     types.forEach { type ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -279,6 +285,7 @@ fun WorkoutHistoryScreen(
     if (showEditDialog) {
         WorkoutEditDialog(
             initialSession = workoutToEdit,
+            availableTags = availableTags,
             onDismiss = { showEditDialog = false },
             onSave = { session ->
                 if (workoutToEdit == null) {
@@ -295,6 +302,7 @@ fun WorkoutHistoryScreen(
 @Composable
 fun WorkoutEditDialog(
     initialSession: WorkoutSessionUi?,
+    availableTags: List<WorkoutTagUi>,
     onDismiss: () -> Unit,
     onSave: (WorkoutSessionUi) -> Unit
 ) {
@@ -302,7 +310,7 @@ fun WorkoutEditDialog(
     var date by remember { mutableStateOf(initialSession?.date ?: "01.01.2023") }
     var time by remember { mutableStateOf(initialSession?.time ?: "12:00") }
     var duration by remember { mutableStateOf(initialSession?.duration ?: "00:30:00") }
-    var tag by remember { mutableStateOf(initialSession?.tag ?: defaultTags[0]) }
+    var tag by remember { mutableStateOf(initialSession?.tag ?: availableTags.firstOrNull() ?: defaultTags[0]) }
 
     var expandedTag by remember { mutableStateOf(false) }
 
@@ -363,7 +371,7 @@ fun WorkoutEditDialog(
                         expanded = expandedTag,
                         onDismissRequest = { expandedTag = false }
                     ) {
-                        defaultTags.forEach { t ->
+                        availableTags.forEach { t ->
                             DropdownMenuItem(
                                 text = { Text(t.name) },
                                 onClick = {

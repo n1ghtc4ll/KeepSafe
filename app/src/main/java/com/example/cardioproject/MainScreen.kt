@@ -117,16 +117,23 @@ fun MainScreen() {
                     val viewModel: WorkoutHistoryViewModel = koinViewModel()
                     val workouts by viewModel.workouts.collectAsState()
 
-                    WorkoutHistoryScreen(
+                    val tags by viewModel.availableTags.collectAsState()
+
+                WorkoutHistoryScreen(
                         workouts = workouts,
+                        availableTags = tags,
                         onBackClick = { topLevelBackStack.removeLast() },
                         onWorkoutClick = { id ->
                             topLevelBackStack.add(WorkoutDetails(id))
                         },
-                        onAddWorkout = { },
-                        onEditWorkout = {  },
+                        onAddWorkout = { session ->
+                            viewModel.saveWorkout(session)
+                        },
+                        onEditWorkout = { session ->
+                            viewModel.saveWorkout(session)
+                        },
                         onDeleteWorkout = { session ->
-                            // viewModel.deleteWorkoutById(session.id)
+                            viewModel.deleteWorkout(session)
                         }
                     )
                 }

@@ -31,7 +31,7 @@ val workoutModule = module {
         )
     }
 
-    viewModel { WorkoutHistoryViewModel(repository = get()) }
+    viewModel { WorkoutHistoryViewModel(repository = get(), settingsRepository = get()) }
     viewModel { MainScreenViewModel(get(), get()) }
 
     viewModel { parameters ->

@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.cardioproject.workout.data.entity.WorkoutSessionDbEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -12,6 +13,9 @@ import kotlinx.coroutines.flow.Flow
 interface WorkoutSessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWorkout(workout: WorkoutSessionDbEntity)
+
+    @Update
+    suspend fun updateWorkout(workout: WorkoutSessionDbEntity)
 
     @Query("SELECT * FROM workout_session_history ORDER BY dateTimestamp DESC")
     fun getAllWorkouts(): Flow<List<WorkoutSessionDbEntity>>

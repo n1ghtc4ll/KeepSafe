@@ -8,6 +8,8 @@ import com.example.cardioproject.core.common.presentation.model.toUiTag
 import com.example.cardioproject.workout.domain.repository.WorkoutSessionRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
+import com.example.cardioproject.core.common.presentation.model.toDomain
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -53,8 +55,11 @@ class WorkoutDetailsViewModel(
 
     fun updateTag(newTag: WorkoutTagUi) {
         viewModelScope.launch {
-            // Чтобы не потерять пульс, сначала берем актуальную сущность, меняем тег и сохраняем
-            // В идеале здесь нужен метод updateTag в самом Dao, но для скорости сойдет и так
+            val domainSession = repository.getWorkoutById(workoutId).firstOrNull()
+            if (domainSession != null) {
+                val updatedSession = domainSession.copy(tag = newTag.toDomain())
+                repository.updateWorkout(updatedSession)
+            }
         }
     }
 }

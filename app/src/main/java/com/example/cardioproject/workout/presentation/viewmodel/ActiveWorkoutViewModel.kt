@@ -1,5 +1,7 @@
 package com.example.cardioproject.workout.presentation.viewmodel
 
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.Manifest
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
@@ -37,6 +39,10 @@ class ActiveWorkoutViewModel(
     private var currentSettings: WorkoutSettings? = null
     private var sessionStartTime: Long = 0
 
+    private var toneGenerator: ToneGenerator? = null
+    private var isPhaseSoundEnabled = true
+    private var signalVolume = 0.6f
+
     fun startWorkout(settings: WorkoutSettings) {
         if (heartRateJob?.isActive == true) return
 
@@ -45,6 +51,15 @@ class ActiveWorkoutViewModel(
 
         viewModelScope.launch {
             settingsRepository.observeSettings().collect { trainingSettings ->
+                isPhaseSoundEnabled = trainingSettings.phaseSoundEnabled
+                
+                if (signalVolume != trainingSettings.signalVolume || toneGenerator == null) {
+                    signalVolume = trainingSettings.signalVolume
+                    val volumeInt = (signalVolume * 100).toInt().coerceIn(0, 100)
+                    toneGenerator?.release()
+                    toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, volumeInt)
+                }
+
                 _uiState.update { it.copy(
                     hrZones = trainingSettings.heartRateZones,
                     keepScreenOn = trainingSettings.keepScreenOnEnabled
@@ -62,7 +77,14 @@ class ActiveWorkoutViewModel(
 
         if (settings.isTabataEnabled && settings.tabataSetup != null) {
             timerJob = viewModelScope.launch {
+                var previousPhase: WorkoutPhase? = null
+                
                 startTimerUseCase(settings.tabataSetup).collect { timerState ->
+                    if (previousPhase != null && previousPhase != timerState.currentPhase && timerState.currentPhase != WorkoutPhase.FINISHED) {
+                        playPhaseChangeSound()
+                    }
+                    previousPhase = timerState.currentPhase
+
                     _uiState.update { it.copy(
                         currentPhase = timerState.currentPhase,
                         tabataTimerRemainingSec = timerState.timeRemainingSec,
@@ -92,6 +114,12 @@ class ActiveWorkoutViewModel(
         }
     }
 
+
+    private fun playPhaseChangeSound() {
+        if (isPhaseSoundEnabled) {
+            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_PIP, 300)
+        }
+    }
 
     fun onNewHeartRateReceived(bpm: Int) {
         heartRateHistory.add(bpm)
@@ -136,7 +164,7 @@ class ActiveWorkoutViewModel(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun onCleared() {
-        super.onCleared()
+        toneGenerator?.release()
         bleConnectionManager.disconnect()
     }
 }

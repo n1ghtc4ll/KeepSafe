@@ -41,6 +41,8 @@ class ActiveWorkoutViewModel(
 
     private var toneGenerator: ToneGenerator? = null
     private var isPhaseSoundEnabled = true
+    private var isCriticalPulseAlertEnabled = true
+    private var isCurrentlyInCriticalZone = false
     private var signalVolume = 0.6f
 
     fun startWorkout(settings: WorkoutSettings) {
@@ -52,6 +54,7 @@ class ActiveWorkoutViewModel(
         viewModelScope.launch {
             settingsRepository.observeSettings().collect { trainingSettings ->
                 isPhaseSoundEnabled = trainingSettings.phaseSoundEnabled
+                isCriticalPulseAlertEnabled = trainingSettings.criticalPulseAlertEnabled
                 
                 if (signalVolume != trainingSettings.signalVolume || toneGenerator == null) {
                     signalVolume = trainingSettings.signalVolume
@@ -123,6 +126,18 @@ class ActiveWorkoutViewModel(
 
     fun onNewHeartRateReceived(bpm: Int) {
         heartRateHistory.add(bpm)
+        
+        val zones = _uiState.value.hrZones
+        if (zones.isNotEmpty() && isCriticalPulseAlertEnabled) {
+            val criticalZoneThreshold = zones.last().lowerBpm
+            val isNowCritical = bpm >= criticalZoneThreshold
+            
+            if (isNowCritical && !isCurrentlyInCriticalZone) {
+                toneGenerator?.startTone(ToneGenerator.TONE_CDMA_HIGH_L, 500)
+            }
+            isCurrentlyInCriticalZone = isNowCritical
+        }
+        
         _uiState.update { state ->
             state.copy(
                 currentHeartRate = bpm,
@@ -165,6 +180,6 @@ class ActiveWorkoutViewModel(
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun onCleared() {
         toneGenerator?.release()
-        bleConnectionManager.disconnect()
+        //bleConnectionManager.disconnect()
     }
 }

@@ -50,6 +50,11 @@ import com.example.cardioproject.core.ui.theme.GraySurface
 import com.example.cardioproject.core.ui.theme.KeepSafeProjectTheme
 import com.example.cardioproject.core.ui.theme.spacing
 import com.example.cardioproject.settings.presentation.model.HeartRateZone
+import com.example.cardioproject.core.ui.theme.Zone1Blue
+import com.example.cardioproject.core.ui.theme.Zone2Green
+import com.example.cardioproject.core.ui.theme.Zone3Yellow
+import com.example.cardioproject.core.ui.theme.Zone4Red
+import com.example.cardioproject.core.ui.theme.UnknownZoneColor
 import com.example.cardioproject.settings.presentation.model.DeviceInfoUi
 
 @Composable
@@ -337,6 +342,14 @@ fun HeartRateZoneRow(
     zone: HeartRateZone,
     onRangeChange: (ClosedFloatingPointRange<Float>) -> Unit
 ) {
+    val zoneColor = when (zone.label) {
+        "Зона 1" -> Zone1Blue
+        "Зона 2" -> Zone2Green
+        "Зона 3" -> Zone3Yellow
+        "Зона 4" -> Zone4Red
+        else -> MaterialTheme.colorScheme.primary
+    }
+
     Column(
         //modifier = Modifier.padding(vertical = 6.dp)
     ) {
@@ -367,8 +380,8 @@ fun HeartRateZoneRow(
                 modifier = Modifier.weight(1f),
                 valueRange = 40f..200f,
                 colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colorScheme.primary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    thumbColor = zoneColor,
+                    activeTrackColor = zoneColor,
                     inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
                 )
             )
